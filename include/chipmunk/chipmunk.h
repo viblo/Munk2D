@@ -36,7 +36,11 @@
 #endif
 
 #ifdef _WIN32
-	#define CP_EXPORT __declspec(dllexport)
+	#ifdef __MINGW32__
+		#define CP_EXPORT
+	#else
+		#define CP_EXPORT __declspec(dllexport)
+	#endif
 #else
 	#define CP_EXPORT
 #endif
