@@ -275,7 +275,11 @@ typedef void (*cpSpaceDebugDrawPolygonImpl)(int count, const cpVect *verts, cpFl
 /// Callback type for a function that draws a dot.
 typedef void (*cpSpaceDebugDrawDotImpl)(cpFloat size, cpVect pos, cpSpaceDebugColor color, cpDataPointer data);
 /// Callback type for a function that returns a color for a given shape. This gives you an opportunity to color shapes based on how they are used in your engine.
-typedef cpSpaceDebugColor (*cpSpaceDebugDrawColorForShapeImpl)(cpShape *shape, cpDataPointer data);
+// Temp ugly hack since cffi 1.14.0 or earlier, and latest pypy v7.3.1 
+// which is tied with cffi 1.14.0 cand handle a returned struct properly. 
+// Should be reverted once a new Pypy version has been released.
+// typedef cpSpaceDebugColor (*cpSpaceDebugDrawColorForShapeImpl)(cpShape *shape, cpDataPointer data);
+typedef void (*cpSpaceDebugDrawColorForShapeImpl)(cpShape *shape, cpDataPointer data, cpSpaceDebugColor* color);
 
 typedef enum cpSpaceDebugDrawFlags {
 	CP_SPACE_DEBUG_DRAW_SHAPES = 1<<0,

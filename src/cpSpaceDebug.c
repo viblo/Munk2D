@@ -30,7 +30,13 @@ cpSpaceDebugDrawShape(cpShape *shape, cpSpaceDebugDrawOptions *options)
 	cpDataPointer data = options->data;
 	
 	cpSpaceDebugColor outline_color = options->shapeOutlineColor;
-	cpSpaceDebugColor fill_color = options->colorForShape(shape, data);
+	
+	// Temp ugly hack since cffi 1.14.0 or earlier, and latest pypy v7.3.1 
+	// which is tied with cffi 1.14.0 cand handle a returned struct properly. 
+	// Should be reverted once a new Pypy version has been released.
+	//cpSpaceDebugColor fill_color = options->colorForShape(shape, data);
+	cpSpaceDebugColor fill_color = {0};
+	options->colorForShape(shape, data, &fill_color);
 	
 	switch(shape->klass->type){
 		case CP_CIRCLE_SHAPE: {
