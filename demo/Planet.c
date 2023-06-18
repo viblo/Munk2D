@@ -62,7 +62,7 @@ add_box(cpSpace *space)
 	const cpFloat size = 10.0f;
 	const cpFloat mass = 1.0f;
 	
-	cpVect verts[] = {
+	cpVect verts[4] = {
 		cpv(-size,-size),
 		cpv(-size, size),
 		cpv( size, size),
@@ -95,10 +95,10 @@ add_box(cpSpace *space)
 static cpSpace *
 init(void)
 {
-	// Create a rouge body to control the planet manually.
 	cpSpace *space = cpSpaceNew();
 	cpSpaceSetIterations(space, 20);
 	
+	// Create a kinematic body to control the planet manually.
 	planetBody = cpSpaceAddBody(space, cpBodyNewKinematic());
 	cpBodySetAngularVelocity(planetBody, 0.2f);
 	
