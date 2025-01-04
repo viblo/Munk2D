@@ -103,9 +103,9 @@ cpBodyFree(cpBody *body)
 #ifdef NDEBUG
 	#define	cpAssertSaneBody(body)
 #else
-	static void cpv_assert_nan(cpVect v, char *message){cpAssertHard(v.x == v.x && v.y == v.y, message);}
-	static void cpv_assert_infinite(cpVect v, char *message){cpAssertHard(cpfabs(v.x) != INFINITY && cpfabs(v.y) != INFINITY, message);}
-	static void cpv_assert_sane(cpVect v, char *message){cpv_assert_nan(v, message); cpv_assert_infinite(v, message);}
+	static void cpv_assert_nan(cpVect v, const char *message){cpAssertHard(v.x == v.x && v.y == v.y, message);}
+	static void cpv_assert_infinite(cpVect v, const char *message){cpAssertHard(cpfabs(v.x) != INFINITY && cpfabs(v.y) != INFINITY, message);}
+	static void cpv_assert_sane(cpVect v, const char *message){cpv_assert_nan(v, message); cpv_assert_infinite(v, message);}
 	
 	static void
 	cpBodySanityCheck(const cpBody *body)
@@ -160,6 +160,23 @@ cpBodySetType(cpBody *body, cpBodyType type)
 		body->m_inv = body->i_inv = INFINITY;
 		
 		cpBodyAccumulateMassFromShapes(body);
+
+        // Check any constraints, and if there are
+        // constraints with another non-DYNAMIC body:
+        // Reset any accumulated force in constraints attached to the body.
+        // Reset velocity of the body. These will be NaN or Inf otherwise.
+        cpConstraint* constraint = body->constraintList;
+        while (constraint) {
+            constraint->klass->resetAcc(constraint);
+            cpBody* a = cpConstraintGetBodyA(constraint);
+            a->v = cpvzero;
+            a->w = 0.0f;
+            cpBody* b = cpConstraintGetBodyB(constraint);
+            b->v = cpvzero;
+            b->w = 0.0f;
+
+            constraint = cpConstraintNext(constraint, body);
+        }
 	} else {
 		body->m = body->i = INFINITY;
 		body->m_inv = body->i_inv = 0.0f;

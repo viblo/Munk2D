@@ -20,7 +20,7 @@
  */
 
 #include "chipmunk/chipmunk_private.h"
-
+#include <stdio.h>
 static cpFloat
 defaultSpringTorque(cpDampedRotarySpring *spring, cpFloat relativeAngle){
 	return (relativeAngle - spring->restAngle)*spring->stiffness;
@@ -40,7 +40,10 @@ preStep(cpDampedRotarySpring *spring, cpFloat dt)
 	spring->target_wrn = 0.0f;
 
 	// apply spring torque
-	cpFloat j_spring = spring->springTorqueFunc((cpConstraint *)spring, a->a - b->a)*dt;
+	cpFloat t_spring = spring->springTorqueFunc((cpConstraint *)spring, a->a - b->a);
+	t_spring = cpfclamp(t_spring, -spring->constraint.maxForce, spring->constraint.maxForce);
+	
+	cpFloat j_spring = t_spring*dt;
 	spring->jAcc = j_spring;
 	
 	a->w -= j_spring*a->i_inv;
@@ -65,8 +68,12 @@ applyImpulse(cpDampedRotarySpring *spring, cpFloat dt)
 	
 	//apply_impulses(a, b, spring->r1, spring->r2, cpvmult(spring->n, v_damp*spring->nMass));
 	cpFloat j_damp = w_damp*spring->iSum;
-	spring->jAcc += j_damp;
+	cpFloat maxImpulse = spring->constraint.maxForce*dt;
 	
+	cpFloat jAccClamped = cpfclamp(spring->jAcc-j_damp, -maxImpulse, maxImpulse);
+	j_damp = spring->jAcc - jAccClamped;
+
+	spring->jAcc -= j_damp;
 	a->w += j_damp*a->i_inv;
 	b->w -= j_damp*b->i_inv;
 }
@@ -77,11 +84,18 @@ getImpulse(cpDampedRotarySpring *spring)
 	return spring->jAcc;
 }
 
+static void
+resetAcc(cpDampedRotarySpring *spring) 
+{
+	spring->jAcc = 0.0f;
+}
+
 static const cpConstraintClass klass = {
 	(cpConstraintPreStepImpl)preStep,
 	(cpConstraintApplyCachedImpulseImpl)applyCachedImpulse,
 	(cpConstraintApplyImpulseImpl)applyImpulse,
 	(cpConstraintGetImpulseImpl)getImpulse,
+	(cpConstraintResetAccImpl)resetAcc,
 };
 
 cpDampedRotarySpring *

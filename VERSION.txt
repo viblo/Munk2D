@@ -1,3 +1,24 @@
+What's new in NEXT:
+* API: Now possible to to override cpMessage by defining CP_OVERRIDE_MESSAGE 
+* API: The maxForce property now have effect on DampedSpring and DampedRotarySpring
+* API: Reset velocity and constraint jAcc when body type changes to DYNAMIC
+* API: Add transform property to cpSpaceDebugDrawOptions 
+* API: Use CGFloat as the float type if CP_USE_CGTYPES is set.
+* BUG: Fixed total impulse calculation of DampedRotarySpring
+* BUG: Fix for compiling cpPolyline with MSVC 
+* BUG: Fix FFI symbols not exported on windows under mingw 
+* BUG: Fix a potential divide by zero in ClosestT
+* BUG: Fix division by zero in cpPolyShapeSegmentQuery() function.
+* BUG: Fix planetmath url (by ccgargantua)
+* BUG: Optimized memory allocation of cpPolylineSet (by richardgroves)
+* BUG: Fix cast between incompatible function type to reduce warnings (by aganm)
+* BUG: Rename body local variable to fix shadow warning (by aganm)
+* BUG: Fixes bug in cpSpaceShapeQuery to not miss collisions (by alanmillard)
+* BUG: Fix for cpSpaceShapeQuery using cpSegmentShape with null body (by maniek2332)
+* MISC: Fix spelling of positive (by skitt)
+
+
+
 What's new in 7.0.3:
 * MISC: Replacing GLFW with Sokol in the demo application. No need to push GLFW binaries and has a nice x-platform renderer to build on.
 * MISC: Fixed some 'const' warnings for MSCV.

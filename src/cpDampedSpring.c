@@ -48,7 +48,9 @@ preStep(cpDampedSpring *spring, cpFloat dt)
 
 	// apply spring force
 	cpFloat f_spring = spring->springForceFunc((cpConstraint *)spring, dist);
+	f_spring = cpfclamp(f_spring, -spring->constraint.maxForce, spring->constraint.maxForce);
 	cpFloat j_spring = spring->jAcc = f_spring*dt;
+	
 	apply_impulses(a, b, spring->r1, spring->r2, cpvmult(spring->n, j_spring));
 }
 
@@ -70,9 +72,15 @@ applyImpulse(cpDampedSpring *spring, cpFloat dt)
 	// compute velocity loss from drag
 	cpFloat v_damp = (spring->target_vrn - vrn)*spring->v_coef;
 	spring->target_vrn = vrn + v_damp;
-	
+
 	cpFloat j_damp = v_damp*spring->nMass;
+	cpFloat maxImpulse = spring->constraint.maxForce*dt;
+
+	cpFloat jAccClamped = cpfclamp(spring->jAcc+j_damp, -maxImpulse, maxImpulse);
+	j_damp = jAccClamped - spring->jAcc;
+	
 	spring->jAcc += j_damp;
+
 	apply_impulses(a, b, spring->r1, spring->r2, cpvmult(spring->n, j_damp));
 }
 
@@ -82,11 +90,18 @@ getImpulse(cpDampedSpring *spring)
 	return spring->jAcc;
 }
 
+static void
+resetAcc(cpDampedSpring *spring)
+{
+	spring->jAcc = 0.0f;
+}
+
 static const cpConstraintClass klass = {
 	(cpConstraintPreStepImpl)preStep,
 	(cpConstraintApplyCachedImpulseImpl)applyCachedImpulse,
 	(cpConstraintApplyImpulseImpl)applyImpulse,
 	(cpConstraintGetImpulseImpl)getImpulse,
+	(cpConstraintResetAccImpl)resetAcc,
 };
 
 cpDampedSpring *

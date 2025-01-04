@@ -1,5 +1,24 @@
 !http://files.slembcke.net/chipmunk/logo/logo1_med.png!
 
+h2. FORK INFO - START HERE
+
+This is a fork of the original "Chipmunk2D":https://github.com/slembcke/Chipmunk2D 
+
+The main purpose of this fork is to be a compainion for the Python 2D physics library "Pymunk":https://www.pymunk.org which is built on Chipmunk2D. Given the slow pace of development of Chipmunk2D, and some unique requirements and oppurtunitites of Pymunk this is something that have grown over a long time. What really made me consider to make it more formal was the discussion "here":https://github.com/slembcke/Chipmunk2D/issues/237 with Slembcke, the creator of Chipmunk2D. 
+
+I do not forsee that I have the time, motivation or skills to really revive Chipmunk2D. However, I hope to incorporate minor new features, and a bunch of fixes. Any changes are driven by what make sense from the Pymunk use case. However, I do think many of these changes are useful also to users outside of Pymunk, and you are of course free to use the fork for other projects / languages as well.
+
+At the moment I dont have any formal release of this fork, but I plan to make some kind of rename and a release if/when enough changes are accumulated.
+
+h3. Differeces:
+
+* This fork will have ABI breaking changes. For Pymunk it does not matter, a Pymunk verison is always compiled against a specific Chipmunk2D version.
+* This fork might have API breaking changes. Since Pymunk wraps Chipmunk2D in a Python friendly API, end users of Pymunk wont be affected.
+* Some additional minor features, useful from Pymunk 
+* Fixes to various issues, mainly those affecting Pymunk
+
+---
+
 h2. NEW IN CHIPMUNK 7
 
 Chipmunk 7 is complete and now includes the ARM NEON optimizations, the autogeometry code, and the mulithreaded solver. 

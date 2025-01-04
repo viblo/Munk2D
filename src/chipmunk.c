@@ -17,7 +17,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- */
+ */ 
 
 #include <stdio.h>
 #include <string.h>
@@ -28,6 +28,7 @@
 
 #include "chipmunk/chipmunk_private.h"
 
+#ifndef CP_OVERRIDE_MESSAGE
 void
 cpMessage(const char *condition, const char *file, int line, int isError, int isHardError, const char *message, ...)
 {
@@ -52,6 +53,8 @@ cpMessage(const char *condition, const char *file, int line, int isError, int is
 	fprintf(stderr, "\tSource:%s:%d\n", file, line);
 #endif
 }
+#endif 
+
 
 #define STR(s) #s
 #define XSTR(s) STR(s)
