@@ -38,6 +38,15 @@ if(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
 	list(APPEND chipmunk_demos_libraries BlocksRuntime)
 endif(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
 
+
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
+		list(APPEND chipmunk_demos_libraries BlocksRuntime)
+	endif()
+endif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+
+
 include_directories(${chipmunk_demos_include_dirs})
 link_directories(${chipmunk_demos_library_dirs})
 add_executable(chipmunk_demos ${chipmunk_demos_source_files})

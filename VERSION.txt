@@ -16,7 +16,8 @@ What's new in NEXT:
 * BUG: Fixes bug in cpSpaceShapeQuery to not miss collisions (by alanmillard)
 * BUG: Fix for cpSpaceShapeQuery using cpSegmentShape with null body (by maniek2332)
 * MISC: Fix spelling of positive (by skitt)
-
+* MISC: Github actions that build on Windows/Linux/MacOS with MSVC/GCC/CLang
+* MISC: Fix warning for INFINITY on CLang 18+
 
 
 What's new in 7.0.3:

@@ -39,6 +39,7 @@ endif()
 
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
   option(FORCE_CLANG_BLOCKS "Force enable Clang blocks" YES)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-nan-infinity-disabled")
 endif()
 
 # sanity checks...
