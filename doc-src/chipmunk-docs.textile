@@ -2,7 +2,19 @@
 
 <%= pop_open_div("Outline") %><%%= Node::Root.outline %></div></div>
 
-<%= h 1, "Chipmunk2D 7.0.3", "Intro" %>
+<%= h 1, "Munk2D 8.0.0", "Title" %>
+
+<%= h 2, "Fork Info - Start here", "ForkInfo" %>
+
+"Munk2D":https://github.com/viblo/Munk2D is a friendly fork of the original "Chipmunk2D":https://github.com/slembcke/Chipmunk2D 2D physics library. 
+
+The main purpose of this fork is to be a compainion for the Python 2D physics library "Pymunk":https://www.pymunk.org which is built on Chipmunk2D. Given the slow pace of development of Chipmunk2D, and some unique requirements and oppurtunitites of Pymunk this is something that have grown over a long time. What really made me (Viblo/author of Pymunk) consider to make it more formal was the discussion "here":https://github.com/slembcke/Chipmunk2D/issues/237 with Slembcke, the creator of Chipmunk2D. 
+
+I do not forsee that I have the time, motivation or skills to really revive Chipmunk2D. However, I hope to incorporate minor new features, and a bunch of fixes. Any changes are driven by what make sense from the Pymunk use case. However, I do think many of these changes are useful also to users outside of Pymunk, and you are of course free to use the fork for other projects / languages as well.
+
+The rest of the documentation is minimally edited from the original Chipmunk2D.
+
+<%= h 2, "Intro", "Intro" %>
 
 Chipmunk2D is a 2D rigid body physics library distributed under the MIT license. It is blazingly fast, portable, numerically stable, and easy to use. For this reason it has been used in hundreds of games across just about every system you can name. This includes top quality titles such as Night Sky for the Wii and many #1 sellers on the iPhone App Store! I've put thousands of hours of work over many years to make Chipmunk2D what it is today. If you find Chipmunk2D has saved you a lot of time, please consider "donating":https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=6666552. You'll make an indie game developer very happy!
 

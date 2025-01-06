@@ -37,7 +37,7 @@ end
 
 def pop_open_example(name)
 	divid = "Pop Open #{name} Example"
-	return %{<div><a class="HideShow" href="javascript:;" onmousedown="toggleExample('#{divid}', 'examples/#{URI.escape(name)}.html');">Hide/Show #{name} Example</a><div id="#{divid}" style="display:none"></div></div>}
+	return %{<div><a class="HideShow" href="javascript:;" onmousedown="toggleExample('#{divid}', 'examples/#{CGI.escape(name)}.html');">Hide/Show #{name} Example</a><div id="#{divid}" style="display:none"></div></div>}
 end
 
 $node_path = [Node::Root]
