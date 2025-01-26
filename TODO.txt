@@ -1,3 +1,5 @@
+INFO: This TODO is not up to date
+
 Priorities:
 	Basics tutorial.
 	Simple top down player controls.

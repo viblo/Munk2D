@@ -1,0 +1,9 @@
+find_package(Doxygen REQUIRED)
+
+set(DOXYFILE ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+
+add_custom_target(docs 
+    ALL
+    COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+)
