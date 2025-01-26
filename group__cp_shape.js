@@ -1,0 +1,58 @@
+var group__cp_shape =
+[
+    [ "cpPointQueryInfo", "structcp_point_query_info.html", [
+      [ "distance", "structcp_point_query_info.html#ab7b002bf19b83cb05dd4635f92884ec8", null ],
+      [ "gradient", "structcp_point_query_info.html#a55bf2732bc2563af6c83ce1985906034", null ],
+      [ "point", "structcp_point_query_info.html#aa3ba52f53251ad8770c39d7789b14547", null ],
+      [ "shape", "structcp_point_query_info.html#ad27c172fcc5ca586f60c4e9fc15560da", null ]
+    ] ],
+    [ "cpSegmentQueryInfo", "structcp_segment_query_info.html", [
+      [ "alpha", "structcp_segment_query_info.html#af5b6ff0d0b32196cf2716e9672604c61", null ],
+      [ "normal", "structcp_segment_query_info.html#a453d113d757becaab1363e80c9a54e76", null ],
+      [ "point", "structcp_segment_query_info.html#ac18fb70008b01420c06a407e3d95923a", null ],
+      [ "shape", "structcp_segment_query_info.html#a1644aedf3beee1c910f0361ff73e50eb", null ]
+    ] ],
+    [ "cpShapeFilter", "structcp_shape_filter.html", [
+      [ "categories", "structcp_shape_filter.html#a916b2d61e3ea9d1e7d26a6bc59ac955b", null ],
+      [ "group", "structcp_shape_filter.html#a6d29bf3cc7f406cdf834465f9de71c21", null ],
+      [ "mask", "structcp_shape_filter.html#a0ee36d60cbc25e1abf18aa1508d7a537", null ]
+    ] ],
+    [ "cpPointQueryInfo", "group__cp_shape.html#ga6fffc743573c722c6a812b74858c9c95", null ],
+    [ "cpSegmentQueryInfo", "group__cp_shape.html#ga9ab5a6d95778c200e37c4eccd67d15c2", null ],
+    [ "cpShapeFilter", "group__cp_shape.html#gab6b62aa46d5beb8603539858ed74952c", null ],
+    [ "cpShapeCacheBB", "group__cp_shape.html#ga899d6f70c74747d4cb52b778447c81e8", null ],
+    [ "cpShapeDestroy", "group__cp_shape.html#ga16db3767b479bc1dcd169f362fa80cb5", null ],
+    [ "cpShapeFilterNew", "group__cp_shape.html#ga897e6e7cf0cc8b627ef7e520880457f0", null ],
+    [ "cpShapeFree", "group__cp_shape.html#ga02e1c9ffa26da3a0a40d6846a3d1dbe7", null ],
+    [ "cpShapeGetArea", "group__cp_shape.html#gac9d45f5ebc8e18552d75889c3899a9cf", null ],
+    [ "cpShapeGetBB", "group__cp_shape.html#ga2e90f99cd96ca0b17b8fe9a41d9db96a", null ],
+    [ "cpShapeGetBody", "group__cp_shape.html#gaa0615b0c5438d7cfec0d73d133e35e8e", null ],
+    [ "cpShapeGetCenterOfGravity", "group__cp_shape.html#ga1d9c68cf011696d081c61897ca6bb07b", null ],
+    [ "cpShapeGetCollisionType", "group__cp_shape.html#gae1f59960451b5324c2d1992ba9023c5b", null ],
+    [ "cpShapeGetDensity", "group__cp_shape.html#gae9c80582330ded34941ca4890160575c", null ],
+    [ "cpShapeGetElasticity", "group__cp_shape.html#ga2aca093a208084722c943a092f9735cb", null ],
+    [ "cpShapeGetFilter", "group__cp_shape.html#ga9f6fa02cd5ca57dacaa8400c0585137b", null ],
+    [ "cpShapeGetFriction", "group__cp_shape.html#gae03dcb3f6221e41cf677eeca42aab280", null ],
+    [ "cpShapeGetMass", "group__cp_shape.html#ga93dbbef0cedbe52d08bc43424c7f5818", null ],
+    [ "cpShapeGetMoment", "group__cp_shape.html#ga5b6d2a25a83812d8d97b40ad7d956c8e", null ],
+    [ "cpShapeGetSensor", "group__cp_shape.html#ga02d5d24afa5c5fbe529d3a1ff3bfb85d", null ],
+    [ "cpShapeGetSpace", "group__cp_shape.html#ga8028b555d6186cf462211ed1a9e2d0ec", null ],
+    [ "cpShapeGetSurfaceVelocity", "group__cp_shape.html#gaa353b1aa872bad9549d45c05bcdb4722", null ],
+    [ "cpShapeGetUserData", "group__cp_shape.html#gab8e58cc69432190ffb0f00cb0f0dc400", null ],
+    [ "cpShapePointQuery", "group__cp_shape.html#ga5b0f787bc6f0d614d4616c08c807cd6c", null ],
+    [ "cpShapesCollide", "group__cp_shape.html#ga0afd273a80a6cbdf01cc93ca7a9975db", null ],
+    [ "cpShapeSegmentQuery", "group__cp_shape.html#gaf25b8d53a1b0185824b1cfdd428c04b7", null ],
+    [ "cpShapeSetBody", "group__cp_shape.html#ga222501265d75e838459285452a92d6f5", null ],
+    [ "cpShapeSetCollisionType", "group__cp_shape.html#ga9c7e4dbae5ea13116d7ebb85eded14d6", null ],
+    [ "cpShapeSetDensity", "group__cp_shape.html#ga6b52b02dd8c60fb33713869ef5bba948", null ],
+    [ "cpShapeSetElasticity", "group__cp_shape.html#ga746fd50b3e2b1d4deb25f2ecb2654028", null ],
+    [ "cpShapeSetFilter", "group__cp_shape.html#gaf7e77e7de50960b9aecf627706a5e747", null ],
+    [ "cpShapeSetFriction", "group__cp_shape.html#ga2ffe1f94c19a1b248e7784216862add9", null ],
+    [ "cpShapeSetMass", "group__cp_shape.html#ga82c8046837b24d08b9ea0b3da6c795a4", null ],
+    [ "cpShapeSetSensor", "group__cp_shape.html#gad82e18c0a765300e42108c88caa3bbbb", null ],
+    [ "cpShapeSetSurfaceVelocity", "group__cp_shape.html#ga6300af79e7bf2427e8142eb5e15ad394", null ],
+    [ "cpShapeSetUserData", "group__cp_shape.html#ga1de05153aca70a3c61c454707c89813e", null ],
+    [ "cpShapeUpdate", "group__cp_shape.html#gaa3ce1518fb4739b0b4e8964dfb7cd728", null ],
+    [ "CP_SHAPE_FILTER_ALL", "group__cp_shape.html#gaef9ee63420c81af95358f210ea29f7e4", null ],
+    [ "CP_SHAPE_FILTER_NONE", "group__cp_shape.html#ga9797bc5baffd39b2d9b8839cc0e1a271", null ]
+];
