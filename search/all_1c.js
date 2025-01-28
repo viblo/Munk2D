@@ -57,7 +57,7 @@ var searchData=
   ['spatial_20indexing_54',['spatial indexing',['../guide.html#autotoc_md58',1,'Spatial Indexing'],['../guide.html#autotoc_md93',1,'Spatial Indexing']]],
   ['spring_55',['spring',['../guide.html#autotoc_md81',1,'Damped Rotary Spring'],['../guide.html#autotoc_md79',1,'Damped Spring']]],
   ['start_56',['start',['../interface_chipmunk_segment_query_info.html#ac0a41963e5c0b9a8b8087850eaaff6c8',1,'ChipmunkSegmentQueryInfo']]],
-  ['started_57',['GETTING STARTED',['../index.html#autotoc_md125',1,'']]],
+  ['started_57',['GETTING STARTED',['../index.html#autotoc_md122',1,'']]],
   ['static_20bodies_58',['Dynamic, Kinematic, and Static Bodies',['../guide.html#autotoc_md25',1,'']]],
   ['staticbody_59',['staticbody',['../interface_chipmunk_space.html#a858a6a13360cc3bbbb79339b76af1554',1,'ChipmunkSpace::staticBody'],['../interface_chipmunk_body.html#a0dd8482ae016a4a99a811af3bb7e8ba8',1,'ChipmunkBody::staticBody()']]],
   ['step_20callbacks_60',['Post-Step Callbacks',['../guide.html#autotoc_md101',1,'']]],
@@ -65,6 +65,6 @@ var searchData=
   ['stiffness_62',['stiffness',['../interface_chipmunk_damped_spring.html#a28ee030525451bee94f7b4821b6d42f7',1,'ChipmunkDampedSpring::stiffness'],['../interface_chipmunk_damped_rotary_spring.html#aeda120b96272f258a57aa11deb79ffe7',1,'ChipmunkDampedRotarySpring::stiffness']]],
   ['struct_20definition_20and_20constructors_63',['Struct Definition and Constructors',['../guide.html#autotoc_md22',1,'']]],
   ['struct_20definition_20constants_20and_20constructors_64',['Struct Definition, Constants and Constructors',['../guide.html#autotoc_md19',1,'']]],
-  ['support_65',['support',['../guide.html#autotoc_md9',1,'Support'],['../index.html#autotoc_md126',1,'SUPPORT']]],
+  ['support_65',['support',['../guide.html#autotoc_md9',1,'Support'],['../index.html#autotoc_md123',1,'SUPPORT']]],
   ['surfacevelocity_66',['surfaceVelocity',['../interface_chipmunk_shape.html#a46f2c7faae242c810aae31db0aae354b',1,'ChipmunkShape']]]
 ];

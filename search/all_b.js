@@ -21,7 +21,7 @@ var searchData=
   ['boxes_3a_20tt_20cpbb_20tt_18',['Chipmunk Axis Aligned Bounding Boxes: &lt;tt&gt;cpBB&lt;/tt&gt;',['../guide.html#autotoc_md21',1,'']]],
   ['boxwithbody_3abb_3aradius_3a_19',['boxWithBody:bb:radius:',['../interface_chipmunk_poly_shape.html#aaac3ac80ed6e05532d839ceb4469f630',1,'ChipmunkPolyShape']]],
   ['boxwithbody_3awidth_3aheight_3aradius_3a_20',['boxWithBody:width:height:radius:',['../interface_chipmunk_poly_shape.html#a6bacfb58799430c8e8f619bd8d4e8b3f',1,'ChipmunkPolyShape']]],
-  ['building_21',['BUILDING',['../index.html#autotoc_md123',1,'']]],
+  ['building_21',['BUILDING',['../index.html#autotoc_md120',1,'']]],
   ['by_20feedback_22',['Error correction by Feedback',['../guide.html#autotoc_md66',1,'']]],
   ['bytesperpixel_23',['bytesPerPixel',['../interface_chipmunk_bitmap_sampler.html#ae0115a0b35ba6d2187afc6e6b8939a04',1,'ChipmunkBitmapSampler']]]
 ];

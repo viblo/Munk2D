@@ -28,6 +28,11 @@
     <script type="text/javascript">
       DoxygenAwesomeDarkModeToggle.init();
     </script>
+    <script
+      data-goatcounter="https://munk2d.goatcounter.com/count"
+      async
+      src="//gc.zgo.at/count.js"
+    ></script>
   </head>
   <body>
     <div id="top">
@@ -111,8 +116,8 @@ $(document).ready(function(){initNavTree('md__2home_2runner_2work_2_munk2_d_2_mu
   <div class="headertitle"><div class="title">Changelog</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md127"></a> </p>
-<h1><a class="anchor" id="autotoc_md128"></a>
+<div class="textblock"><p><a class="anchor" id="autotoc_md125"></a> </p>
+<h1><a class="anchor" id="autotoc_md126"></a>
 UPCOMING 8.0 (Munk2D Fork):</h1>
 <p><em>WIP for next release</em></p>
 <p>TODO Some info about the fork!</p>
@@ -138,18 +143,18 @@ UPCOMING 8.0 (Munk2D Fork):</h1>
 <li>MISC: Fix warning for INFINITY on CLang 18+</li>
 <li>DOC: Reworked the documentation to be easier to maintain</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md129"></a>
+<h1><a class="anchor" id="autotoc_md127"></a>
 7.0.3</h1>
 <ul>
 <li>MISC: Replacing GLFW with Sokol in the demo application. No need to push GLFW binaries and has a nice x-platform renderer to build on.</li>
 <li>MISC: Fixed some 'const' warnings for MSCV.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md130"></a>
+<h1><a class="anchor" id="autotoc_md128"></a>
 7.0.2</h1>
 <ul>
 <li>MISC: Merging pull requests. Build fixes and the like.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md131"></a>
+<h1><a class="anchor" id="autotoc_md129"></a>
 7.0.1</h1>
 <ul>
 <li>BUG: Remove references to M_PI sinces it's not actually part of C and causes problems with MSVC.</li>
@@ -159,7 +164,7 @@ UPCOMING 8.0 (Munk2D Fork):</h1>
 <li>BUG: cpPolyshapeNewRaw() was undefined.</li>
 <li>BUG: Changing gravity will wake up all objects in a space.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md132"></a>
+<h1><a class="anchor" id="autotoc_md130"></a>
 7.0.0</h1>
 <ul>
 <li>All features from Chipmunk Pro are now free and open source! (threaded and NEON solver, autogeometry)</li>
@@ -187,13 +192,13 @@ UPCOMING 8.0 (Munk2D Fork):</h1>
 <li>MISC: Numerous improvements to the collision detection.</li>
 <li>MISC: <a class="el" href="structcp_polyline.html">cpPolyline</a> structs are passed by reference instead of value. (I've regretted that decision for years!)</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md133"></a>
+<h1><a class="anchor" id="autotoc_md131"></a>
 6.2.2</h1>
 <ul>
 <li>Fixed some issues on arm64.</li>
 <li>PRO: Added a 64 bit NEON solver to use on arm64.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md134"></a>
+<h1><a class="anchor" id="autotoc_md132"></a>
 6.2.1</h1>
 <ul>
 <li>Added Android support to the CMake files. (Thanks Eric Wing!)</li>
@@ -202,7 +207,7 @@ UPCOMING 8.0 (Munk2D Fork):</h1>
 <li>Merged a couple of other minor fixes.</li>
 <li>BUG: Fixed a crash issue with the ChipmunkTileCache and <a class="el" href="interface_chipmunk_point_cloud_sampler.html" title="A point cloud sampler allows you to perform deformable terrain like with a bitmap backed sampler,...">ChipmunkPointCloudSampler</a> classes. (Pro only).</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md135"></a>
+<h1><a class="anchor" id="autotoc_md133"></a>
 6.2.0</h1>
 <ul>
 <li>Collision detection now primarily uses the GJK and EPA algorithms instead of SAT. Internally this was a rather huge change. o_O</li>
@@ -222,7 +227,7 @@ UPCOMING 8.0 (Munk2D Fork):</h1>
 <li>MISC: Passing cpvzero to <a class="el" href="group__cp_vect.html#ga0fd46c6ef6dcca0dc7b6c6cef8008758" title="Returns a normalized copy of v.">cpvnormalize()</a> will now return cpvzero. No need to worry about NaNs or cpvnormalize_safe().</li>
 <li>MISC: Demo app now uses GLFW instead of GLUT, and has improved drawing and text rendering routines.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md136"></a>
+<h1><a class="anchor" id="autotoc_md134"></a>
 6.1.5</h1>
 <ul>
 <li>API: Added cpArbiter*SurfaceVelocity() to allow for custom surface velocity calculation.</li>
@@ -240,12 +245,12 @@ UPCOMING 8.0 (Munk2D Fork):</h1>
 <li>MISC: Modified the Sticky demo to use the new cpArbiteSetContactPointSet() to avoid the use of unnecessary sensor shapes.</li>
 <li>MISC: [<a class="el" href="interface_chipmunk_space.html" title="Chipmunk spaces are simulation containers.">ChipmunkSpace</a> addBounds:...] now returns a NSArray of the bounding segments. (Pro only)</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md137"></a>
+<h1><a class="anchor" id="autotoc_md135"></a>
 6.1.4</h1>
 <ul>
 <li>MISC: Fixed a build script issue that was preventing the documentation from being generated.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md138"></a>
+<h1><a class="anchor" id="autotoc_md136"></a>
 6.1.3</h1>
 <ul>
 <li>BUG: Fixed a couple of very specific but fatal bugs that occur when sleeping is enabled and filtering collisions.</li>
@@ -254,7 +259,7 @@ UPCOMING 8.0 (Munk2D Fork):</h1>
 <li>MISC: Implemented the <a class="el" href="group__cp_constraint.html#ga742285346b076309fc021eed1af34483" title="Get the last impulse applied by this constraint.">cpConstraintGetImpulse()</a> functionality for spring joints.</li>
 <li>MISC: Added more functions to <a class="el" href="chipmunk__ffi_8h_source.html">chipmunk_ffi.h</a></li>
 </ul>
-<h1><a class="anchor" id="autotoc_md139"></a>
+<h1><a class="anchor" id="autotoc_md137"></a>
 6.1.2</h1>
 <ul>
 <li>API: Added a cpArbiter.data pointer. Now you can tag collisions with custom persistent data.</li>
@@ -273,12 +278,12 @@ UPCOMING 8.0 (Munk2D Fork):</h1>
 <li>MISC: Added the "Sticky Surfaces" demo as a cpArbiter.data example.</li>
 <li>MISC: Updated Objective-Chipmunk build scripts to always use the latest iOS SDK.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md140"></a>
+<h1><a class="anchor" id="autotoc_md138"></a>
 6.1.1</h1>
 <ul>
 <li>API: Renamed the new block based iterators as soon as possible to match the Apple convention ("\_b" suffix).</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md141"></a>
+<h1><a class="anchor" id="autotoc_md139"></a>
 6.1.0</h1>
 <ul>
 <li>API: Added a pthread based, multi-threaded solver to accelerate the game on multi-core systems. (Pro only)</li>
@@ -302,7 +307,7 @@ UPCOMING 8.0 (Munk2D Fork):</h1>
 <li>MISC: The enableContactGraph property of <a class="el" href="structcp_space.html">cpSpace</a> is deprecated and always be true.</li>
 <li>MISC: Added a new demos of the convex hull functions and a self balancing Unicycle.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md142"></a>
+<h1><a class="anchor" id="autotoc_md140"></a>
 6.0.3</h1>
 <ul>
 <li>API: Added a cpBBForCircle() convenience function.</li>
@@ -324,7 +329,7 @@ UPCOMING 8.0 (Munk2D Fork):</h1>
 <li>MISC: Added NEON optimizations for Chipmunk Pro. Expect running on most ARM platforms to be 25-35% faster for contact heavy simulations.</li>
 <li>MISC: All <a class="el" href="protocol_chipmunk_object-p.html" title="Allows you to add composite objects to a space in a single method call.">ChipmunkObject</a> instances added to a space are now retained, even composite ones.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md143"></a>
+<h1><a class="anchor" id="autotoc_md141"></a>
 6.0.2</h1>
 <ul>
 <li>API: Added <a class="el" href="group__cp_space.html#gad72c9085853f1d612226ec7b6faca362" title="returns true from inside a callback when objects cannot be added/removed.">cpSpaceIsLocked()</a> to check if you are in a callback or not.</li>
@@ -347,7 +352,7 @@ UPCOMING 8.0 (Munk2D Fork):</h1>
 <li>MISC: Updated the MSVC10 project file.</li>
 <li>MISC: Updated the FFI defs.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md144"></a>
+<h1><a class="anchor" id="autotoc_md142"></a>
 6.0.1</h1>
 <ul>
 <li>BUG: Calling cpBodySetPos() on a sleeping body was delaying the Separate() handler callback if one existed.</li>
@@ -357,7 +362,7 @@ UPCOMING 8.0 (Munk2D Fork):</h1>
 <li>API: Added a "CurrentTimeStep" property to <a class="el" href="structcp_space.html">cpSpace</a> to retrieve the current (or most recent) timestep.</li>
 <li>MISC: Got rid of anonymous unions so that it is C99 clean again.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md145"></a>
+<h1><a class="anchor" id="autotoc_md143"></a>
 6.0.0</h1>
 <p>Chipmunk 6.x's API is not quite 100% compatible with 5.x. Make sure you read the list of changes carefully. Keep in mind that this is a x.0.0 release and that it's likely there are still some bugs I don't know about yet. I've spent a lot of effort rewriting the collision detection, sleeping, and contact graph algorithms that have required large changes and cleanup to the 5.x codebase. I've ironed out all the bugs that I know of, and the beta test went well. So it's finally time for 6!</p>
 <ul>
@@ -378,7 +383,7 @@ UPCOMING 8.0 (Munk2D Fork):</h1>
 <li>MISC: Performance! Chipmunk 6 should be way faster than Chipmunk 5 for almost any game.</li>
 <li>MISC: Chipmunk supports multiple spatial indexes and uses a bounding box tree similar to the one found in the Bullet physics library by default. This should provide much better performance for scenes with objects of differening size and works without any tuning for any scale.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md146"></a>
+<h1><a class="anchor" id="autotoc_md144"></a>
 5.3.5</h1>
 <ul>
 <li>FIX: Fixed spelling of <a class="el" href="group__cp_arbiter.html#ga7946b026663db9e03cacefb655369cd8" title="Get the depth of the ith contact point.">cpArbiterGetDepth()</a>. Was cpArbiteGetDepth() before. Apparently nobody ever used this function.</li>
@@ -392,7 +397,7 @@ UPCOMING 8.0 (Munk2D Fork):</h1>
 <li>MISC: Removed cpmalloc from the API and replaced all occurences with cpcalloc</li>
 <li>MISC: Added a benchmarking mode to the demo app. -trial runs it in time trial mode and -bench makes it run some benchmarking demos.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md147"></a>
+<h1><a class="anchor" id="autotoc_md145"></a>
 5.3.4</h1>
 <ul>
 <li>FIX: <a class="el" href="group__cp_body.html#ga23741f9682e268913d9f6f8a72b64cf0" title="Wake up a sleeping or idle body.">cpBodyActivate()</a> can now be called from collision and query callbacks. This way you can use the setter functions to change properties without indirectly calling <a class="el" href="group__cp_body.html#ga23741f9682e268913d9f6f8a72b64cf0" title="Wake up a sleeping or idle body.">cpBodyActivate()</a> and causing an assertion.</li>
@@ -401,7 +406,7 @@ UPCOMING 8.0 (Munk2D Fork):</h1>
 <li>FIX: Shapes attached to static rogue bodies created with <a class="el" href="group__cp_body.html#gad3140a8f543bf33cfa923aebe84c51c0" title="Allocate and initialize a cpBody, and set it as a static body.">cpBodyNewStatic()</a> are added as static shapes.</li>
 <li>MISC: Applied a user patch to update the MSVC project and add a .def file.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md148"></a>
+<h1><a class="anchor" id="autotoc_md146"></a>
 5.3.3</h1>
 <ul>
 <li>API: Added cpArbiteGetCount() to return the number of contact points.</li>
@@ -416,7 +421,7 @@ UPCOMING 8.0 (Munk2D Fork):</h1>
 <li>MISC: C struct fields and function that are considered private have been explicitly marked as such. Defining CP_ALLOW_PRIVATE_ACCESS to 0 in <a class="el" href="chipmunk_8h_source.html">Chipmunk.h</a> will let you test which parts of the private API that you are using and give me feedback about how to build proper APIs in Chipmunk 6 for what you are trying to do.</li>
 <li>MISC: Allow CGPoints to be used as <a class="el" href="structcp_vect.html">cpVect</a> on Mac OS X as well as iOS.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md149"></a>
+<h1><a class="anchor" id="autotoc_md147"></a>
 5.3.2</h1>
 <ul>
 <li>FIX: Collision begin callbacks were being called continuously for sensors or collisions rejected from the pre-solve callback.</li>
@@ -432,7 +437,7 @@ UPCOMING 8.0 (Munk2D Fork):</h1>
 <li>NEW: Added setter functions for the groove joint endpoints.</li>
 <li>MISC: A number of other minor optimizations and fixes.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md150"></a>
+<h1><a class="anchor" id="autotoc_md148"></a>
 5.3.1</h1>
 <ul>
 <li>NEW: Added a brand new tutorial for Objective-Chipmunk: SimpleObjectiveChipmunk that can be found in the Objective-Chipmunk folder.</li>
@@ -441,7 +446,7 @@ UPCOMING 8.0 (Munk2D Fork):</h1>
 <li>FIX: Fixed a rare memory crash in the sensor demo.</li>
 <li>FIX: Fixed some warnings that users submitted.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md151"></a>
+<h1><a class="anchor" id="autotoc_md149"></a>
 5.3.0</h1>
 <ul>
 <li>FIX: Fixed the source so it can compile as C, C++, Objective-C, and Objective-C++.</li>
@@ -455,7 +460,7 @@ UPCOMING 8.0 (Munk2D Fork):</h1>
 <li>NEW: New MSVC projects.</li>
 <li>NEW: Added boolean and time stamp types for clarity.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md152"></a>
+<h1><a class="anchor" id="autotoc_md150"></a>
 5.2.0</h1>
 <ul>
 <li>OPTIMIZATION: Chipmunk structs used within the solver are now allocated linearly in large blocks. This is much more CPU cache friendly. Programs have seen up to 50% performance improvements though 15-20% should be expected.</li>
@@ -464,7 +469,7 @@ UPCOMING 8.0 (Munk2D Fork):</h1>
 <li>FIX: separate() callbacks are called before shapes are removed from the space to prevent dangling pointers.</li>
 <li>NEW: Added convenience functions for creating box shapes and calculating moments.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md153"></a>
+<h1><a class="anchor" id="autotoc_md151"></a>
 5.1.0</h1>
 <ul>
 <li>FIX: fixed a NaN issue that was causing raycasts for horizontal or vertical lines to end up in an infinite loop</li>
@@ -479,7 +484,7 @@ UPCOMING 8.0 (Munk2D Fork):</h1>
 <li>NEW: Added an AABB query to complement point and segment queries</li>
 <li>NEW: CP_NO_GROUP and CP_ALL_LAYERS constants</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md154"></a>
+<h1><a class="anchor" id="autotoc_md152"></a>
 5.0.0</h1>
 <ul>
 <li>Brand new Joint/Constraint API: New constraints can be added easily and are much more flexible than the old joint system</li>
@@ -492,7 +497,7 @@ UPCOMING 8.0 (Munk2D Fork):</h1>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Mon Jan 27 2025 09:25:05 for Munk2D Documentation by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Jan 28 2025 20:09:53 for Munk2D Documentation by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

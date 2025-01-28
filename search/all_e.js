@@ -8,5 +8,6 @@ var searchData=
   ['ensurerect_3a_5',['ensureRect:',['../interface_chipmunk_abstract_tile_cache.html#a0311da2191c87b72765dfa09c0b97695',1,'ChipmunkAbstractTileCache']]],
   ['error_20correction_20by_20feedback_6',['Error correction by Feedback',['../guide.html#autotoc_md66',1,'']]],
   ['errorbias_7',['errorBias',['../interface_chipmunk_constraint.html#a3c27862ffe47ca91d97ef6ff641bb468',1,'ChipmunkConstraint']]],
-  ['examples_8',['examples',['../guide.html#autotoc_md102',1,'Examples'],['../guide.html#autotoc_md114',1,'Examples']]]
+  ['examples_8',['examples',['../guide.html#autotoc_md102',1,'Examples'],['../guide.html#autotoc_md114',1,'Examples']]],
+  ['expectations_20from_20munk2d_9',['Expectations from Munk2D',['../index.html#autotoc_md118',1,'']]]
 ];

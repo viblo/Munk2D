@@ -1,6 +1,5 @@
 var NAVTREEINDEX4 =
 {
-"structcp_body.html":[5,0,39],
 "structcp_circle_shape.html":[5,0,40],
 "structcp_collision_handler.html":[4,21,0],
 "structcp_collision_handler.html#a07bbc9d26af9d41cc87bae6514930d9f":[4,21,0,4],
