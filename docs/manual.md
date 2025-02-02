@@ -144,6 +144,7 @@ slembcke(at)gmail(dot)com. (email or GTalk)
 
 Chipmunk is licensed under the MIT license.
 
+    Copyright (c) 2025 Vicor Blomqvist
     Copyright (c) 2007-2015 Scott Lembcke and Howling Moon Software
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
