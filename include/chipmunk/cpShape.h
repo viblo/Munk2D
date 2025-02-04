@@ -159,9 +159,10 @@ CP_EXPORT cpShapeFilter cpShapeGetFilter(const cpShape *shape);
 /// Set the collision filtering parameters of this shape.
 CP_EXPORT void cpShapeSetFilter(cpShape *shape, cpShapeFilter filter);
 
-
 /// @}
+
 /// @defgroup cpCircleShape cpCircleShape
+/// @{
 
 /// Allocate a circle shape.
 CP_EXPORT cpCircleShape* cpCircleShapeAlloc(void);
@@ -176,7 +177,9 @@ CP_EXPORT cpVect cpCircleShapeGetOffset(const cpShape *shape);
 CP_EXPORT cpFloat cpCircleShapeGetRadius(const cpShape *shape);
 
 /// @}
+
 /// @defgroup cpSegmentShape cpSegmentShape
+/// @{
 
 /// Allocate a segment shape.
 CP_EXPORT cpSegmentShape* cpSegmentShapeAlloc(void);

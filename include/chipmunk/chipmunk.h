@@ -222,7 +222,7 @@ cpBool cpSpaceShapeQuery_b(cpSpace *space, cpShape *shape, cpSpaceShapeQueryBloc
 #endif
 
 
-//@}
+///@}
 
 #ifdef __cplusplus
 }
