@@ -105,8 +105,10 @@ have CMake installed. It can even generate XCode or MSVC projects if you want
 To compile a Chipmunk debug build on the command line, all you need to do is
 run:
 
-    <code>cmake -D CMAKE_BUILD_TYPE=Debug .
-    make</code>
+```c
+cmake -D CMAKE_BUILD_TYPE=Debug .
+    make
+```
 
 If the `-D CMAKE_BUILD_TYPE=Debug` option is left out, it will make a release
 build instead.
@@ -308,25 +310,31 @@ libraries, but is not actually part of the C standard library.
 
 ### Struct Definition, Constants and Constructors
 
-    <code>typedef struct cpVect{
-        cpFloat x, y;
-    } cpVect</code>
+```c
+typedef struct cpVect{
+    cpFloat x, y;
+} cpVect
+```
 
-::: expl 2D vector packed into a struct. No surprises here. :::
+2D vector packed into a struct. No surprises here.
 
-    <code>static const cpVect cpvzero = {0.0f,0.0f};</code>
+```c
+    static const cpVect cpvzero = {0.0f,0.0f};
+```
 
-::: expl Constant for the zero vector. :::
+Constant for the zero vector.
 
-    <code>cpVect cpv(const cpFloat x, const cpFloat y)</code>
+```c
+cpVect cpv(const cpFloat x, const cpFloat y)
+```
 
-::: expl Convenience constructor for creating new `cpVect` structs. :::
+Convenience constructor for creating new `cpVect` structs.
 
 ### Operations
 
 - `cpBool cpveql(const cpVect v1, const cpVect v2)` - Check if two vectors are
   equal. Chipmunk provides an overloaded `==` operator when used in C++
-  programs. _[]{.numbers! .point .floating .comparing .when .careful .Be}_
+  programs. (_Be careful when comparing floating point numbers_)
 - `cpVect cpvadd(const cpVect v1, const cpVect v2)` - Add two vectors. Chipmunk
   provides an overloaded `+` operator when used in C++ programs.
 - `cpVect cpvsub(const cpVect v1, const cpVect v2)` - Subtract two vectors.
@@ -339,10 +347,10 @@ libraries, but is not actually part of the C standard library.
 - `cpFloat cpvcross(const cpVect v1, const cpVect v2)` - 2D vector cross product
   analog. The cross product of 2D vectors results in a 3D vector with only a z
   component. This function returns the value along the z-axis.
-- `cpVect cpvperp(const cpVect v)` - Returns a perpendicular vector. (90 degree
+- `cpVect cpvperp(const cpVect v)` - Returns a perpendicular vector. (90-degree
   rotation)
-- `cpVect cpvrperp(const cpVect v)` - Returns a perpendicular vector. (--90
-  degree rotation)
+- `cpVect cpvrperp(const cpVect v)` - Returns a perpendicular vector.
+  (-90-degree rotation)
 - `cpVect cpvproject(const cpVect v1, const cpVect v2)` - Returns the vector
   projection of `v1` onto `v2`.
 - `cpVect cpvrotate(const cpVect v1, const cpVect v2)` - Uses complex
@@ -382,27 +390,34 @@ libraries, but is not actually part of the C standard library.
 
 ### Struct Definition and Constructors
 
-    <code>typedef struct cpBB{
-        cpFloat l, b, r ,t;
-    } cpBB</code>
+```c
+typedef struct cpBB{
+  cpFloat l, b, r ,t;
+} cpBB
+```
 
-::: expl Simple bounding box struct. Stored as left, bottom, right, top values.
-:::
+Simple bounding box struct. Stored as left, bottom, right, top values.
 
-    <code>cpBB cpBBNew(const cpFloat l, const cpFloat b, const cpFloat r, const cpFloat t)</code>
+```c
+cpBB cpBBNew(const cpFloat l, const cpFloat b, const cpFloat r, const cpFloat t)
+```
 
-::: expl Convenience constructor for `cpBB` structs. Like `cpv()` this function
-returns a copy and not a malloced pointer. :::
+Convenience constructor for `cpBB` structs. Like `cpv()` this function returns a
+copy and not a malloced pointer.
 
-    <code>cpBB cpBBNewForExtents(const cpVect c, const cpFloat hw, const cpFloat hh)</code>
+```c
+cpBB cpBBNewForExtents(const cpVect c, const cpFloat hw, const cpFloat hh)
+```
 
-::: expl Convenience constructor for making a `cpBB` fitting with a center point
-and half width and height. :::
+Convenience constructor for making a `cpBB` fitting with a center point and half
+width and height.
 
-    <code>cpBB cpBBNewForCircle(const cpVect p, const cpFloat r)</code>
+```c
+cpBB cpBBNewForCircle(const cpVect p, const cpFloat r)
+```
 
-::: expl Convenience constructor for making a `cpBB` fitting a circle at
-position `p` with radius `r`. :::
+Convenience constructor for making a `cpBB` fitting a circle at position `p`
+with radius `r`.
 
 ### Operations
 
@@ -421,7 +436,8 @@ position `p` with radius `r`. :::
 - `cpFloat cpBBMergedArea(cpBB a, cpBB b)` - Merges `a` and `b` then returns the
   area of the merged bounding box.
 - `cpFloat cpBBSegmentQuery(cpBB bb, cpVect a, cpVect b)` - Returns the fraction
-  along the segment query the cpBB is hit. Returns INFINITY if it doesn't hit.
+  along the segment query the `cpBB` is hit. Returns `INFINITY` if it doesn't
+  hit.
 - `cpBool cpBBIntersectsSegment(cpBB bb, cpVect a, cpVect b)` - Returns true if
   the segment defined by endpoints `a` and `b` intersect `bb`.
 - `cpVect cpBBClampVect(const cpBB bb, const cpVect v)` - Returns a copy of `v`
@@ -431,7 +447,7 @@ position `p` with radius `r`. :::
 
 ## Chipmunk Rigid Bodies: `cpBody`
 
-### Dynamic, Kinematic, and Static Bodies
+### Dynamic, Kinematic, and Static Bodies {#BodyTypes}
 
 Chipmunk supports three different types of bodies with unique behavioral and
 performance characteristics.
@@ -442,7 +458,7 @@ bodies that you want the physics engine to simulate for you. Dynamic bodies
 interact with all types of bodies and can generate collision callbacks.
 
 Kinematic bodies are bodies that are controlled from your code instead of inside
-the physics engine. They arent affected by gravity and they have an infinite
+the physics engine. They aren't affected by gravity, and they have an infinite
 amount of mass so they don't react to collisions or forces with other bodies.
 Kinematic bodies are controlled by setting their velocity, which will cause them
 to move. Good examples of kinematic bodies might include things like moving
@@ -451,8 +467,8 @@ allowed to fall asleep.
 
 Static bodies are bodies that never (or rarely) move. Using static bodies for
 things like terrain offers a big performance boost over other body types-
-because Chipmunk doesn't need to check for collisions between static objects and
-it never needs to update their collision information. Additionally, because
+because Chipmunk doesn't need to check for collisions between static objects,
+and it never needs to update their collision information. Additionally, because
 static bodies don't move, Chipmunk knows it's safe to let objects that are
 touching or jointed to them fall asleep. Generally all of your level geometry
 will be attached to a static body except for things like moving platforms or
@@ -474,9 +490,9 @@ can do is to attempt to push the objects apart again since there is no
 information about their movement. This generally results in very mushy looking
 collisions. So instead of setting the position of an object, it's better to set
 its velocity and allow the physics engine to update the position. That way it
-can resolve any resulting colisions natuarally since it knows how the objects
+can resolve any resulting collisions naturally since it knows how the objects
 were moving. This is why kinematic bodies work the way they do. You set the
-velocity, and the physics updates their position so the two are never out of
+velocity, and the physics updates their position, so the two are never out of
 sync.
 
 For dynamic bodies, setting the velocity explicitly every frame can cause
@@ -498,25 +514,27 @@ properties. The mouse control in the demo application works the same way.
 
 ### Memory Management Functions
 
-    <code>cpBody *cpBodyAlloc(void)
-    cpBody *cpBodyInit(cpBody *body, cpFloat m, cpFloat i)
-    cpBody *cpBodyNew(cpFloat m, cpFloat i)
+```c
+cpBody *cpBodyAlloc(void)
+cpBody *cpBodyInit(cpBody *body, cpFloat m, cpFloat i)
+cpBody *cpBodyNew(cpFloat m, cpFloat i)
 
-    cpBody *cpBodyInitKinematic(cpBody *body)
-    cpBody *cpBodyNewKinematic()
+cpBody *cpBodyInitKinematic(cpBody *body)
+cpBody *cpBodyNewKinematic()
 
-    cpBody *cpBodyInitStatic(cpBody *body)
-    cpBody *cpBodyNewStatic()
+cpBody *cpBodyInitStatic(cpBody *body)
+cpBody *cpBodyNewStatic()
 
-    void cpBodyDestroy(cpBody *body)
-    void cpBodyFree(cpBody *body)</code>
+void cpBodyDestroy(cpBody *body)
+void cpBodyFree(cpBody *body)
+```
 
-::: expl Standard set of Chipmunk memory management functions. `m` and `i` are
-the mass and moment of inertia for the body. Guessing the mass for a body is
-usually fine, but guessing a moment of inertia can lead to a very poor
-simulation so it's recommended to use Chipmunk's moment calculations to estimate
-the moment for you. Be careful not to free a body before any shapes or
-constraints attached to it have been removed from a space. :::
+Standard set of Chipmunk memory management functions. `m` and `i` are the mass
+and moment of inertia for the body. Guessing the mass for a body is usually
+fine, but guessing a moment of inertia can lead to a very poor simulation so
+it's recommended to use Chipmunk's moment calculations to estimate the moment
+for you. Be careful not to free a body before any shapes or constraints attached
+to it have been removed from a space.
 
 ### Creating Dynamic Bodies
 
@@ -540,96 +558,121 @@ TODO example
 
 Chipmunk provides getter/setter functions for a number of properties on rigid
 bodies. Setting most properties automatically wakes the rigid bodies up if they
-were sleeping. You can also set the fields directly on the cpBody struct if you
-wish. They are documented in the headers.
+were sleeping. You can also set the fields directly on the `cpBody` struct if
+you wish. They are documented in the headers.
 
-    <code>cpBodyType cpBodyGetType(const cpBody *body)
-    void cpBodySetType(cpBody *body, cpBodyType)</code>
+```c
+cpBodyType cpBodyGetType(const cpBody *body)
+void cpBodySetType(cpBody *body, cpBodyType)
+```
 
-::: expl Set the type of a body (dynamic, kinematic, static). See the section on
-[BodyTypes](#BodyTypes) for more information. When changing an body to a dynamic
+Set the type of body (dynamic, kinematic, static). See the section on
+[BodyTypes](#BodyTypes) for more information. When changing a body to a dynamic
 body, the mass and moment of inertia are recalculated from the shapes added to
 the body. Custom calculated moments of inertia are not preserved when changing
 types. This function cannot be called directly in a collision callback. See
-[Post-Step Callbacks](#PostStep) for more information. :::
+[Post-Step Callbacks](#PostStep) for more information.
 
-    <code>cpSpace *cpBodyGetSpace(const cpBody *body)</code>
+```c
+cpSpace *cpBodyGetSpace(const cpBody *body)
+```
 
-::: expl The `cpSpace` this body is currently added to, or `NULL` if it is not
-currently added to a space. :::
+The `cpSpace` this body is currently added to, or `NULL` if it is not currently
+added to a space.
 
-    <code>cpFloat cpBodyGetMass(const cpBody *body)
-    void cpBodySetMass(cpBody *body, cpFloat m)</code>
+```c
+cpFloat cpBodyGetMass(const cpBody *body)
+void cpBodySetMass(cpBody *body, cpFloat m)
+```
 
-::: expl Mass of the body. :::
+Mass of the body.
 
-    <code>cpFloat cpBodyGetMoment(const cpBody *body)
-    void cpBodySetMoment(cpBody *body, cpFloat i)</code>
+```c
+cpFloat cpBodyGetMoment(const cpBody *body)
+void cpBodySetMoment(cpBody *body, cpFloat i)
+```
 
-::: expl Moment of inertia (MoI or sometimes just moment) of the body. The
-moment is like the rotational mass of a body. See below for function to help
-calculate the moment. :::
+Moment of inertia (MoI or sometimes just moment) of the body. The moment is like
+the rotational mass of a body. See below for function to help calculate the
+moment.
 
-    <code>cpVect cpBodyGetPosition(const cpBody *body)
-    void cpBodySetPosition(cpBody *body, cpVect pos)</code>
+```c
+cpVect cpBodyGetPosition(const cpBody *body)
+void cpBodySetPosition(cpBody *body, cpVect pos)
+```
 
-::: expl Position of the body. When changing the position you may also want to
+Position of the body. When changing the position you may also want to call
+`cpSpaceReindexShapesForBody()` to update the collision detection information
+for the attached shapes if plan to make any queries against the space.
+
+```c
+cpVect cpBodyGetCenterOfGravity(const cpBody *body)
+void cpBodySetCenterOfGravity(cpBody *body, cpVect cog)
+```
+
+Location of the center of gravity in body local coordinates. The default value
+is `(0, 0)`, meaning the center of gravity is the same as the position of the
+body.
+
+```c
+cpVect cpBodyGetVelocity(const cpBody *body)
+void cpBodySetVelocity(cpBody *body, const cpVect value)
+```
+
+Linear velocity of the center of gravity of the body.
+
+```c
+cpVect cpBodyGetForce(const cpBody *body)
+void cpBodySetForce(cpBody *body, const cpVect value)
+```
+
+Force applied to the center of gravity of the body. This value is reset for
+every time step.
+
+```c
+cpFloat cpBodyGetAngle(const cpBody *body)
+void cpBodySetAngle(cpBody *body, cpFloat a)
+```
+
+Rotation of the body in radians. When changing the rotation you may also want to
 call `cpSpaceReindexShapesForBody()` to update the collision detection
 information for the attached shapes if plan to make any queries against the
-space. :::
+space. A body rotates around its center of gravity, not its position.
 
-    <code>cpVect cpBodyGetCenterOfGravity(const cpBody *body)
-    void cpBodySetCenterOfGravity(cpBody *body, cpVect cog)</code>
+```c
+cpFloat cpBodyGetAngularVelocity(const cpBody *body)
+void cpBodySetAngularVelocity(cpBody *body, const cpFloat value)
+```
 
-::: expl Location of the center of gravity in body local coordinates. The
-default value is `(0, 0)`, meaning the center of gravity is the same as the
-position of the body. :::
+The angular velocity of the body in radians per second.
 
-    <code>cpVect cpBodyGetVelocity(const cpBody *body)
-    void cpBodySetVelocity(cpBody *body, const cpVect value)</code>
+```c
+cpFloat cpBodyGetTorque(const cpBody *body)
+void cpBodySetTorque(cpBody *body, const cpFloat value)
+```
 
-::: expl Linear velocity of the center of gravity of the body. :::
+The torque applied to the body. This value is reset for every time step.
 
-    <code>cpVect cpBodyGetForce(const cpBody *body)
-    void cpBodySetForce(cpBody *body, const cpVect value)</code>
+```c
+cpVect cpBodyGetRotation(const cpBody *body)
+```
 
-::: expl Force applied to the center of gravity of the body. This value is reset
-for every time step. :::
+The rotation vector for the body. Can be used with `cpvrotate()` or
+`cpvunrotate()` to perform fast rotations.
 
-    <code>cpFloat cpBodyGetAngle(const cpBody *body)
-    void cpBodySetAngle(cpBody *body, cpFloat a)</code>
+```c
+cpSpace* cpBodyGetSpace(const cpBody *body)
+```
 
-::: expl Rotation of the body in radians. When changing the rotation you may
-also want to call `cpSpaceReindexShapesForBody()` to update the collision
-detection information for the attached shapes if plan to make any queries
-against the space. A body rotates around its center of gravity, not its
-position. :::
+Get the `cpSpace` that `body` has been added to.
 
-    <code>cpFloat cpBodyGetAngularVelocity(const cpBody *body)
-    void cpBodySetAngularVelocity(cpBody *body, const cpFloat value)</code>
+```c
+cpDataPointer cpBodyGetUserData(const cpBody *body)
+void cpBodySetUserData(cpBody *body, const cpDataPointer value)
+```
 
-::: expl The angular velocity of the body in radians per second. :::
-
-    <code>cpFloat cpBodyGetTorque(const cpBody *body)
-    void cpBodySetTorque(cpBody *body, const cpFloat value)</code>
-
-::: expl The torque applied to the body. This value is reset for every time
-step. :::
-
-    <code>cpVect cpBodyGetRotation(const cpBody *body)</code>
-
-::: expl The rotation vector for the body. Can be used with `cpvrotate()` or
-`cpvunrotate()` to perform fast rotations. :::
-
-    <code>cpSpace* cpBodyGetSpace(const cpBody *body)</code>
-
-::: expl Get the `cpSpace` that `body` has been added to. :::
-
-    <code>cpDataPointer cpBodyGetUserData(const cpBody *body)
-    void cpBodySetUserData(cpBody *body, const cpDataPointer value)</code>
-
-::: expl User data pointer. Use this pointer to get a reference to the game
-object that owns this body from callbacks. :::
+User data pointer. Use this pointer to get a reference to the game object that
+owns this body from callbacks.
 
 ### Moment of Inertia and Area Helper Functions
 
@@ -638,8 +681,8 @@ adding the results together if you want to use more than one.
 
 - `cpFloat cpMomentForCircle(cpFloat m, cpFloat r1, cpFloat r2, cpVect offset)` -
   Calculate the moment of inertia for a hollow circle, `r1` and `r2` are the
-  inner and outer diameters in no particular order. _[]{.0 .of .diameter .inner
-  .an .has .circle .solid .A}_
+  inner and outer diameters in no particular order. (A solid circle has an inner
+  diameter of 0).
 - `cpFloat cpMomentForSegment(cpFloat m, cpVect a, cpVect b, cpFloat radius)` -
   Calculate the moment of inertia for a line segment. The endpoints `a` and `b`
   are relative to the body.
@@ -658,7 +701,7 @@ want to approximate masses or density or whatnot.
 
 - `cpFloat cpAreaForCircle(cpFloat r1, cpFloat r2)` - Area of a hollow circle.
 - `cpFloat cpAreaForSegment(cpVect a, cpVect b, cpFloat r)` - Area of a beveled
-  segment. _[]{.zero .is .radius .if .zero .be .always .Will}_
+  segment. (Will always be zero if radius is zero).
 - `cpFloat cpAreaForPoly(const int count, const cpVect *verts, cpFloat radius)` -
   Signed area of a polygon shape. Returns a negative number for polygons with a
   clockwise winding.
@@ -708,7 +751,7 @@ of the object will halve the effect.
 
 Chipmunk supports a sleeping feature which improves performance by not
 simulating groups of objects that aren't moving. Read more about it in the
-[cpSpace section](#cpSpace-Sleeping).
+[Space section](#cpSpace-Sleeping).
 
 - `cpBool cpBodyIsSleeping(const cpBody *body)` - Returns true if `body` is
   sleeping.
@@ -721,47 +764,53 @@ simulating groups of objects that aren't moving. Read more about it in the
   `filter` is not `NULL`, then only bodies touching through `filter` will be
   awoken.
 
-<!-- -->
+```c
+void cpBodySleepWithGroup(cpBody *body, cpBody *group)
+```
 
-    <code>void cpBodySleepWithGroup(cpBody *body, cpBody *group)</code>
-
-::: expl When objects in Chipmunk sleep, they sleep as a group of all objects
-that are touching or jointed together. When an object is woken up, all of the
-objects in its group are woken up. `cpBodySleepWithGroup()` allows you group
-sleeping objects together. It acts identically to `cpBodySleep()` if you pass
-`NULL` as `group` by starting a new group. If you pass a sleeping body for
-`group`, `body` will be awoken when `group` is awoken. You can use this to
-initialize levels and start stacks of objects in a pre-sleeping state. :::
+When objects in Chipmunk sleep, they sleep as a group of all objects that are
+touching or jointed together. When an object is woken up, all the objects in its
+group are woken up. `cpBodySleepWithGroup()` allows you group sleeping objects
+together. It acts identically to `cpBodySleep()` if you pass `NULL` as `group`
+by starting a new group. If you pass a sleeping body for `group`, `body` will be
+awoken when `group` is awoken. You can use this to initialize levels and start
+stacks of objects in a pre-sleeping state.
 
 \<%= pop_open_example "Sleeping" %\>
 
 ### Iterators
 
-    <code>typedef void (*cpBodyShapeIteratorFunc)(cpBody *body, cpShape *shape, void *data)
-    void cpBodyEachShape(cpBody *body, cpBodyShapeIteratorFunc func, void *data)</code>
+```c
+typedef void (*cpBodyShapeIteratorFunc)(cpBody *body, cpShape *shape, void *data)
+void cpBodyEachShape(cpBody *body, cpBodyShapeIteratorFunc func, void *data)
+```
 
-::: expl Call `func` once for each shape that is attached to `body` and added to
-a space. `data` is passed along as a context value. It is safe to remove shapes
-using these callbacks. :::
+Call `func` once for each shape that is attached to `body` and added to a space.
+`data` is passed along as a context value. It is safe to remove shapes using
+these callbacks.
 
-    <code>typedef void (*cpBodyConstraintIteratorFunc)(cpBody *body, cpConstraint *constraint, void *data)
-    void cpBodyEachConstraint(cpBody *body, cpBodyConstraintIteratorFunc func, void *data)</code>
+```c
+typedef void (*cpBodyConstraintIteratorFunc)(cpBody *body, cpConstraint *constraint, void *data)
+void cpBodyEachConstraint(cpBody *body, cpBodyConstraintIteratorFunc func, void *data)
+```
 
-::: expl Call `func` once for each constraint that is attached to `body` and
-added to a space. `data` is passed along as a context value. It is safe to
-remove constraints using thes callbacks. :::
+Call `func` once for each constraint that is attached to `body` and added to a
+space. `data` is passed along as a context value. It is safe to remove
+constraints using the callbacks.
 
-    <code>typedef void (*cpBodyArbiterIteratorFunc)(cpBody *body, cpArbiter *arbiter, void *data)
-    void cpBodyEachArbiter(cpBody *body, cpBodyArbiterIteratorFunc func, void *data)</code>
+```c
+typedef void (*cpBodyArbiterIteratorFunc)(cpBody *body, cpArbiter *arbiter, void *data)
+void cpBodyEachArbiter(cpBody *body, cpBodyArbiterIteratorFunc func, void *data)
+```
 
-::: expl This one is more interesting. Calls `func` once for each collision pair
-that `body` is involved in. Calling `cpArbiterGet[Bodies|Shapes]()` or
+This one is more interesting. Calls `func` once for each collision pair that
+`body` is involved in. Calling `cpArbiterGet[Bodies|Shapes]()` or
 `CP_ARBITER_GET_[BODIES|SHAPES]()` will return the body or shape for `body` as
 the first argument. You can use this to check all sorts of collision information
 for a body like if it's touching the ground, another particular object, how much
 collision force is being applied to an object, etc. Sensor shapes and arbiters
 that have been rejected by a collision handler callback or `cpArbiterIgnore()`
-are not tracked by the contact graph. :::
+are not tracked by the contact graph.
 
 **Note:** If your compiler supports blocks (such as Clang), there are an
 alternate set of functions you can call. `cpBodyEachShape_b()`, etc. See
@@ -771,7 +820,7 @@ alternate set of functions you can call. `cpBodyEachShape_b()`, etc. See
 
 ### Integration Callbacks
 
-This section is a stub. For now you can look at the Planet demo for an example
+This section is a stub. For now, you can look at the Planet demo for an example
 of how to use integration callbacks to implement planetary gravity.
 
 <!-- TODO document and examples -->
@@ -804,73 +853,91 @@ collision shapes. Setting most properties will automatically wake the attached
 rigid body, if it's sleeping. You can also set some of the fields directly on
 the cpShape struct if you wish. They are documented in the headers.
 
-    <code>cpBody * cpShapeGetBody(const cpShape *shape)
-    void cpShapeSetBody(cpShape *shape, cpBody *body)</code>
+```c
+cpBody * cpShapeGetBody(const cpShape *shape)
+    void cpShapeSetBody(cpShape *shape, cpBody *body)
+```
 
-::: expl The rigid body the shape is attached to. Can only be set when the shape
-is not added to a space. :::
+The rigid body the shape is attached to. Can only be set when the shape is not
+added to a space.
 
-    <code>cpBB cpShapeGetBB(const cpShape *shape)</code>
+```c
+cpBB cpShapeGetBB(const cpShape *shape)
+```
 
-::: expl The bounding box of the shape. Only guaranteed to be valid after
+The bounding box of the shape. Only guaranteed to be valid after
 `cpShapeCacheBB()` or `cpSpaceStep()` is called. Moving a body that a shape is
 connected to does not update its bounding box. For shapes used for queries that
-aren't attached to bodies, you can also use `cpShapeUpdate()`. :::
+aren't attached to bodies, you can also use `cpShapeUpdate()`.
 
-    <code>cpBool cpShapeGetSensor(const cpShape *shape)
-    void cpShapeSetSensor(cpShape *shape, cpBool value)</code>
+```c
+cpBool cpShapeGetSensor(const cpShape *shape)
+    void cpShapeSetSensor(cpShape *shape, cpBool value)
+```
 
-::: expl A boolean value if this shape is a sensor or not. Sensors only call
-collision callbacks, and never generate real collisions. :::
+A boolean value if this shape is a sensor or not. Sensors only call collision
+callbacks, and never generate real collisions.
 
-    <code>cpFloat cpShapeGetElasticity(const cpShape *shape)
-    void cpShapeSetElasticity(cpShape *shape, cpFloat value)</code>
+```c
+cpFloat cpShapeGetElasticity(const cpShape *shape)
+    void cpShapeSetElasticity(cpShape *shape, cpFloat value)
+```
 
-::: expl Elasticity of the shape. A value of 0.0 gives no bounce, while a value
-of 1.0 will give a "perfect" bounce. However due to inaccuracies in the
-simulation using 1.0 or greater is not recommended however. The elasticity for a
-collision is found by multiplying the elasticity of the individual shapes
-together. :::
+Elasticity of the shape. A value of 0.0 gives no bounce, while a value of 1.0
+will give a "perfect" bounce. However due to inaccuracies in the simulation
+using 1.0 or greater is not recommended however. The elasticity for a collision
+is found by multiplying the elasticity of the individual shapes together.
 
-    <code>cpFloat cpShapeGetFriction(const cpShape *shape)
-    void cpShapeSetFriction(cpShape *shape, cpFloat value)</code>
+```c
+cpFloat cpShapeGetFriction(const cpShape *shape)
+    void cpShapeSetFriction(cpShape *shape, cpFloat value)
+```
 
-::: expl Friction coefficient. Chipmunk uses the Coulomb friction model, a value
-of 0.0 is frictionless. The friction for a collision is found by multiplying the
+Friction coefficient. Chipmunk uses the Coulomb friction model, a value of 0.0
+is frictionless. The friction for a collision is found by multiplying the
 friction of the individual shapes together.
 [Tables of friction coefficients](http://www.roymech.co.uk/Useful_Tables/Tribology/co_of_frict.htm).
 :::
 
-    <code>cpVect cpShapeGetSurfaceVelocity(const cpShape *shape)
-    void cpShapeSetSurfaceVelocity(cpShape *shape, cpVect value)</code>
+```c
+cpVect cpShapeGetSurfaceVelocity(const cpShape *shape)
+    void cpShapeSetSurfaceVelocity(cpShape *shape, cpVect value)
+```
 
-::: expl The surface velocity of the object. Useful for creating conveyor belts
-or players that move around. This value is only used when calculating friction,
-not resolving the collision. :::
+The surface velocity of the object. Useful for creating conveyor belts or
+players that move around. This value is only used when calculating friction, not
+resolving the collision.
 
-    <code>cpCollisionType cpShapeGetCollisionType(const cpShape *shape)
-    void cpShapeSetCollisionType(cpShape *shape, cpCollisionType value)</code>
+```c
+cpCollisionType cpShapeGetCollisionType(const cpShape *shape)
+    void cpShapeSetCollisionType(cpShape *shape, cpCollisionType value)
+```
 
-::: expl You can assign types to Chipmunk collision shapes that trigger
-callbacks when objects of certain types touch. See the
-[callbacks section](#Callbacks-Handlers) for more information. :::
+You can assign types to Chipmunk collision shapes that trigger callbacks when
+objects of certain types touch. See the [callbacks section](#Callbacks-Handlers)
+for more information.
 
-    <code>cpShapeFilter cpShapeGetFilter(const cpShape *shape)
-    void cpShapeSetFilter(cpShape *shape, cpShapeFilter filter)</code>
+```c
+cpShapeFilter cpShapeGetFilter(const cpShape *shape)
+    void cpShapeSetFilter(cpShape *shape, cpShapeFilter filter)
+```
 
-::: expl Set the collision filter for this shape. See
-[Filtering Collisions](#Filtering) for more information. :::
+Set the collision filter for this shape. See [Filtering Collisions](#Filtering)
+for more information.
 
-    <code>cpSpace* cpShapeGetSpace(const cpShape *shape)</code>
+```c
+cpSpace* cpShapeGetSpace(const cpShape *shape)
+```
 
-::: expl Get the `cpSpace` that `shape` has been added to. :::
+Get the `cpSpace` that `shape` has been added to.
 
-    <code>cpDataPointer cpShapeGetUserData(const cpShape *shape)
-    void cpShapeSetUserData(cpShape *shape, cpDataPointer value)</code>
+```c
+cpDataPointer cpShapeGetUserData(const cpShape *shape)
+    void cpShapeSetUserData(cpShape *shape, cpDataPointer value)
+```
 
-::: expl A user definable data pointer. If you set this to point at the game
-object the shapes is for, then you can access your game object from Chipmunk
-callbacks. :::
+A user definable data pointer. If you set this to point at the game object the
+shapes is for, then you can access your game object from Chipmunk callbacks.
 
 ### Fast Collision Filtering using cpShapeFilter
 
@@ -924,12 +991,13 @@ category masks is preferred.
 
 ### Memory Management Functions
 
-    <code>void cpShapeDestroy(cpShape *shape)
-    void cpShapeFree(cpShape *shape)</code>
+```c
+void cpShapeDestroy(cpShape *shape)
+    void cpShapeFree(cpShape *shape)
+```
 
-::: expl `Destroy` and `Free` functions are shared by all shape types.
-Allocation and initialization functions are specific to each shape type. See
-below. :::
+`Destroy` and `Free` functions are shared by all shape types. Allocation and
+initialization functions are specific to each shape type. See below.
 
 ### Misc Functions
 
@@ -940,49 +1008,61 @@ below. :::
 
 ### Working With Circle Shapes
 
-    <code>cpCircleShape *cpCircleShapeAlloc(void)
+```c
+cpCircleShape *cpCircleShapeAlloc(void)
     cpCircleShape *cpCircleShapeInit(cpCircleShape *circle, cpBody *body, cpFloat radius, cpVect offset)
-    cpShape *cpCircleShapeNew(cpBody *body, cpFloat radius, cpVect offset)</code>
+    cpShape *cpCircleShapeNew(cpBody *body, cpFloat radius, cpVect offset)
+```
 
-::: expl `body` is the body to attach the circle to, `offset` is the offset from
-the body's center of gravity in body local coordinates. :::
+`body` is the body to attach the circle to, `offset` is the offset from the
+body's center of gravity in body local coordinates.
 
-    <code>cpVect cpCircleShapeGetOffset(cpShape *circleShape)
-    cpFloat cpCircleShapeGetRadius(cpShape *circleShape)</code>
+```c
+cpVect cpCircleShapeGetOffset(cpShape *circleShape)
+    cpFloat cpCircleShapeGetRadius(cpShape *circleShape)
+```
 
-::: expl Getters for circle shape properties. Passing as non-circle shape will
-throw an assertion. :::
+Getters for circle shape properties. Passing as non-circle shape will throw an
+assertion.
 
 ### Working With Segment Shapes
 
-    <code>cpSegmentShape* cpSegmentShapeAlloc(void)
+```c
+cpSegmentShape* cpSegmentShapeAlloc(void)
     cpSegmentShape* cpSegmentShapeInit(cpSegmentShape *seg, cpBody *body, cpVect a, cpVect b, cpFloat radius)
-    cpShape* cpSegmentShapeNew(cpBody *body, cpVect a, cpVect b, cpFloat radius)</code>
+    cpShape* cpSegmentShapeNew(cpBody *body, cpVect a, cpVect b, cpFloat radius)
+```
 
-::: expl `body` is the body to attach the segment to, `a` and `b` are the
-endpoints, and `radius` is the thickness of the segment. :::
+`body` is the body to attach the segment to, `a` and `b` are the endpoints, and
+`radius` is the thickness of the segment.
 
-    <code>cpVect cpSegmentShapeGetA(cpShape *shape)
+```c
+cpVect cpSegmentShapeGetA(cpShape *shape)
     cpVect cpSegmentShapeGetB(cpShape *shape)
     cpVect cpSegmentShapeGetNormal(cpShape *shape)
-    cpFloat cpSegmentShapeGetRadius(cpShape *shape)</code>
+    cpFloat cpSegmentShapeGetRadius(cpShape *shape)
+```
 
-::: expl Getters for segment shape properties. Passing a non-segment shape will
-throw an assertion. :::
+Getters for segment shape properties. Passing a non-segment shape will throw an
+assertion.
 
-    <code>void cpSegmentShapeSetNeighbors(cpShape *shape, cpVect prev, cpVect next)</code>
+```c
+void cpSegmentShapeSetNeighbors(cpShape *shape, cpVect prev, cpVect next)
+```
 
-::: expl When you have a number of segment shapes that are all joined together,
-things can still collide with the "cracks" between the segments. By setting the
+When you have a number of segment shapes that are all joined together, things
+can still collide with the "cracks" between the segments. By setting the
 neighbor segment endpoints you can tell Chipmunk to avoid colliding with the
-inner parts of the crack. :::
+inner parts of the crack.
 
 ### Working With Polygon Shapes
 
-    <code>cpPolyShape *cpPolyShapeAlloc(void)
+```c
+cpPolyShape *cpPolyShapeAlloc(void)
 
     cpPolyShape *cpPolyShapeInit(cpPolyShape *poly, cpBody *body, int count, const cpVect *verts, cpTransform transform, cpFloat radius)
-    cpShape *cpPolyShapeNew(cpBody *body, int numVerts, cpVect *verts, cpTransform transform, cpFloat radius)</code>
+    cpShape *cpPolyShapeNew(cpBody *body, int numVerts, cpVect *verts, cpTransform transform, cpFloat radius)
+```
 
 \
 p(expl). `body` is the body to attach the poly to, `verts` is an array of `cpVect`
@@ -991,19 +1071,23 @@ from the vertexes automatically.\
 The polygon shape will be created with a `radius`, increasing the size of the
 shape.
 
-    <code>cpPolyShape* cpPolyShapeInitRaw(cpPolyShape *poly, cpBody *body, int count, const cpVect *verts, cpFloat radius)
-    cpShape* cpPolyShapeNewRaw(cpBody *body, int count, const cpVect *verts, cpFloat radius)</code>
+```c
+cpPolyShape* cpPolyShapeInitRaw(cpPolyShape *poly, cpBody *body, int count, const cpVect *verts, cpFloat radius)
+    cpShape* cpPolyShapeNewRaw(cpBody *body, int count, const cpVect *verts, cpFloat radius)
+```
 
 Alternate constructors for poly shapes. This version does not apply a transform
 nor does it create a convex hull. Vertices _must_ be provided with a
 counter-clockwise winding.
 
-    <code>int cpPolyShapeGetCount(cpShape *shape)
+```c
+int cpPolyShapeGetCount(cpShape *shape)
     cpVect cpPolyShapeGetVert(cpShape *shape, int index)
-    cpFloat cpPolyShapeGetRadius()</code>
+    cpFloat cpPolyShapeGetRadius()
+```
 
-::: expl Getters for poly shape properties. Passing a non-poly shape or an index
-that does not exist will throw an assertion. :::
+Getters for poly shape properties. Passing a non-poly shape or an index that
+does not exist will throw an assertion.
 
 #### Boxes
 
@@ -1014,11 +1098,13 @@ the corners and can significantly reduce problems where the box gets stuck on
 seams in your geometry. If you want to create an off-center box, you will need
 to use `cpPolyShapeNew()` or `cpPolyShapeInit()`.
 
-    <code>cpPolyShape *cpBoxShapeInit(cpPolyShape *poly, cpBody *body, cpFloat width, cpFloat height, cpFloat radius)
+```c
+cpPolyShape *cpBoxShapeInit(cpPolyShape *poly, cpBody *body, cpFloat width, cpFloat height, cpFloat radius)
     cpPolyShape *cpBoxShapeInit2(cpPolyShape *poly, cpBody *body, cpBB box, cpFloat radius)
 
     cpShape *cpBoxShapeNew(cpBody *body, cpFloat width, cpFloat height, cpFloat radius)
-    cpShape *cpBoxShapeNew2(cpBody *body, cpBB box, cpFloat radius)</code>
+    cpShape *cpBoxShapeNew2(cpBody *body, cpBB box, cpFloat radius)
+```
 
 #### Poly Shape Helper Functions
 
@@ -1027,21 +1113,25 @@ to use `cpPolyShapeNew()` or `cpPolyShapeInit()`.
 
 #### Convex Hull Helper Functions
 
-    <code>int cpConvexHull(int count, cpVect *verts, cpVect *result, int *first, cpFloat tol)</code>
+```c
+int cpConvexHull(int count, cpVect *verts, cpVect *result, int *first, cpFloat tol)
+```
 
-::: expl Calculate the convex hull of a given set of points. Returns the count
-of points in the hull. `result` must be a pointer to a `cpVect` array with at
-least `count` elements. If `result` is `NULL`, then `verts` array wil be reduced
+Calculate the convex hull of a given set of points. Returns the count of points
+in the hull. `result` must be a pointer to a `cpVect` array with at least
+`count` elements. If `result` is `NULL`, then `verts` array wil be reduced
 instead. `first` is an optional pointer to an integer to store where the first
 vertex in the hull came from (i.e. `verts[first] == result[0]`) `tol` is the
 allowed amount to shrink the hull when simplifying it. A tolerance of 0.0
-creates an exact hull. :::
+creates an exact hull.
 
-    <code>#define CP_CONVEX_HULL(inputCount, inputVerts, outputCount_varName, outputVerts_varName)</code>
+```c
+#define CP_CONVEX_HULL(inputCount, inputVerts, outputCount_varName, outputVerts_varName)
+```
 
-::: expl Convenience macro for using `cpConvexHull()`. Creates an array on the
-stack using `alloca()` and then calls `cpConvexHull()`. Because the output array
-is created on the stack it doesn't need to be freed. :::
+Convenience macro for using `cpConvexHull()`. Creates an array on the stack
+using `alloca()` and then calls `cpConvexHull()`. Because the output array is
+created on the stack it doesn't need to be freed.
 
 \<%= pop_open_example "cpConvexHull" %\>
 
@@ -1081,7 +1171,7 @@ bouncy when the objects should be solid. Setting the number of iterations lets
 you balance between CPU usage and the accuracy of the physics. Chipmunk's
 default of 10 iterations is sufficient for most simple games.
 
-### Sleeping
+### Sleeping #{#cpSpace-Sleeping}
 
 Spaces can disable entire groups of objects that have stopped moving to save CPU
 time and battery life. In order to use this feature you must do two things. You
@@ -1095,103 +1185,128 @@ kinematic body.
 
 ### Properties
 
-    <code>int cpSpaceGetIterations(const cpSpace *space)
-    void cpSpaceSetIterations(cpSpace *space, int value)</code>
+```c
+int cpSpaceGetIterations(const cpSpace *space)
+    void cpSpaceSetIterations(cpSpace *space, int value)
+```
 
-::: expl Iterations allow you to control the accuracy of the solver. Defaults
-to 10. See [above](#cpSpace-Iterations) for more information. :::
+Iterations allow you to control the accuracy of the solver. Defaults to 10. See
+[above](#cpSpace-Iterations) for more information.
 
-    <code>cpVect cpSpaceGetGravity(const cpSpace *space)
-    void cpSpaceSetGravity(cpSpace *space, cpVect value)</code>
+```c
+cpVect cpSpaceGetGravity(const cpSpace *space)
+    void cpSpaceSetGravity(cpSpace *space, cpVect value)
+```
 
-::: expl Global gravity applied to the space. Defaults to `cpvzero`. Can be
-overridden on a per body basis by writing custom integration functions. Changing
-the gravity will activate all sleeping bodies in the space. :::
+Global gravity applied to the space. Defaults to `cpvzero`. Can be overridden on
+a per body basis by writing custom integration functions. Changing the gravity
+will activate all sleeping bodies in the space.
 
-    <code>cpFloat cpSpaceGetDamping(const cpSpace *space)
-    void cpSpaceSetDamping(cpSpace *space, cpFloat value)</code>
+```c
+cpFloat cpSpaceGetDamping(const cpSpace *space)
+    void cpSpaceSetDamping(cpSpace *space, cpFloat value)
+```
 
-::: expl Amount of simple damping to apply to the space. A value of 0.9 means
-that each body will lose 10% of its velocity per second. Defaults to 1. Like
-`gravity`, it can be overridden on a per body basis. :::
+Amount of simple damping to apply to the space. A value of 0.9 means that each
+body will lose 10% of its velocity per second. Defaults to 1. Like `gravity`, it
+can be overridden on a per body basis.
 
-    <code>cpFloat cpSpaceGetIdleSpeedThreshold(const cpSpace *space)
-    void cpSpaceSetIdleSpeedThreshold(cpSpace *space, cpFloat value)</code>
+```c
+cpFloat cpSpaceGetIdleSpeedThreshold(const cpSpace *space)
+    void cpSpaceSetIdleSpeedThreshold(cpSpace *space, cpFloat value)
+```
 
-::: expl Speed threshold for a body to be considered idle. The default value of
-0 means the space estimates a good threshold based on gravity. :::
+Speed threshold for a body to be considered idle. The default value of 0 means
+the space estimates a good threshold based on gravity.
 
-    <code>cpFloat cpSpaceGetSleepTimeThreshold(const cpSpace *space)
-    void cpSpaceSetSleepTimeThreshold(cpSpace *space, cpFloat value)</code>
+```c
+cpFloat cpSpaceGetSleepTimeThreshold(const cpSpace *space)
+    void cpSpaceSetSleepTimeThreshold(cpSpace *space, cpFloat value)
+```
 
-::: expl Time a group of bodies must remain idle in order to fall asleep. The
-default value of `INFINITY` disables the sleeping feature. :::
+Time a group of bodies must remain idle in order to fall asleep. The default
+value of `INFINITY` disables the sleeping feature.
 
-    <code>cpFloat cpSpaceGetCollisionSlop(const cpSpace *space)
-    void cpSpaceSetCollisionSlop(cpSpace *space, cpFloat value)</code>
+```c
+cpFloat cpSpaceGetCollisionSlop(const cpSpace *space)
+    void cpSpaceSetCollisionSlop(cpSpace *space, cpFloat value)
+```
 
-::: expl Amount of overlap between shapes that is allowed. To improve stability,
-set this as high as you can without noticable overlapping. It defaults to 0.1.
-:::
+Amount of overlap between shapes that is allowed. To improve stability, set this
+as high as you can without noticable overlapping. It defaults to 0.1. :::
 
-    <code>cpFloat cpSpaceGetCollisionBias(const cpSpace *space)
-    void cpSpaceSetCollisionBias(cpSpace *space, cpFloat value)</code>
+```c
+cpFloat cpSpaceGetCollisionBias(const cpSpace *space)
+    void cpSpaceSetCollisionBias(cpSpace *space, cpFloat value)
+```
 
-::: expl Chipmunk allows fast moving objects to overlap, then fixes the overlap
-over time. Overlapping objects are unavoidable even if swept collisions are
+Chipmunk allows fast moving objects to overlap, then fixes the overlap over
+time. Overlapping objects are unavoidable even if swept collisions are
 supported, and this is an efficient and stable way to deal with overlapping
 objects. The bias value controls what percentage of overlap remains unfixed
 after a second and defaults to \~0.2%. Valid values are in the range from 0 to
 1, but using 0 is not recommended for stability reasons. The default value is
 calculated as `cpfpow(1.0f - 0.1f, 60.0f)` meaning that Chipmunk attempts to
 correct 10% of error ever 1/60th of a second. **Note:** Very, very few games
-will need to change this value. :::
+will need to change this value.
 
-    <code>cpTimestamp cpSpaceGetCollisionPersistence(const cpSpace *space)
-    void cpSpaceSetCollisionPersistence(cpSpace *space, cpTimestamp value)</code>
+```c
+cpTimestamp cpSpaceGetCollisionPersistence(const cpSpace *space)
+    void cpSpaceSetCollisionPersistence(cpSpace *space, cpTimestamp value)
+```
 
-::: expl The number of frames the space keeps collision solutions around for.
-Helps prevent jittering contacts from getting worse. This defaults to 3 and very
-very _very_ few games will need to change this value. :::
+The number of frames the space keeps collision solutions around for. Helps
+prevent jittering contacts from getting worse. This defaults to 3 and very very
+_very_ few games will need to change this value.
 
-    <code>cpFloat cpSpaceGetCurrentTimeStep(const cpSpace *space)</code>
+```c
+cpFloat cpSpaceGetCurrentTimeStep(const cpSpace *space)
+```
 
-::: expl Retrieves the current (if you are in a callback from `cpSpaceStep()`)
-or most recent (outside of a `cpSpaceStep()` call) timestep. :::
+Retrieves the current (if you are in a callback from `cpSpaceStep()`) or most
+recent (outside of a `cpSpaceStep()` call) timestep.
 
-    <code>cpFloat cpSpaceIsLocked(const cpSpace *space)</code>
+```c
+cpFloat cpSpaceIsLocked(const cpSpace *space)
+```
 
-::: expl Returns true when you cannot add/remove objects from the space. In
-particular, spaces are locked when in a collision callback. Instead, run your
-code in a post-step callback instead. :::
+Returns true when you cannot add/remove objects from the space. In particular,
+spaces are locked when in a collision callback. Instead, run your code in a
+post-step callback instead.
 
-    <code>cpDataPointer cpSpaceGetUserData(const cpSpace *space)
-    void cpSpaceSetUserData(cpSpace *space, cpDataPointer value)</code>
+```c
+cpDataPointer cpSpaceGetUserData(const cpSpace *space)
+    void cpSpaceSetUserData(cpSpace *space, cpDataPointer value)
+```
 
-::: expl A user definable data pointer. It is often useful to point this at the
-game state object or scene management object that owns the space. :::
+A user definable data pointer. It is often useful to point this at the game
+state object or scene management object that owns the space.
 
-    <code>cpBody * cpSpaceGetStaticBody(const cpSpace *space)</code>
+```c
+cpBody * cpSpaceGetStaticBody(const cpSpace *space)
+```
 
-::: expl A dedicated static body for the space. You don't have to use it, but
-because its memory is managed automatically with the space its very convenient.
-You can set its user data pointer to something helpful if you want for
-callbacks. :::
+A dedicated static body for the space. You don't have to use it, but because its
+memory is managed automatically with the space its very convenient. You can set
+its user data pointer to something helpful if you want for callbacks.
 
 ### Memory Management Functions
 
-    <code>cpSpace* cpSpaceAlloc(void)
+```c
+cpSpace* cpSpaceAlloc(void)
     cpSpace* cpSpaceInit(cpSpace *space)
     cpSpace* cpSpaceNew()
 
     void cpSpaceDestroy(cpSpace *space)
-    void cpSpaceFree(cpSpace *space)</code>
+    void cpSpaceFree(cpSpace *space)
+```
 
-::: expl More standard Chipmunk memory functions. :::
+More standard Chipmunk memory functions.
 
 ### Operations
 
-    <code>cpShape *cpSpaceAddShape(cpSpace *space, cpShape *shape)
+```c
+cpShape *cpSpaceAddShape(cpSpace *space, cpShape *shape)
     cpBody *cpSpaceAddBody(cpSpace *space, cpBody *body)
     cpConstraint *cpSpaceAddConstraint(cpSpace *space, cpConstraint *constraint)
 
@@ -1201,18 +1316,19 @@ callbacks. :::
 
     cpBool cpSpaceContainsShape(cpSpace *space, cpShape *shape)
     cpBool cpSpaceContainsBody(cpSpace *space, cpBody *body)
-    cpBool cpSpaceContainsConstraint(cpSpace *space, cpConstraint *constraint)</code>
+    cpBool cpSpaceContainsConstraint(cpSpace *space, cpConstraint *constraint)
+```
 
-::: expl These functions add and remove shapes, bodies and constraints from
-`space`. The add/remove functions cannot be called from within a callback other
-than a `postStep()` callback _(which is different than a postSolve()
-callback!)_. Attempting to add or remove objects from the space while
-`cpSpaceStep()` is still executing will throw an assertion. See the
-[callbacks section](#Callbacks) for more information. The add functions return
-the thing being added so that you can create and add something in one line. Be
-careful not to free bodies before removing shapes and constraints attached to
-them or you will cause crashes.. The contains functions allow you to check if an
-object has been added to the space or not. :::
+These functions add and remove shapes, bodies and constraints from `space`. The
+add/remove functions cannot be called from within a callback other than a
+`postStep()` callback _(which is different than a postSolve() callback!)_.
+Attempting to add or remove objects from the space while `cpSpaceStep()` is
+still executing will throw an assertion. See the [callbacks section](#Callbacks)
+for more information. The add functions return the thing being added so that you
+can create and add something in one line. Be careful not to free bodies before
+removing shapes and constraints attached to them or you will cause crashes.. The
+contains functions allow you to check if an object has been added to the space
+or not.
 
 ### Spatial Indexing
 
@@ -1231,26 +1347,32 @@ want to perform queries against them before the next call to `cpSpaceStep()`.
 
 ### Iterators
 
-    <code>typedef void (*cpSpaceBodyIteratorFunc)(cpBody *body, void *data)
-    void cpSpaceEachBody(cpSpace *space, cpSpaceBodyIteratorFunc func, void *data)</code>
+```c
+typedef void (*cpSpaceBodyIteratorFunc)(cpBody *body, void *data)
+    void cpSpaceEachBody(cpSpace *space, cpSpaceBodyIteratorFunc func, void *data)
+```
 
-::: expl Call `func` for each body in the space also passing along your data
-pointer. Sleeping bodies are included, but static and kinematic bodies are not
-as they aren't added to the space. :::
+Call `func` for each body in the space also passing along your data pointer.
+Sleeping bodies are included, but static and kinematic bodies are not as they
+aren't added to the space.
 
 \<%= pop_open_example "cpSpaceEachBody" %\>
 
-    <code>typedef void (*cpSpaceShapeIteratorFunc)(cpShape *shape, void *data)
-    void cpSpaceEachShape(cpSpace *space, cpSpaceShapeIteratorFunc func, void *data)</code>
+```c
+typedef void (*cpSpaceShapeIteratorFunc)(cpShape *shape, void *data)
+    void cpSpaceEachShape(cpSpace *space, cpSpaceShapeIteratorFunc func, void *data)
+```
 
-::: expl Call `func` for each shape in the space also passing along your data
-pointer. Sleeping and static shapes are included. :::
+Call `func` for each shape in the space also passing along your data pointer.
+Sleeping and static shapes are included.
 
-    <code>typedef void (*cpSpaceConstraintIteratorFunc)(cpConstraint *constraint, void *data)
-    void cpSpaceEachConstraint(cpSpace *space, cpSpaceConstraintIteratorFunc func, void *data)</code>
+```c
+typedef void (*cpSpaceConstraintIteratorFunc)(cpConstraint *constraint, void *data)
+    void cpSpaceEachConstraint(cpSpace *space, cpSpaceConstraintIteratorFunc func, void *data)
+```
 
-::: expl Call `func` for each constraint in the space also passing along your
-data pointer. :::
+Call `func` for each constraint in the space also passing along your data
+pointer.
 
 **Note:** If your compiler supports blocks (such as Clang), there are an
 alternate set of functions you can call. `cpSpaceEachBody_b()`, etc. See
@@ -1258,16 +1380,18 @@ alternate set of functions you can call. `cpSpaceEachBody_b()`, etc. See
 
 ### Simulating the Space
 
-    <code>void cpSpaceStep(cpSpace *space, cpFloat dt)</code>
+```c
+void cpSpaceStep(cpSpace *space, cpFloat dt)
+```
 
-::: expl Update the space for the given time step. Using a fixed time step is
-_highly_ recommended. Doing so can greatly increase the quality of the
-simulation. The easiest way to do constant timesteps is to simple step forward
-by 1/60th of a second (or whatever your target framerate is) for each frame
-regardless of how long it took to render. This works fine for many games, but a
-better way to do it is to separate your physics timestep and rendering.
+Update the space for the given time step. Using a fixed time step is _highly_
+recommended. Doing so can greatly increase the quality of the simulation. The
+easiest way to do constant timesteps is to simple step forward by 1/60th of a
+second (or whatever your target framerate is) for each frame regardless of how
+long it took to render. This works fine for many games, but a better way to do
+it is to separate your physics timestep and rendering.
 [This](http://gafferongames.com/game-physics/fix-your-timestep/) is a good
-article on how to do that. :::
+article on how to do that.
 
 ### Enabling and Tuning the Spatial Hash
 
@@ -1282,10 +1406,11 @@ objects, or objects that vary a lot in size, the spatial hash is usually much
 slower. It also requires tuning (usually through experimentation) to get the
 best possible performance.
 
-    <code>void cpSpaceUseSpatialHash(cpSpace *space, cpFloat dim, int count)</code>
+```c
+void cpSpaceUseSpatialHash(cpSpace *space, cpFloat dim, int count)
+```
 
-::: expl Switch the space to use a spatial hash instead of the bounding box
-tree. :::
+Switch the space to use a spatial hash instead of the bounding box tree.
 
 The spatial hash data is fairly size sensitive. `dim` is the size of the hash
 cells. Setting `dim` to the average collision shape size is likely to give the
@@ -1371,55 +1496,71 @@ forces separately.
 
 ### Properties
 
-    <code>cpBody * cpConstraintGetA(const cpConstraint *constraint)
-    cpBody * cpConstraintGetB(const cpConstraint *constraint)</code>
+```c
+cpBody * cpConstraintGetA(const cpConstraint *constraint)
+    cpBody * cpConstraintGetB(const cpConstraint *constraint)
+```
 
-::: expl Getters for the two bodies the constraint is attached to. :::
+Getters for the two bodies the constraint is attached to.
 
-    <code>cpFloat cpConstraintGetMaxForce(const cpConstraint *constraint)
-    void cpConstraintSetMaxForce(cpConstraint *constraint, cpFloat value)</code>
+```c
+cpFloat cpConstraintGetMaxForce(const cpConstraint *constraint)
+    void cpConstraintSetMaxForce(cpConstraint *constraint, cpFloat value)
+```
 
-::: expl The maximum force that the constraint can use to act on the two bodies.
-Defaults to INFINITY. :::
+The maximum force that the constraint can use to act on the two bodies. Defaults
+to INFINITY.
 
-    <code>cpFloat cpConstraintGetErrorBias(const cpConstraint *constraint)
-    void cpConstraintSetErrorBias(cpConstraint *constraint, cpFloat value)</code>
+```c
+cpFloat cpConstraintGetErrorBias(const cpConstraint *constraint)
+    void cpConstraintSetErrorBias(cpConstraint *constraint, cpFloat value)
+```
 
-::: expl The percentage of joint error that remains unfixed after a second. This
-works exactly the same as the collision bias property of a space, but applies to
-fixing error (stretching) of joints instead of overlapping collisions. :::
+The percentage of joint error that remains unfixed after a second. This works
+exactly the same as the collision bias property of a space, but applies to
+fixing error (stretching) of joints instead of overlapping collisions.
 
-    <code>cpFloat cpConstraintGetMaxBias(const cpConstraint *constraint)
-    void cpConstraintSetMaxBias(cpConstraint *constraint, cpFloat value)</code>
+```c
+cpFloat cpConstraintGetMaxBias(const cpConstraint *constraint)
+    void cpConstraintSetMaxBias(cpConstraint *constraint, cpFloat value)
+```
 
-::: expl The maximum speed at which the constraint can apply error correction.
-Defaults to INFINITY. :::
+The maximum speed at which the constraint can apply error correction. Defaults
+to INFINITY.
 
-    <code>cpSpace* cpConstraintGetSpace(const cpConstraint *constraint)</code>
+```c
+cpSpace* cpConstraintGetSpace(const cpConstraint *constraint)
+```
 
-::: expl Get the `cpSpace` that `constraint` has been added to. :::
+Get the `cpSpace` that `constraint` has been added to.
 
-    <code>cpBool cpConstraintGetCollideBodies(const cpConstraint *constraint)
-    void cpConstraintSetCollideBodies(cpConstraint *constraint, cpBool collideBodies)</code>
+```c
+cpBool cpConstraintGetCollideBodies(const cpConstraint *constraint)
+    void cpConstraintSetCollideBodies(cpConstraint *constraint, cpBool collideBodies)
+```
 
-::: expl Constraints can be used for filtering collisions too. When two bodies
-collide, Chipmunk ignores the collisions if this property is set to `cpFalse` on
-any constraint that connects the two bodies. Defaults to `cpTrue`. This can be
-used to create a chain that self collides, but adjacent links in the chain do
-not collide. :::
+Constraints can be used for filtering collisions too. When two bodies collide,
+Chipmunk ignores the collisions if this property is set to `cpFalse` on any
+constraint that connects the two bodies. Defaults to `cpTrue`. This can be used
+to create a chain that self collides, but adjacent links in the chain do not
+collide.
 
-    <code>cpDataPointer cpConstraintGetUserData(const cpConstraint *constraint)
-    void cpConstraintSetUserData(cpConstraint *constraint, cpDataPointer value)</code>
+```c
+cpDataPointer cpConstraintGetUserData(const cpConstraint *constraint)
+    void cpConstraintSetUserData(cpConstraint *constraint, cpDataPointer value)
+```
 
-::: expl User data pointer. Use this pointer to get a reference to the game
-object that owns this constraint from callbacks. :::
+User data pointer. Use this pointer to get a reference to the game object that
+owns this constraint from callbacks.
 
-    <code>cpFloat cpConstraintGetImpulse(cpConstraint *constraint)</code>
+```c
+cpFloat cpConstraintGetImpulse(cpConstraint *constraint)
+```
 
-::: expl The most recent impulse that `constraint` applied. To convert this to a
-force, divide by the timestep passed to `cpSpaceStep()`. You can use this to
-implement breakable joints to check if the force they attempted to apply
-exceeded a certain threshold. :::
+The most recent impulse that `constraint` applied. To convert this to a force,
+divide by the timestep passed to `cpSpaceStep()`. You can use this to implement
+breakable joints to check if the force they attempted to apply exceeded a
+certain threshold.
 
 \<%= pop_open_example "BreakableJoint" %\>
 
@@ -1477,24 +1618,28 @@ property exists.
 
 ### Shared Memory Management Functions
 
-    <code>void cpConstraintDestroy(cpConstraint *constraint)
-    void cpConstraintFree(cpConstraint *constraint)</code>
+```c
+void cpConstraintDestroy(cpConstraint *constraint)
+    void cpConstraintFree(cpConstraint *constraint)
+```
 
-::: expl `Destroy` and `Free` functions are shared by all joint types.
-Allocation and initialization functions are specific to each joint type. :::
+`Destroy` and `Free` functions are shared by all joint types. Allocation and
+initialization functions are specific to each joint type.
 
 ## Constraint Types
 
 ### Pin Joints
 
-    <code>cpPinJoint *cpPinJointAlloc(void)
+```c
+cpPinJoint *cpPinJointAlloc(void)
     cpPinJoint *cpPinJointInit(cpPinJoint *joint, cpBody *a, cpBody *b, cpVect anchorA, cpVect anchorB)
-    cpConstraint *cpPinJointNew(cpBody *a, cpBody *b, cpVect anchorA, cpVect anchorB)</code>
+    cpConstraint *cpPinJointNew(cpBody *a, cpBody *b, cpVect anchorA, cpVect anchorB)
+```
 
-::: expl `a` and `b` are the two bodies to connect, and `anchorA` and `anchorB`
-are the anchor points on those bodies. The distance between the two anchor
-points is measured when the joint is created. If you want to set a specific
-distance, use the setter function to override it. :::
+`a` and `b` are the two bodies to connect, and `anchorA` and `anchorB` are the
+anchor points on those bodies. The distance between the two anchor points is
+measured when the joint is created. If you want to set a specific distance, use
+the setter function to override it.
 
 #### Properties
 
@@ -1507,18 +1652,20 @@ distance, use the setter function to override it. :::
 
 ### Slide Joints
 
-    <code>cpSlideJoint *cpSlideJointAlloc(void)
+```c
+cpSlideJoint *cpSlideJointAlloc(void)
 
     cpSlideJoint *cpSlideJointInit(
         cpSlideJoint *joint, cpBody *a, cpBody *b,
         cpVect anchorA, cpVect anchorB, cpFloat min, cpFloat max
     )
 
-    cpConstraint *cpSlideJointNew(cpBody *a, cpBody *b, cpVect anchorA, cpVect anchorB, cpFloat min, cpFloat max)</code>
+    cpConstraint *cpSlideJointNew(cpBody *a, cpBody *b, cpVect anchorA, cpVect anchorB, cpFloat min, cpFloat max)
+```
 
-::: expl `a` and `b` are the two bodies to connect, `anchorA` and `anchorB` are
-the anchor points on those bodies, and `min` and `max` define the allowed
-distances of the anchor points. :::
+`a` and `b` are the two bodies to connect, `anchorA` and `anchorB` are the
+anchor points on those bodies, and `min` and `max` define the allowed distances
+of the anchor points.
 
 #### Properties
 
@@ -1533,17 +1680,19 @@ distances of the anchor points. :::
 
 ### Pivot Joints
 
-    <code>cpPivotJoint *cpPivotJointAlloc(void)
+```c
+cpPivotJoint *cpPivotJointAlloc(void)
     cpPivotJoint *cpPivotJointInit(cpPivotJoint *joint, cpBody *a, cpBody *b, cpVect pivot)
     cpConstraint *cpPivotJointNew(cpBody *a, cpBody *b, cpVect pivot)
-    cpConstraint *cpPivotJointNew2(cpBody *a, cpBody *b, cpVect anchorA, cpVect anchorB)</code>
+    cpConstraint *cpPivotJointNew2(cpBody *a, cpBody *b, cpVect anchorA, cpVect anchorB)
+```
 
-::: expl `a` and `b` are the two bodies to connect, and `pivot` is the point in
-world coordinates of the pivot. Because the pivot location is given in world
+`a` and `b` are the two bodies to connect, and `pivot` is the point in world
+coordinates of the pivot. Because the pivot location is given in world
 coordinates, you must have the bodies moved into the correct positions already.
 Alternatively you can specify the joint based on a pair of anchor points, but
 make sure you have the bodies in the right place as the joint will fix itself as
-soon as you start simulating the space. :::
+soon as you start simulating the space.
 
 #### Properties
 
@@ -1554,17 +1703,19 @@ soon as you start simulating the space. :::
 
 ### Groove Joint
 
-    <code>cpGrooveJoint *cpGrooveJointAlloc(void)
+```c
+cpGrooveJoint *cpGrooveJointAlloc(void)
 
     cpGrooveJoint *cpGrooveJointInit(
         cpGrooveJoint *joint, cpBody *a, cpBody *b,
         cpVect groove_a, cpVect groove_b, cpVect anchorB
     )
 
-    cpConstraint *cpGrooveJointNew(cpBody *a, cpBody *b, cpVect groove_a, cpVect groove_b, cpVect anchorB)</code>
+    cpConstraint *cpGrooveJointNew(cpBody *a, cpBody *b, cpVect groove_a, cpVect groove_b, cpVect anchorB)
+```
 
-::: expl The groove goes from `groov_a` to `groove_b` on body `a`, and the pivot
-is attached to `anchorB` on body `b`. All coordinates are body local. :::
+The groove goes from `groov_a` to `groove_b` on body `a`, and the pivot is
+attached to `anchorB` on body `b`. All coordinates are body local.
 
 #### Properties
 
@@ -1577,7 +1728,8 @@ is attached to `anchorB` on body `b`. All coordinates are body local. :::
 
 ### Damped Spring
 
-    <code>cpDampedSpring *cpDampedSpringAlloc(void)
+```c
+cpDampedSpring *cpDampedSpringAlloc(void)
 
     cpDampedSpring *cpDampedSpringInit(
         cpDampedSpring *joint, cpBody *a, cpBody *b, cpVect anchorA, cpVect anchorB,
@@ -1587,12 +1739,13 @@ is attached to `anchorB` on body `b`. All coordinates are body local. :::
     cpConstraint *cpDampedSpringNew(
         cpBody *a, cpBody *b, cpVect anchorA, cpVect anchorB,
         cpFloat restLength, cpFloat stiffness, cpFloat damping
-    )</code>
+    )
+```
 
-::: expl Defined much like a slide joint. `restLength` is the distance the
-spring wants to be, `stiffness` is the spring constant
+Defined much like a slide joint. `restLength` is the distance the spring wants
+to be, `stiffness` is the spring constant
 ([Young's modulus](http://en.wikipedia.org/wiki/Young's_modulus)), and `damping`
-is how soft to make the damping of the spring. :::
+is how soft to make the damping of the spring.
 
 #### Properties
 
@@ -1609,18 +1762,20 @@ is how soft to make the damping of the spring. :::
 
 ### Damped Rotary Spring
 
-    <code>cpDampedRotarySpring *cpDampedRotarySpringAlloc(void)
+```c
+cpDampedRotarySpring *cpDampedRotarySpringAlloc(void)
 
     cpDampedRotarySpring *cpDampedRotarySpringInit(
         cpDampedRotarySpring *joint, cpBody *a, cpBody *b,
         cpFloat restAngle, cpFloat stiffness, cpFloat damping
     )
 
-    cpConstraint *cpDampedRotarySpringNew(cpBody *a, cpBody *b, cpFloat restAngle, cpFloat stiffness, cpFloat damping)</code>
+    cpConstraint *cpDampedRotarySpringNew(cpBody *a, cpBody *b, cpFloat restAngle, cpFloat stiffness, cpFloat damping)
+```
 
-::: expl Like a damped spring, but works in an angular fashion. `restAngle` is
-the relative angle in radians that the bodies want to have, `stiffness` and
-`damping` work basically the same as on a damped spring. :::
+Like a damped spring, but works in an angular fashion. `restAngle` is the
+relative angle in radians that the bodies want to have, `stiffness` and
+`damping` work basically the same as on a damped spring.
 
 #### Properties
 
@@ -1633,13 +1788,15 @@ the relative angle in radians that the bodies want to have, `stiffness` and
 
 ### Rotary Limit Joint
 
-    <code>cpRotaryLimitJoint *cpRotaryLimitJointAlloc(void)
+```c
+cpRotaryLimitJoint *cpRotaryLimitJointAlloc(void)
     cpRotaryLimitJoint *cpRotaryLimitJointInit(cpRotaryLimitJoint *joint, cpBody *a, cpBody *b, cpFloat min, cpFloat max)
-    cpConstraint *cpRotaryLimitJointNew(cpBody *a, cpBody *b, cpFloat min, cpFloat max)</code>
+    cpConstraint *cpRotaryLimitJointNew(cpBody *a, cpBody *b, cpFloat min, cpFloat max)
+```
 
-::: expl Constrains the relative rotations of two bodies. `min` and `max` are
-the angular limits in radians. It is implemented so that it's possible to for
-the range to be greater than a full revolution. :::
+Constrains the relative rotations of two bodies. `min` and `max` are the angular
+limits in radians. It is implemented so that it's possible to for the range to
+be greater than a full revolution.
 
 #### Properties
 
@@ -1650,13 +1807,14 @@ the range to be greater than a full revolution. :::
 
 ### Ratchet Joint
 
-    <code>cpRatchetJoint *cpRatchetJointAlloc(void);
+```c
+cpRatchetJoint *cpRatchetJointAlloc(void);
     cpRatchetJoint *cpRatchetJointInit(cpRatchetJoint *joint, cpBody *a, cpBody *b, cpFloat phase, cpFloat ratchet);
-    cpConstraint *cpRatchetJointNew(cpBody *a, cpBody *b, cpFloat phase, cpFloat ratchet);</code>
+    cpConstraint *cpRatchetJointNew(cpBody *a, cpBody *b, cpFloat phase, cpFloat ratchet);
+```
 
-::: expl Works like a socket wrench. `ratchet` is the distance between "clicks",
-`phase` is the initial offset to use when deciding where the ratchet angles are.
-:::
+Works like a socket wrench. `ratchet` is the distance between "clicks", `phase`
+is the initial offset to use when deciding where the ratchet angles are. :::
 
 #### Properties
 
@@ -1669,14 +1827,16 @@ the range to be greater than a full revolution. :::
 
 ### Gear Joint
 
-    <code>cpGearJoint *cpGearJointAlloc(void);
+```c
+cpGearJoint *cpGearJointAlloc(void);
     cpGearJoint *cpGearJointInit(cpGearJoint *joint, cpBody *a, cpBody *b, cpFloat phase, cpFloat ratio);
-    cpConstraint *cpGearJointNew(cpBody *a, cpBody *b, cpFloat phase, cpFloat ratio);</code>
+    cpConstraint *cpGearJointNew(cpBody *a, cpBody *b, cpFloat phase, cpFloat ratio);
+```
 
-::: expl Keeps the angular velocity ratio of a pair of bodies constant. `ratio`
-is always measured in absolute terms. It is currently not possible to set the
-ratio in relation to a third body's angular velocity. `phase` is the initial
-angular offset of the two bodies. :::
+Keeps the angular velocity ratio of a pair of bodies constant. `ratio` is always
+measured in absolute terms. It is currently not possible to set the ratio in
+relation to a third body's angular velocity. `phase` is the initial angular
+offset of the two bodies.
 
 #### Properties
 
@@ -1687,14 +1847,16 @@ angular offset of the two bodies. :::
 
 ### Simple Motor
 
-    <code>cpSimpleMotor *cpSimpleMotorAlloc(void);
+```c
+cpSimpleMotor *cpSimpleMotorAlloc(void);
     cpSimpleMotor *cpSimpleMotorInit(cpSimpleMotor *joint, cpBody *a, cpBody *b, cpFloat rate);
-    cpConstraint *cpSimpleMotorNew(cpBody *a, cpBody *b, cpFloat rate);</code>
+    cpConstraint *cpSimpleMotorNew(cpBody *a, cpBody *b, cpFloat rate);
+```
 
-::: expl Keeps the relative angular velocity of a pair of bodies constant.
-`rate` is the desired relative angular velocity. You will usually want to set an
-force (torque) maximum for motors as otherwise they will be able to apply a
-nearly infinite torque to keep the bodies moving. :::
+Keeps the relative angular velocity of a pair of bodies constant. `rate` is the
+desired relative angular velocity. You will usually want to set an force
+(torque) maximum for motors as otherwise they will be able to apply a nearly
+infinite torque to keep the bodies moving.
 
 #### Properties
 
@@ -1845,16 +2007,19 @@ until it's reawoken.
 
 ### Collision Handler API
 
-    <code>typedef int (*cpCollisionBeginFunc)(cpArbiter *arb, struct cpSpace *space, cpDataPointer data)
+```c
+typedef int (*cpCollisionBeginFunc)(cpArbiter *arb, struct cpSpace *space, cpDataPointer data)
     typedef int (*cpCollisionPreSolveFunc)(cpArbiter *arb, cpSpace *space, cpDataPointer data)
     typedef void (*cpCollisionPostSolveFunc)(cpArbiter *arb, cpSpace *space, cpDataPointer data)
-    typedef void (*cpCollisionSeparateFunc)(cpArbiter *arb, cpSpace *space, cpDataPointer data)</code>
+    typedef void (*cpCollisionSeparateFunc)(cpArbiter *arb, cpSpace *space, cpDataPointer data)
+```
 
-::: expl Collision handler function types. While all of them take an arbiter,
-space, and a user data pointer, only the `begin()` and `preSolve()` callbacks
-return a value. See above for more information. :::
+Collision handler function types. While all of them take an arbiter, space, and
+a user data pointer, only the `begin()` and `preSolve()` callbacks return a
+value. See above for more information.
 
-    <code>
+```c
+
     struct cpCollisionHandler {
         cpCollisionType typeA, typeB;
         cpCollisionBeginFunc beginFunc;
@@ -1863,46 +2028,52 @@ return a value. See above for more information. :::
         cpCollisionSeparateFunc separateFunc;
         cpDataPointer userData;
     };
-    </code>
 
-::: expl This collision handler processes collisions between objects of type
-`typeA` and `typeB`. Fill the desired collision callback functions - they are
-documented above. A user definable context pointer `userData` is included for
-your convenience. This pointer is provided as an argument in each callback
-function. :::
+```
 
-    <code>cpCollisionHandler *cpSpaceAddCollisionHandler(cpSpace *space, cpCollisionType a, cpCollisionType b)</code>
+This collision handler processes collisions between objects of type `typeA` and
+`typeB`. Fill the desired collision callback functions - they are documented
+above. A user definable context pointer `userData` is included for your
+convenience. This pointer is provided as an argument in each callback function.
 
-::: expl Add a `cpCollisionHandler` for specific collision type pair or return
-the existing handler for the type pair. Whenever shapes with collision types
+```c
+cpCollisionHandler *cpSpaceAddCollisionHandler(cpSpace *space, cpCollisionType a, cpCollisionType b)
+```
+
+Add a `cpCollisionHandler` for specific collision type pair or return the
+existing handler for the type pair. Whenever shapes with collision types
 (`cpShape.collision_type`) `a` and `b` collide, this handler will be used to
 process the collision events. When a new collision handler is created, the
 callbacks will all be set to builtin callbacks that perform the default behavior
-(call the wildcard handlers, and accept all collisions). :::
+(call the wildcard handlers, and accept all collisions).
 
 \<%= pop_open_example "PlaySoundOnCollision" %\>
 
-    <code>cpCollisionHandler *cpSpaceAddWildcardHandler(cpSpace *space, cpCollisionType type)</code>
+```c
+cpCollisionHandler *cpSpaceAddWildcardHandler(cpSpace *space, cpCollisionType type)
+```
 
-::: expl Add a wildcard collision handler for given collision type. This handler
-will be used any time an object with this type collides with another object,
-regardless of its type. A good example is a projectile that should be destroyed
-the first time it hits anything. There may be a specific collision handler and
-two wildcard handlers. It's up to the specific handler to decide if and when to
-call the wildcard handlers and what to do with their return values. (See
+Add a wildcard collision handler for given collision type. This handler will be
+used any time an object with this type collides with another object, regardless
+of its type. A good example is a projectile that should be destroyed the first
+time it hits anything. There may be a specific collision handler and two
+wildcard handlers. It's up to the specific handler to decide if and when to call
+the wildcard handlers and what to do with their return values. (See
 `cpArbiterCallWildcard*()` below) When a new wildcard handler is created, the
 callbacks will all be set to builtin callbacks that perform the default
 behavior. (Accept all collisions in `begin()` and `preSolve()`, or do nothing
-for `postSolve()` and `separate()`). :::
+for `postSolve()` and `separate()`).
 
-    <code>cpCollisionHandler *cpSpaceAddDefaultCollisionHandler(cpSpace *space)</code>
+```c
+cpCollisionHandler *cpSpaceAddDefaultCollisionHandler(cpSpace *space)
+```
 
-::: expl Return a reference to the default collision handler or that is used to
-process all collisions that don't have a more specific handler. The default
-behavior for each of the callbacks is to call the wildcard handlers, ANDing
-their return values together if applicable. :::
+Return a reference to the default collision handler or that is used to process
+all collisions that don't have a more specific handler. The default behavior for
+each of the callbacks is to call the wildcard handlers, ANDing their return
+values together if applicable.
 
-### Post-Step Callbacks
+### Post-Step Callbacks {#PostStep}
 
 Post-step callbacks are the one place where you can break the rules about adding
 or removing objects from within a callback. In fact, their primary function is
@@ -1920,21 +2091,24 @@ and a second `postStep()` callback to remove the bullet. Because you can only
 register one callback per key, the `postStep()` callback for the bullet will
 only be called once, and you can't accidentally try to remove it twice.
 
-    <code>typedef void (*cpPostStepFunc)(cpSpace *space, void *obj, void *data)</code>
+```c
+typedef void (*cpPostStepFunc)(cpSpace *space, void *obj, void *data)
+```
 
-::: expl Function type used for `postStep()` callbacks. `space` is the space the
-callback was registered on, `obj` is the pointer value you supplied as the key,
-and `data` is a user definable pointer you can use to pass in as a context
-value. :::
+Function type used for `postStep()` callbacks. `space` is the space the callback
+was registered on, `obj` is the pointer value you supplied as the key, and
+`data` is a user definable pointer you can use to pass in as a context value.
 
-    <code>cpBool cpSpaceAddPostStepCallback(cpSpace *space, cpPostStepFunc func, void *key, void *data);</code>
+```c
+cpBool cpSpaceAddPostStepCallback(cpSpace *space, cpPostStepFunc func, void *key, void *data);
+```
 
-::: expl Add `func` to be called before `cpSpaceStep()` returns. `key` and
-`data` will be passed to your function. Only the first callback registered for
-any unique value of `key` will be recorded. It returns `cpTrue` if the callback
-is scheduled and `cpfalse` when the `key` has already been used. The behavior of
-adding a `postStep()` callback from outside of a collision handler or query
-callback is undefined. :::
+Add `func` to be called before `cpSpaceStep()` returns. `key` and `data` will be
+passed to your function. Only the first callback registered for any unique value
+of `key` will be recorded. It returns `cpTrue` if the callback is scheduled and
+`cpfalse` when the `key` has already been used. The behavior of adding a
+`postStep()` callback from outside of a collision handler or query callback is
+undefined.
 
 **Note:** Post-step callbacks are not run in any particular order. If you need
 to sequence a number of events, you'll need to put them in a single callback.
@@ -1968,37 +2142,44 @@ information you need.
 
 ### Properties
 
-    <code>cpFloat cpArbiterGetElasticity(const cpArbiter *arb)
-    void cpArbiterSetElasticity(cpArbiter *arb, cpFloat value)</code>
+```c
+cpFloat cpArbiterGetElasticity(const cpArbiter *arb)
+    void cpArbiterSetElasticity(cpArbiter *arb, cpFloat value)
+```
 
-::: expl The calculated elasticity for this collision pair. Setting the value in
-a `preSolve()` callback will override the value calculated by the space. The
-default calculation multiplies the elasticity of the two shapes together. :::
-
-    <code>cpFloat cpArbiterGetFriction(const cpArbiter *arb)
-    void cpArbiterSetFriction(cpArbiter *arb, cpFloat value)</code>
-
-::: expl The calculated friction for this collision pair. Setting the value in a
+The calculated elasticity for this collision pair. Setting the value in a
 `preSolve()` callback will override the value calculated by the space. The
-default calculation multiplies the friction of the two shapes together. :::
+default calculation multiplies the elasticity of the two shapes together.
 
-    <code>cpVect cpArbiterGetSurfaceVelocity(const cpArbiter *arb)
-    void cpArbiterSetSurfaceVelocity(cpArbiter *arb, cpVect value)</code>
+```c
+cpFloat cpArbiterGetFriction(const cpArbiter *arb)
+    void cpArbiterSetFriction(cpArbiter *arb, cpFloat value)
+```
 
-::: expl The calculated surface velocity for this collision pair. Setting the
-value in a `preSolve()` callback will override the value calculated by the
-space. The default calculation subtracts the surface velocity of the second
-shape from the first and then projects that onto the tangent of the collision.
-This is so that only friction is affected by default calculation. Using a custom
-calculation, you can make something that responds like a pinball bumper, or
-where the surface velocity is dependent on the location of the contact point.
-:::
+The calculated friction for this collision pair. Setting the value in a
+`preSolve()` callback will override the value calculated by the space. The
+default calculation multiplies the friction of the two shapes together.
 
-    <code>cpDataPointer cpArbiterGetUserData(const cpArbiter *arb)
-    void cpArbiterSetUserData(cpArbiter *arb, cpDataPointer data)</code>
+```c
+cpVect cpArbiterGetSurfaceVelocity(const cpArbiter *arb)
+    void cpArbiterSetSurfaceVelocity(cpArbiter *arb, cpVect value)
+```
 
-::: expl A user definable context pointer. The value will persist until just
-after the `separate()` callback is called for the pair. :::
+The calculated surface velocity for this collision pair. Setting the value in a
+`preSolve()` callback will override the value calculated by the space. The
+default calculation subtracts the surface velocity of the second shape from the
+first and then projects that onto the tangent of the collision. This is so that
+only friction is affected by default calculation. Using a custom calculation,
+you can make something that responds like a pinball bumper, or where the surface
+velocity is dependent on the location of the contact point. :::
+
+```c
+cpDataPointer cpArbiterGetUserData(const cpArbiter *arb)
+    void cpArbiterSetUserData(cpArbiter *arb, cpDataPointer data)
+```
+
+A user definable context pointer. The value will persist until just after the
+`separate()` callback is called for the pair.
 
 **NOTE:** If you need to clean up this pointer, you should implement the
 `separate()` callback to do it. Also be careful when destroying the space as
@@ -2008,53 +2189,63 @@ space before disposing of it. This is something I'd suggest doing anyway. See
 ChipmunkDemo.c:ChipmunkDemoFreeSpaceChildren() for an example of how to do it
 easily.
 
-    <code>int cpArbiterGetCount(const cpArbiter *arb)
+```c
+int cpArbiterGetCount(const cpArbiter *arb)
     cpVect cpArbiterGetNormal(const cpArbiter *arb, int i)
     cpVect cpArbiterGetPoint(const cpArbiter *arb, int i)
-    cpFloat cpArbiterGetDepth(const cpArbiter *arb, int i)</code>
+    cpFloat cpArbiterGetDepth(const cpArbiter *arb, int i)
+```
 
-::: expl Get the number of contacts tracked by this arbiter or the specific
-collision point, collision normal or penetration depth of a collision point. For
-the forseeable future, the maximum number of contacts will be two. :::
+Get the number of contacts tracked by this arbiter or the specific collision
+point, collision normal or penetration depth of a collision point. For the
+forseeable future, the maximum number of contacts will be two.
 
-    <code>cpBool cpArbiterIsFirstContact(const cpArbiter *arb)</code>
+```c
+cpBool cpArbiterIsFirstContact(const cpArbiter *arb)
+```
 
-::: expl Returns true if this is the first step the two shapes started touching.
-This can be useful for sound effects for instance. If its the first frame for a
-certain collision, check the energy of the collision in a `postStep()` callbock
-and use that to determine the volume of a sound effect to play. :::
+Returns true if this is the first step the two shapes started touching. This can
+be useful for sound effects for instance. If its the first frame for a certain
+collision, check the energy of the collision in a `postStep()` callbock and use
+that to determine the volume of a sound effect to play.
 
-    <code>cpBool cpArbiterIsRemoval(const cpArbiter *arb)</code>
+```c
+cpBool cpArbiterIsRemoval(const cpArbiter *arb)
+```
 
-::: expl Returns `cpTrue` during a `separate()` callback if the callback was
-invoked due to an object removal. :::
+Returns `cpTrue` during a `separate()` callback if the callback was invoked due
+to an object removal.
 
-    <code>void cpArbiterGetShapes(const cpArbiter *arb, cpShape **a, cpShape **b)
-    void cpArbiterGetBodies(const cpArbiter *arb, cpBody **a, cpBody **b)</code>
+```c
+void cpArbiterGetShapes(const cpArbiter *arb, cpShape **a, cpShape **b)
+    void cpArbiterGetBodies(const cpArbiter *arb, cpBody **a, cpBody **b)
+```
 
-::: expl Get the shapes or bodies in the order that they were defined in the
-collision handler associated with this arbiter. If you defined the handler as
+Get the shapes or bodies in the order that they were defined in the collision
+handler associated with this arbiter. If you defined the handler as
 `cpSpaceAddCollisionHandler(space, 1, 2, ...)`, you you will find that
-`a->collision_type == 1` and `b->collision_type == 2`. :::
+`a->collision_type == 1` and `b->collision_type == 2`.
 
-    <code>cpBool cpArbiterCallWildcardBeginA(cpArbiter *arb, cpSpace *space)
+```c
+cpBool cpArbiterCallWildcardBeginA(cpArbiter *arb, cpSpace *space)
     cpBool cpArbiterCallWildcardBeginB(cpArbiter *arb, cpSpace *space)
     cpBool cpArbiterCallWildcardPreSolveA(cpArbiter *arb, cpSpace *space)
     cpBool cpArbiterCallWildcardPreSolveB(cpArbiter *arb, cpSpace *space)
     void cpArbiterCallWildcardPostSolveA(cpArbiter *arb, cpSpace *space)
     void cpArbiterCallWildcardPostSolveB(cpArbiter *arb, cpSpace *space)
     void cpArbiterCallWildcardSeparateA(cpArbiter *arb, cpSpace *space)
-    void cpArbiterCallWildcardSeparateB(cpArbiter *arb, cpSpace *space)</code>
+    void cpArbiterCallWildcardSeparateB(cpArbiter *arb, cpSpace *space)
+```
 
-::: expl These functions invoke the wildcard handlers for a given collision. For
-custom collision handlers between specific types or overriding the default
-handler, you must decide how to invoke the wildcard handlers since it may be
-important to call the wildcards first, last, or possibly skip them entirely. For
-the `begin()` and `preSolve()` callbacks, you also need to decide what to do
-with their return values since they may not agree with each other or the
-specific handler they were called from. Every collision handler is defined for
-two types, the "A" variants of these functions call the wildcard handler for the
-first type, and the "B" variants call the handler for the second type. :::
+These functions invoke the wildcard handlers for a given collision. For custom
+collision handlers between specific types or overriding the default handler, you
+must decide how to invoke the wildcard handlers since it may be important to
+call the wildcards first, last, or possibly skip them entirely. For the
+`begin()` and `preSolve()` callbacks, you also need to decide what to do with
+their return values since they may not agree with each other or the specific
+handler they were called from. Every collision handler is defined for two types,
+the "A" variants of these functions call the wildcard handler for the first
+type, and the "B" variants call the handler for the second type.
 
 \<%= pop_open_example "CollisionCallback" %\>
 
@@ -2062,61 +2253,74 @@ first type, and the "B" variants call the handler for the second type. :::
 
 Contact point sets make getting contact information simpler.
 
-    <code>cpContactPointSet cpArbiterGetContactPointSet(const cpArbiter *arb)</code>
+```c
+cpContactPointSet cpArbiterGetContactPointSet(const cpArbiter *arb)
+```
 
-::: expl Get a contact point set struct from an arbiter. :::
+Get a contact point set struct from an arbiter.
 
 You might do something like the following to get and process a contact point
 set:
 
-    <code>cpContactPointSet set = cpArbiterGetContactPointSet(arbiter);
+```c
+cpContactPointSet set = cpArbiterGetContactPointSet(arbiter);
     for(int i=0; i<set.count; i++){
         // get and work with the collision point normal and penetration distance:
         set.points[i].point
         set.points[i].normal
         set.points[i].dist
-    }</code>
+    }
+```
 
-    <code>void cpArbiterSetContactPointSet(cpArbiter *arb, cpContactPointSet *set)</code>
+```c
+void cpArbiterSetContactPointSet(cpArbiter *arb, cpContactPointSet *set)
+```
 
-::: expl Replace the contact point set of an Arbiter. You cannot change the
-number of contacts, but can change the location, normal or penetration distance.
-The "Sticky" demo uses this to allow objects to overlap an extra amount. You
-could also use it in a Pong style game to modify the normal of the collision
-based on the x-position of the collision even though the paddle is a flat shape.
-:::
+Replace the contact point set of an Arbiter. You cannot change the number of
+contacts, but can change the location, normal or penetration distance. The
+"Sticky" demo uses this to allow objects to overlap an extra amount. You could
+also use it in a Pong style game to modify the normal of the collision based on
+the x-position of the collision even though the paddle is a flat shape. :::
 
 ### Helper Functions
 
-    <code>void cpArbiterGetShapes(cpArbiter *arb, cpShape **a, cpShape **b)
-    void cpArbiterGetBodies(const cpArbiter *arb, cpBody **a, cpBody **b)</code>
+```c
+void cpArbiterGetShapes(cpArbiter *arb, cpShape **a, cpShape **b)
+    void cpArbiterGetBodies(const cpArbiter *arb, cpBody **a, cpBody **b)
+```
 
-::: expl Get the shapes (or their bodies) in the order that they were defined in
-the collision handler associated with this arbiter. If you defined the handler
-as `cpSpaceAddCollisionHandler(space, 1, 2, ...)`, you you will find that
+Get the shapes (or their bodies) in the order that they were defined in the
+collision handler associated with this arbiter. If you defined the handler as
+`cpSpaceAddCollisionHandler(space, 1, 2, ...)`, you you will find that
 `a->collision_type == 1` and `b->collision_type == 2`. The convenience macro
 defines and initializes the two shape variables for you. The default collision
-handler doesn't use collision types so the order is undefined. :::
+handler doesn't use collision types so the order is undefined.
 
-    <code>#define CP_ARBITER_GET_SHAPES(arb, a, b) cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b)
-    #define CP_ARBITER_GET_BODIES(arb, a, b) cpBody *a, *b; cpArbiterGetBodies(arb, &a, &b);</code>
+```c
+#define CP_ARBITER_GET_SHAPES(arb, a, b) cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b)
+    #define CP_ARBITER_GET_BODIES(arb, a, b) cpBody *a, *b; cpArbiterGetBodies(arb, &a, &b);
+```
 
-::: expl Shortcut macros for defining variables for and retrieving the
-shapes/bodies for an arbiter. :::
+Shortcut macros for defining variables for and retrieving the shapes/bodies for
+an arbiter.
 
-    <code>cpVect cpArbiterTotalImpulseWithFriction(cpArbiter *arb);
-    cpVect cpArbiterTotalImpulse(cpArbiter *arb);</code>
+```c
+cpVect cpArbiterTotalImpulseWithFriction(cpArbiter *arb);
+    cpVect cpArbiterTotalImpulse(cpArbiter *arb);
+```
 
-::: expl Returns the impulse that was applied this step to resolve the
-collision. These functions should only be called from a `postStep()` or
-`cpBodyEachArbiter()` callback, otherwise the result is undefined. If in doubt
-which function to use, use `cpArbiterTotalImpulseWithFriction()`. :::
+Returns the impulse that was applied this step to resolve the collision. These
+functions should only be called from a `postStep()` or `cpBodyEachArbiter()`
+callback, otherwise the result is undefined. If in doubt which function to use,
+use `cpArbiterTotalImpulseWithFriction()`.
 
-    <code>cpFloat cpArbiterTotalKE(const cpArbiter *arb);</code>
+```c
+cpFloat cpArbiterTotalKE(const cpArbiter *arb);
+```
 
-::: expl Calculate the amount of energy lost in a collision including static,
-but not dynamic friction. This function should only be called from a
-`postSolve()`, `postStep()` or `cpBodyEachArbiter()` callback. :::
+Calculate the amount of energy lost in a collision including static, but not
+dynamic friction. This function should only be called from a `postSolve()`,
+`postStep()` or `cpBodyEachArbiter()` callback.
 
 ## Queries
 
@@ -2136,7 +2340,8 @@ allow you to check if there are shapes within a certain distance of a point,
 find the closest point on a shape to a given point or find the closest shape to
 a point.
 
-    <code>typedef struct cpPointQueryInfo {
+```c
+typedef struct cpPointQueryInfo {
         /// The nearest shape, NULL if no shape was within range.
         const cpShape *shape;
         /// The closest point on the shape's surface. (in world space coordinates)
@@ -2146,39 +2351,45 @@ a point.
         /// The gradient of the signed distance function.
         /// The value should be similar to info.p/info.d, but accurate even for very small values of info.d.
         cpVect gradient;
-    } cpPointQueryInfo;</code>
+    } cpPointQueryInfo;
+```
 
-::: expl Nearest point queries return the point on the surface of the shape as
-well as the distance from the query point to the surface point. :::
+Nearest point queries return the point on the surface of the shape as well as
+the distance from the query point to the surface point.
 
-    <code>cpFloat cpShapeNearestPointQuery(cpShape *shape, cpVect p, cpPointQueryInfo *out)</code>
+```c
+cpFloat cpShapeNearestPointQuery(cpShape *shape, cpVect p, cpPointQueryInfo *out)
+```
 
-::: expl Find the distance from `point` to `shape`. If the point is inside of
-the shape, the distance will be negative and equal to the depth of the point.
-:::
+Find the distance from `point` to `shape`. If the point is inside of the shape,
+the distance will be negative and equal to the depth of the point. :::
 
-    <code>typedef void (*cpSpaceNearestPointQueryFunc)(cpShape *shape, cpFloat distance, cpVect point, void *data);
+```c
+typedef void (*cpSpaceNearestPointQueryFunc)(cpShape *shape, cpFloat distance, cpVect point, void *data);
 
     void cpSpacePointQuery(
         cpSpace *space, cpVect point, cpFloat maxDistance,
         cpShapeFilter filter,
         cpSpaceNearestPointQueryFunc func, void *data
-    )</code>
+    )
+```
 
-::: expl Query `space` at `point` for shapes within the given distance range.
-The `filter` is applied to the query and follows the same rules as the collision
+Query `space` at `point` for shapes within the given distance range. The
+`filter` is applied to the query and follows the same rules as the collision
 detection. `func` is called for each shape found along with the distance to the
 closest point on the shape's surface, the distance to that point and the `data`
 argument passed to `cpSpaceNearestPointQuery()`. Sensor shapes are included. If
 a `maxDistance` of `0.0` is used, the point must lie inside a shape. Negative
 `maxDistance` is also allowed meaning that the point must be a under a certain
-depth within a shape to be considered a match. :::
+depth within a shape to be considered a match.
 
-    <code>cpShape *cpSpacePointQueryNearest(cpSpace *space, cpVect point, cpFloat maxDistance, cpShapeFilter filter, cpPointQueryInfo *out)</code>
+```c
+cpShape *cpSpacePointQueryNearest(cpSpace *space, cpVect point, cpFloat maxDistance, cpShapeFilter filter, cpPointQueryInfo *out)
+```
 
-::: expl Query `space` at `point` and return the closest shape within
-`maxDistance` units of distance. `out` is an optional pointer to a
-`cpPointQueryInfo` if you want additional information about the match. :::
+Query `space` at `point` and return the closest shape within `maxDistance` units
+of distance. `out` is an optional pointer to a `cpPointQueryInfo` if you want
+additional information about the match.
 
 ### Segment Queries
 
@@ -2188,7 +2399,8 @@ this is still very fast, and you don't need to worry too much about the
 performance as long as you aren't using extremely long segments for your
 queries.
 
-    <code>typedef struct cpSegmentQueryInfo {
+```c
+typedef struct cpSegmentQueryInfo {
         /// The shape that was hit, or NULL if no collision occured.
         const cpShape *shape;
         /// The point of impact.
@@ -2197,64 +2409,73 @@ queries.
         cpVect normal;
         /// The normalized distance along the query segment in the range [0, 1].
         cpFloat alpha;
-    } cpSegmentQueryInfo;</code>
+    } cpSegmentQueryInfo;
+```
 
-::: expl Segment queries return more information than just a simple yes or no,
-they also return where a shape was hit and its surface normal at the hit point.
-`t` is the percentage between the query start and end points. If you need the
-hit point in world space or the absolute distance from start, see the segment
-query helper functions farther down. If a segment query starts within a shape it
-will have `t = 0` and `n = cpvzero`. :::
+Segment queries return more information than just a simple yes or no, they also
+return where a shape was hit and its surface normal at the hit point. `t` is the
+percentage between the query start and end points. If you need the hit point in
+world space or the absolute distance from start, see the segment query helper
+functions farther down. If a segment query starts within a shape it will have
+`t = 0` and `n = cpvzero`.
 
-    <code>cpBool cpShapeSegmentQuery(cpShape *shape, cpVect a, cpVect b, cpFloat radius, cpSegmentQueryInfo *info)</code>
+```c
+cpBool cpShapeSegmentQuery(cpShape *shape, cpVect a, cpVect b, cpFloat radius, cpSegmentQueryInfo *info)
+```
 
-::: expl Perform a segment query from `a` to `b` with the given `radius` against
-a single shape `shape`. `info` must be a valid pointer to a `cpSegmentQueryInfo`
-structure which will be initialized with the raycast info. :::
+Perform a segment query from `a` to `b` with the given `radius` against a single
+shape `shape`. `info` must be a valid pointer to a `cpSegmentQueryInfo`
+structure which will be initialized with the raycast info.
 
-    <code>typedef void (*cpSpaceSegmentQueryFunc)(cpShape *shape, cpFloat t, cpVect n, void *data)
+```c
+typedef void (*cpSpaceSegmentQueryFunc)(cpShape *shape, cpFloat t, cpVect n, void *data)
 
     void cpSpaceSegmentQuery(
         cpSpace *space, cpVect start, cpVect end, cpFloat radius,
         cpShapeFilter filter,
         cpSpaceSegmentQueryFunc func, void *data
-    )</code>
+    )
+```
 
-::: expl Query `space` along the line segment from `start` to `end` with the
-given `radius`. The `filter` is applied to the query and follows the same rules
-as the collision detection. `func` is called with the normalized distance along
-the line and surface normal for each shape found along with the `data` argument
-passed to `cpSpacePointQuery()`. Sensor shapes are included. :::
+Query `space` along the line segment from `start` to `end` with the given
+`radius`. The `filter` is applied to the query and follows the same rules as the
+collision detection. `func` is called with the normalized distance along the
+line and surface normal for each shape found along with the `data` argument
+passed to `cpSpacePointQuery()`. Sensor shapes are included.
 
-    <code>cpShape *cpSpaceSegmentQueryFirst(
+```c
+cpShape *cpSpaceSegmentQueryFirst(
         cpSpace *space, cpVect start, cpVect end, cpFloat radius,
         cpShapeFilter filter,
         cpSegmentQueryInfo *info
-    )</code>
+    )
+```
 
-::: expl Query `space` along the line segment from `start` to `end` with the
-given `radius`. The `filter` is applied to the query and follows the same rules
-as the collision detection. Only the first shape encountered is returned and the
-search is short circuited. Returns `NULL` if no shape was found. The info struct
+Query `space` along the line segment from `start` to `end` with the given
+`radius`. The `filter` is applied to the query and follows the same rules as the
+collision detection. Only the first shape encountered is returned and the search
+is short circuited. Returns `NULL` if no shape was found. The info struct
 pointed to by `info` will be initialized with the raycast info unless `info` is
-NULL. Sensor shapes are ignored. :::
+NULL. Sensor shapes are ignored.
 
 ### AABB Queries
 
 AABB queries give you a fast way to check roughly which shapes are in an area.
 
-    <code>typedef void (*cpSpaceBBQueryFunc)(cpShape *shape, void *data)
+```c
+typedef void (*cpSpaceBBQueryFunc)(cpShape *shape, void *data)
 
     void cpSpaceBBQuery(
         cpSpace *space, cpBB bb,
         cpShapeFilter filter,
         cpSpaceBBQueryFunc func, void *data
-    )</code>
+    )
+```
 
-::: expl Query `space` to find all shapes near `bb`. The `filter` is applied to
-the query and follows the same rules as the collision detection. `func` is
-called for each shape whose bounding box overlaps `bb` along with the `data`
-argument passed to `cpSpaceBBQuery()`. Sensor shapes are included. :::
+Query `space` to find all shapes near `bb`. The `filter` is applied to the query
+and follows the same rules as the collision detection. `func` is called for each
+shape whose bounding box overlaps `bb` along with the `data` argument passed to
+`cpSpaceBBQuery()`. Sensor shapes are included.
 
 ### Shape Queries
 
@@ -2266,14 +2487,15 @@ You can either create a body/shape pair before querying, or you can create a
 shape passing `NULL` for the body and position the shape using `cpShapeUpdate()`
 to set the position and rotation of the shape.
 
-    <code>typedef void (*cpSpaceShapeQueryFunc)(cpShape *shape, cpContactPointSet *points, void *data);
+```c
+typedef void (*cpSpaceShapeQueryFunc)(cpShape *shape, cpContactPointSet *points, void *data);
 
-    cpBool cpSpaceShapeQuery(cpSpace *space, cpShape *shape, cpSpaceShapeQueryFunc func, void *data);</code>
+    cpBool cpSpaceShapeQuery(cpSpace *space, cpShape *shape, cpSpaceShapeQueryFunc func, void *data);
+```
 
-::: expl Query `space` to find all shapes overlapping `shape`. `func` is called
-for each overlapping shape along with a pointer to a temporary cpContactPointSet
-and the `data` argument passed to `cpSpaceBBQuery()`. Sensor shapes are
-included. :::
+Query `space` to find all shapes overlapping `shape`. `func` is called for each
+overlapping shape along with a pointer to a temporary cpContactPointSet and the
+`data` argument passed to `cpSpaceBBQuery()`. Sensor shapes are included.
 
 ### Blocks
 
