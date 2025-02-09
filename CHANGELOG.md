@@ -28,6 +28,7 @@ TODO Some info about the fork!
 - MISC: Github actions that build on Windows/Linux/MacOS with MSVC/GCC/CLang
 - MISC: Fix warning for INFINITY on CLang 18+
 - DOC: Reworked the documentation to be easier to maintain
+- DOC: Unified license texts everywhere
 
 ## 7.0.3
 

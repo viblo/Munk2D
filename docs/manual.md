@@ -851,11 +851,11 @@ cast `cpShape` pointers to their specific types.
 Chipmunk provides getter/setter functions for a number of properties on
 collision shapes. Setting most properties will automatically wake the attached
 rigid body, if it's sleeping. You can also set some of the fields directly on
-the cpShape struct if you wish. They are documented in the headers.
+the `cpShape` struct if you wish. They are documented in the headers.
 
 ```c
 cpBody * cpShapeGetBody(const cpShape *shape)
-    void cpShapeSetBody(cpShape *shape, cpBody *body)
+void cpShapeSetBody(cpShape *shape, cpBody *body)
 ```
 
 The rigid body the shape is attached to. Can only be set when the shape is not
@@ -872,7 +872,7 @@ aren't attached to bodies, you can also use `cpShapeUpdate()`.
 
 ```c
 cpBool cpShapeGetSensor(const cpShape *shape)
-    void cpShapeSetSensor(cpShape *shape, cpBool value)
+void cpShapeSetSensor(cpShape *shape, cpBool value)
 ```
 
 A boolean value if this shape is a sensor or not. Sensors only call collision
@@ -880,7 +880,7 @@ callbacks, and never generate real collisions.
 
 ```c
 cpFloat cpShapeGetElasticity(const cpShape *shape)
-    void cpShapeSetElasticity(cpShape *shape, cpFloat value)
+void cpShapeSetElasticity(cpShape *shape, cpFloat value)
 ```
 
 Elasticity of the shape. A value of 0.0 gives no bounce, while a value of 1.0
@@ -890,18 +890,17 @@ is found by multiplying the elasticity of the individual shapes together.
 
 ```c
 cpFloat cpShapeGetFriction(const cpShape *shape)
-    void cpShapeSetFriction(cpShape *shape, cpFloat value)
+void cpShapeSetFriction(cpShape *shape, cpFloat value)
 ```
 
 Friction coefficient. Chipmunk uses the Coulomb friction model, a value of 0.0
 is frictionless. The friction for a collision is found by multiplying the
 friction of the individual shapes together.
 [Tables of friction coefficients](http://www.roymech.co.uk/Useful_Tables/Tribology/co_of_frict.htm).
-:::
 
 ```c
 cpVect cpShapeGetSurfaceVelocity(const cpShape *shape)
-    void cpShapeSetSurfaceVelocity(cpShape *shape, cpVect value)
+void cpShapeSetSurfaceVelocity(cpShape *shape, cpVect value)
 ```
 
 The surface velocity of the object. Useful for creating conveyor belts or
@@ -910,7 +909,7 @@ resolving the collision.
 
 ```c
 cpCollisionType cpShapeGetCollisionType(const cpShape *shape)
-    void cpShapeSetCollisionType(cpShape *shape, cpCollisionType value)
+void cpShapeSetCollisionType(cpShape *shape, cpCollisionType value)
 ```
 
 You can assign types to Chipmunk collision shapes that trigger callbacks when
@@ -919,7 +918,7 @@ for more information.
 
 ```c
 cpShapeFilter cpShapeGetFilter(const cpShape *shape)
-    void cpShapeSetFilter(cpShape *shape, cpShapeFilter filter)
+void cpShapeSetFilter(cpShape *shape, cpShapeFilter filter)
 ```
 
 Set the collision filter for this shape. See [Filtering Collisions](#Filtering)
@@ -933,7 +932,7 @@ Get the `cpSpace` that `shape` has been added to.
 
 ```c
 cpDataPointer cpShapeGetUserData(const cpShape *shape)
-    void cpShapeSetUserData(cpShape *shape, cpDataPointer value)
+void cpShapeSetUserData(cpShape *shape, cpDataPointer value)
 ```
 
 A user definable data pointer. If you set this to point at the game object the
@@ -960,12 +959,13 @@ with their own bullets, and bullets should not collide with other bullets.
 However, players collide with enemy bullets, and enemies collide with player
 bullets.
 
----
-
-Object Object Category Category Mask "Player" 1 4, 5 "Enemy" 2 2, 3, 5 "Player
-Bullet" 3 1, 5 "Enemy Bullet" 4 2, 5 "Walls" 5 1, 2, 3, 4
-
----
+| Object          | Object Category | Category Mask |
+| --------------- | --------------- | ------------- |
+| "Player"        | 1               | 4, 5          |
+| "Enemy"         | 2               | 2, 3, 5       |
+| "Player Bullet" | 3               | 1, 5          |
+| "Enemy Bullet"  | 4               | 2, 5          |
+| "Walls"         | 5               | 1, 2, 3, 4    |
 
 Note that everything in this example collides with walls. Additionally, the
 enemies collide with each other.
@@ -993,7 +993,7 @@ category masks is preferred.
 
 ```c
 void cpShapeDestroy(cpShape *shape)
-    void cpShapeFree(cpShape *shape)
+void cpShapeFree(cpShape *shape)
 ```
 
 `Destroy` and `Free` functions are shared by all shape types. Allocation and
@@ -1001,8 +1001,8 @@ initialization functions are specific to each shape type. See below.
 
 ### Misc Functions
 
-- `cpBB cpShapeCacheBB(cpShape *shape)` - Synchronizes `shape` with the body its
-  attached to.
+- `cpBB cpShapeCacheBB(cpShape *shape)` - Synchronizes `shape` with the body it
+  is attached to.
 - `cpBB cpShapeUpdate(cpShape *shape, cpVect pos, cpVect rot)` - Sets the
   position and rotation of the shape to
 
@@ -1010,8 +1010,8 @@ initialization functions are specific to each shape type. See below.
 
 ```c
 cpCircleShape *cpCircleShapeAlloc(void)
-    cpCircleShape *cpCircleShapeInit(cpCircleShape *circle, cpBody *body, cpFloat radius, cpVect offset)
-    cpShape *cpCircleShapeNew(cpBody *body, cpFloat radius, cpVect offset)
+cpCircleShape *cpCircleShapeInit(cpCircleShape *circle, cpBody *body, cpFloat radius, cpVect offset)
+cpShape *cpCircleShapeNew(cpBody *body, cpFloat radius, cpVect offset)
 ```
 
 `body` is the body to attach the circle to, `offset` is the offset from the
@@ -1019,7 +1019,7 @@ body's center of gravity in body local coordinates.
 
 ```c
 cpVect cpCircleShapeGetOffset(cpShape *circleShape)
-    cpFloat cpCircleShapeGetRadius(cpShape *circleShape)
+cpFloat cpCircleShapeGetRadius(cpShape *circleShape)
 ```
 
 Getters for circle shape properties. Passing as non-circle shape will throw an
@@ -1029,8 +1029,8 @@ assertion.
 
 ```c
 cpSegmentShape* cpSegmentShapeAlloc(void)
-    cpSegmentShape* cpSegmentShapeInit(cpSegmentShape *seg, cpBody *body, cpVect a, cpVect b, cpFloat radius)
-    cpShape* cpSegmentShapeNew(cpBody *body, cpVect a, cpVect b, cpFloat radius)
+cpSegmentShape* cpSegmentShapeInit(cpSegmentShape *seg, cpBody *body, cpVect a, cpVect b, cpFloat radius)
+cpShape* cpSegmentShapeNew(cpBody *body, cpVect a, cpVect b, cpFloat radius)
 ```
 
 `body` is the body to attach the segment to, `a` and `b` are the endpoints, and
@@ -1038,9 +1038,9 @@ cpSegmentShape* cpSegmentShapeAlloc(void)
 
 ```c
 cpVect cpSegmentShapeGetA(cpShape *shape)
-    cpVect cpSegmentShapeGetB(cpShape *shape)
-    cpVect cpSegmentShapeGetNormal(cpShape *shape)
-    cpFloat cpSegmentShapeGetRadius(cpShape *shape)
+cpVect cpSegmentShapeGetB(cpShape *shape)
+cpVect cpSegmentShapeGetNormal(cpShape *shape)
+cpFloat cpSegmentShapeGetRadius(cpShape *shape)
 ```
 
 Getters for segment shape properties. Passing a non-segment shape will throw an
@@ -1059,21 +1059,18 @@ inner parts of the crack.
 
 ```c
 cpPolyShape *cpPolyShapeAlloc(void)
-
-    cpPolyShape *cpPolyShapeInit(cpPolyShape *poly, cpBody *body, int count, const cpVect *verts, cpTransform transform, cpFloat radius)
-    cpShape *cpPolyShapeNew(cpBody *body, int numVerts, cpVect *verts, cpTransform transform, cpFloat radius)
+cpPolyShape *cpPolyShapeInit(cpPolyShape *poly, cpBody *body, int count, const cpVect *verts, cpTransform transform, cpFloat radius)
+cpShape *cpPolyShapeNew(cpBody *body, int numVerts, cpVect *verts, cpTransform transform, cpFloat radius)
 ```
 
-\
-p(expl). `body` is the body to attach the poly to, `verts` is an array of `cpVect`
-structs, `transform` will be applied to every vertex. A convex hull will be calculated
-from the vertexes automatically.\
-The polygon shape will be created with a `radius`, increasing the size of the
-shape.
+`body` is the body to attach the poly to, `verts` is an array of `cpVect`
+structs, `transform` will be applied to every vertex. A convex hull will be
+calculated from the vertexes automatically. The polygon shape will be created
+with a `radius`, increasing the size of the shape.
 
 ```c
 cpPolyShape* cpPolyShapeInitRaw(cpPolyShape *poly, cpBody *body, int count, const cpVect *verts, cpFloat radius)
-    cpShape* cpPolyShapeNewRaw(cpBody *body, int count, const cpVect *verts, cpFloat radius)
+cpShape* cpPolyShapeNewRaw(cpBody *body, int count, const cpVect *verts, cpFloat radius)
 ```
 
 Alternate constructors for poly shapes. This version does not apply a transform
@@ -1082,8 +1079,8 @@ counter-clockwise winding.
 
 ```c
 int cpPolyShapeGetCount(cpShape *shape)
-    cpVect cpPolyShapeGetVert(cpShape *shape, int index)
-    cpFloat cpPolyShapeGetRadius()
+cpVect cpPolyShapeGetVert(cpShape *shape, int index)
+cpFloat cpPolyShapeGetRadius()
 ```
 
 Getters for poly shape properties. Passing a non-poly shape or an index that
@@ -1100,10 +1097,9 @@ to use `cpPolyShapeNew()` or `cpPolyShapeInit()`.
 
 ```c
 cpPolyShape *cpBoxShapeInit(cpPolyShape *poly, cpBody *body, cpFloat width, cpFloat height, cpFloat radius)
-    cpPolyShape *cpBoxShapeInit2(cpPolyShape *poly, cpBody *body, cpBB box, cpFloat radius)
-
-    cpShape *cpBoxShapeNew(cpBody *body, cpFloat width, cpFloat height, cpFloat radius)
-    cpShape *cpBoxShapeNew2(cpBody *body, cpBB box, cpFloat radius)
+cpPolyShape *cpBoxShapeInit2(cpPolyShape *poly, cpBody *body, cpBB box, cpFloat radius)
+cpShape *cpBoxShapeNew(cpBody *body, cpFloat width, cpFloat height, cpFloat radius)
+cpShape *cpBoxShapeNew2(cpBody *body, cpBB box, cpFloat radius)
 ```
 
 #### Poly Shape Helper Functions
@@ -1119,7 +1115,7 @@ int cpConvexHull(int count, cpVect *verts, cpVect *result, int *first, cpFloat t
 
 Calculate the convex hull of a given set of points. Returns the count of points
 in the hull. `result` must be a pointer to a `cpVect` array with at least
-`count` elements. If `result` is `NULL`, then `verts` array wil be reduced
+`count` elements. If `result` is `NULL`, then `verts` array will be reduced
 instead. `first` is an optional pointer to an integer to store where the first
 vertex in the hull came from (i.e. `verts[first] == result[0]`) `tol` is the
 allowed amount to shrink the hull when simplifying it. A tolerance of 0.0
@@ -1135,7 +1131,7 @@ created on the stack it doesn't need to be freed.
 
 \<%= pop_open_example "cpConvexHull" %\>
 
-### Modifying cpShapes
+### Modifying `cpShapes`
 
 The short answer is that you can't because the changes would be only picked up
 as a change to the position of the shape's surface, but not its velocity. The
@@ -1158,7 +1154,7 @@ Spaces in Chipmunk are the basic unit of simulation. You add rigid bodies,
 shapes, and constraints to the space and then step them all forward through time
 together.
 
-### What Are Iterations, and Why Should I Care?
+### What Are Iterations, and Why Should I Care? {#cpSpace-Iterations}
 
 Chipmunk uses an iterative solver to figure out the forces between objects in
 the space. What this means is that it builds a big list of all the collisions,
@@ -1171,7 +1167,7 @@ bouncy when the objects should be solid. Setting the number of iterations lets
 you balance between CPU usage and the accuracy of the physics. Chipmunk's
 default of 10 iterations is sufficient for most simple games.
 
-### Sleeping #{#cpSpace-Sleeping}
+### Sleeping {#cpSpace-Sleeping}
 
 Spaces can disable entire groups of objects that have stopped moving to save CPU
 time and battery life. In order to use this feature you must do two things. You
@@ -1187,7 +1183,7 @@ kinematic body.
 
 ```c
 int cpSpaceGetIterations(const cpSpace *space)
-    void cpSpaceSetIterations(cpSpace *space, int value)
+void cpSpaceSetIterations(cpSpace *space, int value)
 ```
 
 Iterations allow you to control the accuracy of the solver. Defaults to 10. See
@@ -1195,16 +1191,16 @@ Iterations allow you to control the accuracy of the solver. Defaults to 10. See
 
 ```c
 cpVect cpSpaceGetGravity(const cpSpace *space)
-    void cpSpaceSetGravity(cpSpace *space, cpVect value)
+void cpSpaceSetGravity(cpSpace *space, cpVect value)
 ```
 
 Global gravity applied to the space. Defaults to `cpvzero`. Can be overridden on
-a per body basis by writing custom integration functions. Changing the gravity
+a per-body basis by writing custom integration functions. Changing the gravity
 will activate all sleeping bodies in the space.
 
 ```c
 cpFloat cpSpaceGetDamping(const cpSpace *space)
-    void cpSpaceSetDamping(cpSpace *space, cpFloat value)
+void cpSpaceSetDamping(cpSpace *space, cpFloat value)
 ```
 
 Amount of simple damping to apply to the space. A value of 0.9 means that each
@@ -1213,7 +1209,7 @@ can be overridden on a per body basis.
 
 ```c
 cpFloat cpSpaceGetIdleSpeedThreshold(const cpSpace *space)
-    void cpSpaceSetIdleSpeedThreshold(cpSpace *space, cpFloat value)
+void cpSpaceSetIdleSpeedThreshold(cpSpace *space, cpFloat value)
 ```
 
 Speed threshold for a body to be considered idle. The default value of 0 means
@@ -1221,7 +1217,7 @@ the space estimates a good threshold based on gravity.
 
 ```c
 cpFloat cpSpaceGetSleepTimeThreshold(const cpSpace *space)
-    void cpSpaceSetSleepTimeThreshold(cpSpace *space, cpFloat value)
+void cpSpaceSetSleepTimeThreshold(cpSpace *space, cpFloat value)
 ```
 
 Time a group of bodies must remain idle in order to fall asleep. The default
@@ -1229,11 +1225,11 @@ value of `INFINITY` disables the sleeping feature.
 
 ```c
 cpFloat cpSpaceGetCollisionSlop(const cpSpace *space)
-    void cpSpaceSetCollisionSlop(cpSpace *space, cpFloat value)
+void cpSpaceSetCollisionSlop(cpSpace *space, cpFloat value)
 ```
 
 Amount of overlap between shapes that is allowed. To improve stability, set this
-as high as you can without noticable overlapping. It defaults to 0.1. :::
+as high as you can without noticeable overlapping. It defaults to 0.1.
 
 ```c
 cpFloat cpSpaceGetCollisionBias(const cpSpace *space)
@@ -1244,15 +1240,15 @@ Chipmunk allows fast moving objects to overlap, then fixes the overlap over
 time. Overlapping objects are unavoidable even if swept collisions are
 supported, and this is an efficient and stable way to deal with overlapping
 objects. The bias value controls what percentage of overlap remains unfixed
-after a second and defaults to \~0.2%. Valid values are in the range from 0 to
-1, but using 0 is not recommended for stability reasons. The default value is
+after a second and defaults to ~0.2%. Valid values are in the range from 0 to 1,
+but using 0 is not recommended for stability reasons. The default value is
 calculated as `cpfpow(1.0f - 0.1f, 60.0f)` meaning that Chipmunk attempts to
 correct 10% of error ever 1/60th of a second. **Note:** Very, very few games
 will need to change this value.
 
 ```c
 cpTimestamp cpSpaceGetCollisionPersistence(const cpSpace *space)
-    void cpSpaceSetCollisionPersistence(cpSpace *space, cpTimestamp value)
+void cpSpaceSetCollisionPersistence(cpSpace *space, cpTimestamp value)
 ```
 
 The number of frames the space keeps collision solutions around for. Helps
@@ -1276,7 +1272,7 @@ post-step callback instead.
 
 ```c
 cpDataPointer cpSpaceGetUserData(const cpSpace *space)
-    void cpSpaceSetUserData(cpSpace *space, cpDataPointer value)
+void cpSpaceSetUserData(cpSpace *space, cpDataPointer value)
 ```
 
 A user definable data pointer. It is often useful to point this at the game
@@ -1307,26 +1303,26 @@ More standard Chipmunk memory functions.
 
 ```c
 cpShape *cpSpaceAddShape(cpSpace *space, cpShape *shape)
-    cpBody *cpSpaceAddBody(cpSpace *space, cpBody *body)
-    cpConstraint *cpSpaceAddConstraint(cpSpace *space, cpConstraint *constraint)
+cpBody *cpSpaceAddBody(cpSpace *space, cpBody *body)
+cpConstraint *cpSpaceAddConstraint(cpSpace *space, cpConstraint *constraint)
 
-    void cpSpaceRemoveShape(cpSpace *space, cpShape *shape)
-    void cpSpaceRemoveBody(cpSpace *space, cpBody *body)
-    void cpSpaceRemoveConstraint(cpSpace *space, cpConstraint *constraint)
+void cpSpaceRemoveShape(cpSpace *space, cpShape *shape)
+void cpSpaceRemoveBody(cpSpace *space, cpBody *body)
+void cpSpaceRemoveConstraint(cpSpace *space, cpConstraint *constraint)
 
-    cpBool cpSpaceContainsShape(cpSpace *space, cpShape *shape)
-    cpBool cpSpaceContainsBody(cpSpace *space, cpBody *body)
-    cpBool cpSpaceContainsConstraint(cpSpace *space, cpConstraint *constraint)
+cpBool cpSpaceContainsShape(cpSpace *space, cpShape *shape)
+cpBool cpSpaceContainsBody(cpSpace *space, cpBody *body)
+cpBool cpSpaceContainsConstraint(cpSpace *space, cpConstraint *constraint)
 ```
 
 These functions add and remove shapes, bodies and constraints from `space`. The
 add/remove functions cannot be called from within a callback other than a
-`postStep()` callback _(which is different than a postSolve() callback!)_.
+`postStep()` callback _(which is different from a postSolve() callback!)_.
 Attempting to add or remove objects from the space while `cpSpaceStep()` is
 still executing will throw an assertion. See the [callbacks section](#Callbacks)
 for more information. The add functions return the thing being added so that you
 can create and add something in one line. Be careful not to free bodies before
-removing shapes and constraints attached to them or you will cause crashes.. The
+removing shapes and constraints attached to them, or you will cause crashes. The
 contains functions allow you to check if an object has been added to the space
 or not.
 
@@ -1349,7 +1345,7 @@ want to perform queries against them before the next call to `cpSpaceStep()`.
 
 ```c
 typedef void (*cpSpaceBodyIteratorFunc)(cpBody *body, void *data)
-    void cpSpaceEachBody(cpSpace *space, cpSpaceBodyIteratorFunc func, void *data)
+void cpSpaceEachBody(cpSpace *space, cpSpaceBodyIteratorFunc func, void *data)
 ```
 
 Call `func` for each body in the space also passing along your data pointer.
@@ -1360,7 +1356,7 @@ aren't added to the space.
 
 ```c
 typedef void (*cpSpaceShapeIteratorFunc)(cpShape *shape, void *data)
-    void cpSpaceEachShape(cpSpace *space, cpSpaceShapeIteratorFunc func, void *data)
+void cpSpaceEachShape(cpSpace *space, cpSpaceShapeIteratorFunc func, void *data)
 ```
 
 Call `func` for each shape in the space also passing along your data pointer.
@@ -1368,7 +1364,7 @@ Sleeping and static shapes are included.
 
 ```c
 typedef void (*cpSpaceConstraintIteratorFunc)(cpConstraint *constraint, void *data)
-    void cpSpaceEachConstraint(cpSpace *space, cpSpaceConstraintIteratorFunc func, void *data)
+void cpSpaceEachConstraint(cpSpace *space, cpSpaceConstraintIteratorFunc func, void *data)
 ```
 
 Call `func` for each constraint in the space also passing along your data
@@ -1425,13 +1421,13 @@ the number of objects in the space is probably a good starting point. Tune from
 there if necessary.
 
 Using the spatial has visualization in the demo program you can see what I mean.
-The grey squares represent cells in the spatial hash. The darker the cell, the
+The gray squares represent cells in the spatial hash. The darker the cell, the
 more objects have been mapped into that cell. A good `dim` size is when your
 objects fit nicely into the grid:
 
 ![](images/hash_just_right.png)
 
-Notice the light grey meaning that each cell doesn't have too many objects
+Notice the light gray meaning that each cell doesn't have too many objects
 mapped onto it.
 
 When you use too small a size, Chipmunk has to insert each object into a lot of
@@ -1439,7 +1435,7 @@ cells. This can get expensive.
 
 ![](images/hash_too_small.png)
 
-Notice that the grey cells are very small compared to the collision shapes.
+Notice that the gray cells are very small compared to the collision shapes.
 
 When you use too big of a size, a lot of shapes will fit into each cell. Each
 shape has to be checked against every other shape in the cell, so this makes for
@@ -1447,7 +1443,7 @@ a lot of unnecessary collision checks.
 
 ![](images/hash_too_big.png)
 
-Notice the dark grey cells meaning that many objects are mapped onto them.
+Notice the dark gray cells meaning that many objects are mapped onto them.
 
 Chipmunk also has an experimental single axis sort and sweep implementation. It
 can be very efficient on mobile games if your world is very long and flat like a

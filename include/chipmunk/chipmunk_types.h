@@ -247,7 +247,7 @@ typedef uint32_t cpCollisionID;
 	typedef CGPoint cpVect;
 #else
 /// Chipmunk's 2D vector type.
-/// @addtogroup cpVect
+/// @addtogroup cpVect 
 	typedef struct cpVect{cpFloat x,y;} cpVect;
 #endif
 
