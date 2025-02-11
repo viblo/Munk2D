@@ -123,7 +123,72 @@ in order to compile things, but it has saved me a lot of time and effort.
 Hello world Chipmunk style. Create a simple simulation where a ball falls onto a
 static line segment, then rolls off. Print out the coordinates of the ball.
 
-\<%= pop_open_example "Hello Chipmunk" %\>
+```c
+#include <stdio.h>
+#include <chipmunk.h>
+
+int main(void){
+  // cpVect is a 2D vector and cpv() is a shortcut for initializing them.
+  cpVect gravity = cpv(0, -100);
+
+  // Create an empty space.
+  cpSpace *space = cpSpaceNew();
+  cpSpaceSetGravity(space, gravity);
+
+  // Add a static line segment shape for the ground.
+  // We'll make it slightly tilted so the ball will roll off.
+  // We attach it to a static body to tell Chipmunk it shouldn't be movable.
+  cpShape *ground = cpSegmentShapeNew(cpSpaceGetStaticBody(space), cpv(-20, 5), cpv(20, -5), 0);
+  cpShapeSetFriction(ground, 1);
+    cpSpaceAddShape(space, ground);
+
+  // Now let's make a ball that falls onto the line and rolls off.
+  // First we need to make a cpBody to hold the physical properties of the object.
+  // These include the mass, position, velocity, angle, etc. of the object.
+  // Then we attach collision shapes to the cpBody to give it a size and shape.
+
+  cpFloat radius = 5;
+  cpFloat mass = 1;
+
+  // The moment of inertia is like mass for rotation
+  // Use the cpMomentFor*() functions to help you approximate it.
+  cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);
+
+  // The cpSpaceAdd*() functions return the thing that you are adding.
+  // It's convenient to create and add an object in one line.
+  cpBody *ballBody = cpSpaceAddBody(space, cpBodyNew(mass, moment));
+  cpBodySetPosition(ballBody, cpv(0, 15));
+
+  // Now we create the collision shape for the ball.
+  // You can create multiple collision shapes that point to the same body.
+  // They will all be attached to the body and move around to follow it.
+  cpShape *ballShape = cpSpaceAddShape(space, cpCircleShapeNew(ballBody, radius, cpvzero));
+  cpShapeSetFriction(ballShape, 0.7);
+
+  // Now that it's all set up, we simulate all the objects in the space by
+  // stepping forward through time in small increments called steps.
+  // It is *highly* recommended to use a fixed size time step.
+  cpFloat timeStep = 1.0/60.0;
+  for(cpFloat time = 0; time < 2; time += timeStep){
+    cpVect pos = cpBodyGetPosition(ballBody);
+    cpVect vel = cpBodyGetVelocity(ballBody);
+    printf(
+      "Time is %5.2f. ballBody is at (%5.2f, %5.2f). It's velocity is (%5.2f, %5.2f)\n",
+      time, pos.x, pos.y, vel.x, vel.y
+    );
+
+    cpSpaceStep(space, timeStep);
+  }
+
+  // Clean up our objects and exit!
+  cpShapeFree(ballShape);
+  cpBodyFree(ballBody);
+  cpShapeFree(ground);
+  cpSpaceFree(space);
+
+  return 0;
+}
+```
 
 ### Support
 
@@ -386,7 +451,7 @@ Convenience constructor for creating new `cpVect` structs.
 - `cpFloat cpvtoangle(const cpVect v)` - Returns the angular direction `v` is
   pointing in (in radians).
 
-## Chipmunk Axis Aligned Bounding Boxes: `cpBB`
+## Axis Aligned Bounding Boxes: `cpBB`
 
 ### Struct Definition and Constructors
 
@@ -445,7 +510,7 @@ with radius `r`.
 - `cpVect cpBBWrapVect(const cpBB bb, const cpVect v)` - Returns a copy of `v`
   wrapped to the bounding box.
 
-## Chipmunk Rigid Bodies: `cpBody`
+## Rigid Bodies: `cpBody`
 
 ### Dynamic, Kinematic, and Static Bodies {#BodyTypes}
 
@@ -694,7 +759,26 @@ adding the results together if you want to use more than one.
 
 <!-- TODO poly examples -->
 
-\<%= pop_open_example "Moments" %\>
+#### Moment Examples
+
+Note that most of the time its more convenient to use `cpShapeSetMass` or
+`cpShapeSetDensity` instead to automatically calculate the moment.
+
+```c
+// Moment for a solid circle with a mass of 2 and radius 5.
+cpFloat circle1 = cpMomentForCircle(2, 0, 5, cpvzero);
+
+// Moment for a hollow circle with a mass of 1, inner radius of 2 and outer radius of 6.
+cpFloat circle2 = cpMomentForCircle(1, 2, 6, cpvzero);
+
+// Moment for a solid circle with a mass of 1, radius of 3 and
+// centered 3 units along the x axis from the center of gravity.
+cpFloat circle3 = cpMomentForCircle(2, 0, 5, cpv(3, 0));
+
+// Composite object. 1x4 box centered on the center of gravity and a circle sitting on top.
+// Just add the moments together.
+cpFloat composite = cpMomentForBox(boxMass, 1, 4) + cpMomentForCircle(circleMass, 0, 1, cpv(0, 3));
+```
 
 Use the following functions to get the area for common Chipmunk shapes if you
 want to approximate masses or density or whatnot.
@@ -776,7 +860,34 @@ by starting a new group. If you pass a sleeping body for `group`, `body` will be
 awoken when `group` is awoken. You can use this to initialize levels and start
 stacks of objects in a pre-sleeping state.
 
-\<%= pop_open_example "Sleeping" %\>
+#### Sleeping Example
+
+```c
+// Construct a pile of boxes.
+// Force them to sleep until the first time they are touched.
+// Group them together so that touching any box wakes all of them.
+cpFloat size = 20;
+cpFloat mass = 1;
+cpFloat moment = cpMomentForBox(mass, size, size);
+
+cpBody *lastBody = NULL;
+
+for(int i=0; i<5; i++){
+  cpBody *body = cpSpaceAddBody(space, cpBodyNew(mass, moment));
+  cpBodySetPos(body, cpv(0, i*size));
+
+  cpShape *shape = cpSpaceAddShape(space, cpBoxShapeNew(body, size, size));
+  cpShapeSetFriction(shape, 0.7);
+
+  // You can use any sleeping body as a group identifier.
+  // Here we just keep a reference to the last body we initialized.
+  // Passing NULL as the group starts a new sleeping group.
+  // You MUST do this after completely initializing the object.
+  // Attaching shapes or calling setter functions will wake the body back up.
+  cpBodySleepWithGroup(body, lastBody);
+  lastBody = body;
+}
+```
 
 ### Iterators
 
@@ -816,7 +927,33 @@ are not tracked by the contact graph.
 alternate set of functions you can call. `cpBodyEachShape_b()`, etc. See
 `chipmunk.h` for more information.
 
-\<%= pop_open_example "Crushing" %\>
+#### Crushing Example
+
+```c
+struct CrushingContext {
+  cpFloat magnitudeSum;
+  cpVect vectorSum;
+};
+
+static void
+EstimateCrushingHelper(cpBody *body, cpArbiter *arb, struct CrushingContext *context)
+{
+  cpVect j = cpArbiterTotalImpulseWithFriction(arb);
+  context->magnitudeSum += cpvlength(j);
+  context->vectorSum = cpvadd(context->vectorSum, j);
+}
+
+cpFloat
+EstimateCrushForce(cpBody *body, cpFloat dt)
+{
+  struct CrushingContext crush = {0.0f, cpvzero};
+  cpBodyEachArbiter(body, (cpBodyArbiterIteratorFunc)EstimateCrushingHelper, &crush);
+
+  // Compare the vector sum magnitude and magnitude sum to see if
+  // how much the collision forces oppose one another.
+  cpFloat crushForce = (crush.magnitudeSum - cpvlength(crush.vectorSum))*dt;
+}
+```
 
 ### Integration Callbacks
 
@@ -825,7 +962,7 @@ of how to use integration callbacks to implement planetary gravity.
 
 <!-- TODO document and examples -->
 
-## Chipmunk Collision Shapes: `cpShape`
+## Collision Shapes: `cpShape`
 
 There are currently 3 collision shape types:
 
@@ -1129,7 +1266,34 @@ Convenience macro for using `cpConvexHull()`. Creates an array on the stack
 using `alloca()` and then calls `cpConvexHull()`. Because the output array is
 created on the stack it doesn't need to be freed.
 
-\<%= pop_open_example "cpConvexHull" %\>
+#### Convex Hull Example
+
+```c
+int first = 0;
+
+// Create space to store the convex hull.
+// An alloca(), or a variable length array would be a better, but not always portable choice.
+cpVect *hullVerts = (cpVect *)calloc(vertCount, sizeof(cpVect));
+int hullCount = cpConvexHull(vertCount, verts, hullVerts, &first, 0.0);
+
+// hullVerts[0] will be equal to verts[first] here.
+// If you don't care, pass NULL instead of the 'first' pointer.
+
+cpBody *body = cpBodyNew(mass, cpMomentForPoly(mass, hullCount, hullVerts, cpvzero));
+cpShape *shape = cpPolyShapeNew(body, hullCount, hullVerts, cpvzero);
+
+free(hullVerts);
+
+// *********
+// Altenatively you can use the CP_CONVEX_HULL() macro to save yourself a little work
+
+// The macro will declare the hullCount and hullVerts variables.
+// hullVerts is allocated on the stack and does not need to be freed.
+CP_CONVEX_HULL(count, verts, hullCount, hullVerts)
+
+cpBody *body = cpBodyNew(mass, cpMomentForPoly(mass, hullCount, hullVerts, cpvzero));
+cpShape *shape = cpPolyShapeNew(body, hullCount, hullVerts, cpvzero);
+```
 
 ### Modifying `cpShapes`
 
@@ -1148,7 +1312,7 @@ defined in a separate header `chipmunk_unsafe.h`.
   body.
 - Make sure you add both the body and its collision shapes to a space.
 
-## Chipmunk Spaces: `cpSpace`
+## Spaces `cpSpace`
 
 Spaces in Chipmunk are the basic unit of simulation. You add rigid bodies,
 shapes, and constraints to the space and then step them all forward through time
@@ -1352,7 +1516,21 @@ Call `func` for each body in the space also passing along your data pointer.
 Sleeping bodies are included, but static and kinematic bodies are not as they
 aren't added to the space.
 
-\<%= pop_open_example "cpSpaceEachBody" %\>
+#### cpSpaceEachBody Example
+
+```c
+// Code snippet to check if all bodies in the space are sleeping
+
+// This function is called once for each body in the space.
+static void EachBody(cpBody *body, cpBool *allSleeping){
+  if(!cpBodyIsSleeping(body)) *allSleeping = cpFalse;
+}
+
+// Then in your tick method, do this:
+cpBool allSleeping = true;
+cpSpaceEachBody(space, (cpSpaceBodyIteratorFunc)EachBody, &allSleeping);
+printf("All are sleeping: %s\n", allSleeping ? "true" : "false");
+```
 
 ```c
 typedef void (*cpSpaceShapeIteratorFunc)(cpShape *shape, void *data)
@@ -1460,7 +1638,7 @@ enabling it.
 - Because static shapes are only rehashed when you request it, TODO:
   `cpSpaceHashResize`
 
-## Chipmunk Constraints: `cpConstraint`
+## Constraints: `cpConstraint`
 
 A constraint is something that describes how two bodies interact with each
 other. (how they constrain each other) Constraints can be simple joints that
@@ -1558,7 +1736,31 @@ divide by the timestep passed to `cpSpaceStep()`. You can use this to implement
 breakable joints to check if the force they attempted to apply exceeded a
 certain threshold.
 
-\<%= pop_open_example "BreakableJoint" %\>
+#### Breakable Joint Example
+
+```c
+// Create the joint and set it's max force property.
+breakableJoint = cpSpaceAddConstraint(space, cpPinJointNew(body1, body2, cpv(15,0), cpv(-15,0)));
+cpConstraintSetMaxForce(breakableJoint, 4000);
+
+
+// In your update function:
+// Step your space normally...
+cpFloat dt = 1.0/60.0;
+cpSpaceStep(space, dt);
+
+if(breakableJoint){
+  // Convert the impulse to a force by dividing it by the timestep.
+  cpFloat force = cpConstraintGetImpulse(breakableJoint)/dt;
+  cpFloat maxForce = cpConstraintGetMaxForce(breakableJoint);
+
+  // If the force is almost as big as the joint's max force, break it.
+  if(force > 0.9*maxForce){
+    cpSpaceRemoveConstraint(space, breakableJoint);
+    breakableJoint = NULL;
+  }
+}
+```
 
 To access properties of specific joint types, use the getter and setter
 functions provided (ex: `cpPinJointGetanchorA()`). See the lists of properties
@@ -1595,7 +1797,27 @@ but is probably the least useful of the three properties by far.
 
 <!-- TODO more examples -->
 
-\<%= pop_open_example "JointRecipies" %\>
+#### Joint Recipes
+
+```c
+// Faked top down friction.
+
+// A pivot joint configured this way will calculate friction against the ground for games with a top down perspective.
+// Because the joint correction is disabled, the joint will not recenter itself and only apply to the velocity.
+// The force the joint applies when changing the velocity will be clamped by the max force
+// and this causes it to work exactly like friction!
+cpConstraint *pivot = cpSpaceAddConstraint(space, cpPivotJointNew2(staticBody, body, cpvzero, cpvzero));
+cpConstraintSetMaxBias(pivot, 0.0f); // disable joint correction
+cpConstraintSetMaxForce(pivot, 1000.0f);
+
+// The pivot joint doesn't apply rotational forces, use a gear joint with a ratio of 1.0 for that.
+cpConstraint *gear = cpSpaceAddConstraint(space, cpGearJointNew(staticBody, body, 0.0f, 1.0f));
+cpConstraintSetMaxBias(gear, 0.0f); // disable joint correction
+cpConstraintSetMaxForce(gear, 5000.0f);
+
+// Also, instead of connecting the joints to a static body, you can connect them to an infinite mass rogue body.
+// You can then use the rogue body as a control body to the connected body. See the Tank demo as an example.
+```
 
 ### Constraints and Collision Shapes
 
@@ -1872,7 +2094,7 @@ torque to keep the bodies moving.
 - You can add multiple joints between two bodies, but make sure that they don't
   fight. Doing so can cause the bodies jitter or spin violently.
 
-## Overview of Collision Detection in Chipmunk
+## Overview of Collision Detection
 
 In order to make collision detection in Chipmunk as fast as possible, the
 process is broken down into several stages. While it tries to be conceptually
@@ -2049,7 +2271,23 @@ process the collision events. When a new collision handler is created, the
 callbacks will all be set to builtin callbacks that perform the default behavior
 (call the wildcard handlers, and accept all collisions).
 
-\<%= pop_open_example "PlaySoundOnCollision" %\>
+#### Play Sound On Collision Example
+
+```c
+// Callback function
+static cpBool PlaySoundOnImpact(cpArbiter *arb, cpSpace *space, void *data){
+    PlayCrashSound();
+    return cpTrue;
+}
+
+// When setting up, reference your callback function:
+{
+    ...
+    cpCollisionHandler *handler = cpSpaceAddCollisionHandler(space, PLAYER, WALL);
+    handler->postSolveFunc = PlaySoundOnImpact;
+    ...
+}
+```
 
 ```c
 cpCollisionHandler *cpSpaceAddWildcardHandler(cpSpace *space, cpCollisionType type)
@@ -2120,7 +2358,7 @@ to sequence a number of events, you'll need to put them in a single callback.
 See the [callback examples](examples.html#CollisionCallbacks) for more
 information.
 
-## Chipmunk Collision Pairs: `cpArbiter` {#cpArbiter}
+## Collision Pairs: `cpArbiter` {#cpArbiter}
 
 Chipmunk's `cpArbiter` struct encapsulates a pair of colliding shapes and all
 the data about their collision. `cpArbiter` are created when a collision starts,
@@ -2173,7 +2411,7 @@ default calculation subtracts the surface velocity of the second shape from the
 first and then projects that onto the tangent of the collision. This is so that
 only friction is affected by default calculation. Using a custom calculation,
 you can make something that responds like a pinball bumper, or where the surface
-velocity is dependent on the location of the contact point. :::
+velocity is dependent on the location of the contact point.
 
 ```c
 cpDataPointer cpArbiterGetUserData(const cpArbiter *arb)
@@ -2249,7 +2487,46 @@ handler they were called from. Every collision handler is defined for two types,
 the "A" variants of these functions call the wildcard handler for the first
 type, and the "B" variants call the handler for the second type.
 
-\<%= pop_open_example "CollisionCallback" %\>
+#### Collision Callback Example
+
+```c
+static void
+postStepRemove(cpSpace *space, cpShape *shape, void *unused)
+{
+  cpSpaceRemoveShape(space, shape);
+  cpSpaceRemoveBody(space, shape->body);
+
+  cpShapeFree(shape);
+  cpBodyFree(shape->body);
+}
+
+static int
+begin(cpArbiter *arb, cpSpace *space, void *data)
+{
+  // Get the cpShapes involved in the collision
+  // The order will be the same as you defined in the handler definition
+  // a->collision_type will be BULLET_TYPE and b->collision_type will be MONSTER_TYPE
+  CP_ARBITER_GET_SHAPES(arb, a, b);
+
+  // The macro expands exactly as if you had typed this:
+  // cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b);
+
+  // Add a post step callback to safely remove the body and shape from the space.
+  // Calling cpSpaceRemove*() directly from a collision handler callback can cause crashes.
+  cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepRemove, b, NULL);
+
+  // The object is dead, don’t process the collision further
+  return 0;
+}
+
+#define BULLET_TYPE 1
+#define MONSTER_TYPE 2
+
+// Define a collision handler for bullets and monsters
+// Kill the monster by removing it’s shape and body from the space as soon as it’s hit by a bullet
+cpCollisionHandler *handler = cpSpaceAddCollisionHandler(space, BULLET_TYPE, MONSTER_TYPE);
+handler->beginFunc = begin;
+```
 
 ### Contact Point Sets
 
