@@ -962,6 +962,26 @@ of how to use integration callbacks to implement planetary gravity.
 
 <!-- TODO document and examples -->
 
+### Getting a Transformation from a Rigid Body
+
+You can quickly and easily build a transformation matrix from a Chipmunk body.
+The following code is for OpenGL, but it should be trivial to modify for DirectX
+or affine transforms. (Note that OpenGL matrices are column-major)
+
+```c
+cpVect pos = body->p;
+cpVect rot = body->rot;
+
+GLFloat matrix[16] = {
+   rot.x, rot.y, 0.0f, 0.0f,
+  -rot.y, rot.x, 0.0f, 0.0f,
+   0.0f,   0.0f, 1.0f, 0.0f,
+   pos.x, pos.y, 0.0f, 1.0f,
+};
+
+glMultMatrixf(matrix.farr);
+```
+
 ## Collision Shapes: `cpShape`
 
 There are currently 3 collision shape types:
@@ -2271,6 +2291,51 @@ process the collision events. When a new collision handler is created, the
 callbacks will all be set to builtin callbacks that perform the default behavior
 (call the wildcard handlers, and accept all collisions).
 
+#### General Collision Callback Example
+
+This snippet demonstrates several Chipmunk collision callback features. It
+defines a collision handler that is called when collision shapes start touching
+and also a post-step callback to remove the collision shape and body.
+
+```c
+static void
+postStepRemove(cpSpace *space, cpShape *shape, void *unused)
+{
+  cpSpaceRemoveBody(space, shape->body);
+  cpSpaceRemoveShape(space, shape);
+
+  cpShapeFree(shape);
+  cpBodyFree(shape->body);
+}
+
+static int
+begin(cpArbiter *arb, cpSpace *space, void *unused)
+{
+  // Get the cpShapes involved in the collision
+  // The order will be the same as you defined in the handler definition
+  // a->collision_type will be BULLET_TYPE and b->collision_type will be MONSTER_TYPE
+  cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b);
+
+  // Alternatively you can use the CP_ARBITER_GET_SHAPES() macro
+  // It defines and sets the variables for you.
+  //CP_ARBITER_GET_SHAPES(arb, a, b);
+
+  // Add a post step callback to safely remove the body and shape from the space.
+  // Calling cpSpaceRemove*() directly from a collision handler callback can cause crashes.
+  cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepRemove, b, NULL);
+
+  // The object is dead, don’t process the collision further
+  return 0;
+}
+
+#define BULLET_TYPE 1
+#define MONSTER_TYPE 2
+
+// Define a collision handler for bullets and monsters
+// Kill the monster by removing it’s shape and body from the space as soon as it’s hit by a bullet
+cpSpaceAddCollisionHandler(space, BULLET_TYPE, MONSTER_TYPE, begin, NULL, NULL, NULL, NULL);
+```
+
 #### Play Sound On Collision Example
 
 ```c
@@ -2288,6 +2353,9 @@ static cpBool PlaySoundOnImpact(cpArbiter *arb, cpSpace *space, void *data){
     ...
 }
 ```
+
+For more callback examples, see the `One Way Platform Demo`, `Sensors Demo`, or
+the `Player Demo`.
 
 ```c
 cpCollisionHandler *cpSpaceAddWildcardHandler(cpSpace *space, cpCollisionType type)
@@ -2783,6 +2851,49 @@ If your compiler supports blocks (such as Clang), there are an alternate set of
 functions you can call. `cpSpaceNearestPointQuery_b()`, etc. See `chipmunk.h`
 for more information.
 
-### Examples
+### Query Examples
 
-See the [query examples](examples.html#Query) for more information.
+The following example is taken directly from `ChipmunkDemo.c`. When the mouse is
+clicked, a point query is performed to see if there is a shape under the mouse.
+If there is, it adds a joint to the body that links it to the mouse's movement.
+
+```c
+static void
+click(int button, int state, int x, int y)
+{
+  if(button == GLUT_LEFT_BUTTON){
+    if(state == GLUT_DOWN){
+      cpVect point = mouseToSpace(x, y);
+
+      cpShape *shape = cpSpacePointQueryFirst(space, point, GRABABLE_MASK_BIT, 0);
+      if(shape){
+        cpBody *body = shape->body;
+        mouseJoint = cpPivotJointNew2(mouseBody, body, cpvzero, cpBodyWorld2Local(body, point));
+        mouseJoint->maxForce = 50000.0f;
+        mouseJoint->biasCoef = 0.15f;
+        cpSpaceAddConstraint(space, mouseJoint);
+      }
+    } else if(mouseJoint){
+      cpSpaceRemoveConstraint(space, mouseJoint);
+      cpConstraintFree(mouseJoint);
+      mouseJoint = NULL;
+    }
+  }
+}
+```
+
+Perform a segment query to see if a laser beam hits a shape. We want to draw
+particles at both the position where the beam enters and exits the shape.
+
+```c
+cpVect a = cpv(...), b = cpv(...);
+
+cpSegmentQueryInfo info = {};
+if(cpSpaceSegmentQueryFirst(space, a, b, -1, 0, &info)){
+  cpSegmentQueryInfo info2;
+  cpShapeSegmentQuery(info.shape, b, a, &info2);
+
+  cpVect enterPoint = cpSegmentQueryHitPoint(a, b, info);
+  cpVect exitPoint = cpSegmentQueryHitPoint(b, a, info2);
+}
+```
