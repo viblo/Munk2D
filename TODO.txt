@@ -1,4 +1,8 @@
-INFO: This TODO is not up to date
+INFO: This TODO is not up to date, and should be seen more as a collection of notes than a roadmap.
+
+Munk2D / the fork:
+	Update "namespace" to Munk2D?
+	Update documentation and Readme files to better reflect Munk2D
 
 Priorities:
 	Basics tutorial.
@@ -23,7 +27,6 @@ Unordered
 
 Website things
 	Don't make any mistakes: http://www.gamasutra.com/view/feature/185773/the_top_10_mistakes_tool_.php
-	Several people want a Chipmunk Facebook page.
 	figure out and redo front page.	Chipmunk js examples.
 
 Future things to think about:

@@ -130,10 +130,10 @@ typedef struct cpSpace cpSpace;
 
 #include "cpSpace.h"
 
-// Chipmunk 7.0.3
-#define CP_VERSION_MAJOR 7
+// Munk2D 8.0.0
+#define CP_VERSION_MAJOR 8
 #define CP_VERSION_MINOR 0
-#define CP_VERSION_RELEASE 3
+#define CP_VERSION_RELEASE 0
 
 /// Version string.
 CP_EXPORT extern const char *cpVersionString;

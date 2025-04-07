@@ -1,10 +1,19 @@
 # Changelog
 
-## UPCOMING 8.0 (Munk2D Fork):
+## 8.0.0 The first Munk2D release!
 
-_WIP for next release_
+This is the first release of Munk2D, the friendly Chipmunk2D fork!
 
-TODO Some info about the fork!
+The main purpose of this fork is to be a companion for the Python 2D physics
+library [Pymunk](https://www.pymunk.org) which is built on Chipmunk2D. Given the
+slow pace of development of Chipmunk2D, and some unique requirements and
+opportunities of Pymunk this is something that have grown over a long time.
+
+New in this release compared to latest stable Chipmunk is mainly a number of bug
+fixes together with documentation updates which became a requirement to have
+documentation of this fork.
+
+Changes:
 
 - API: Now possible to to override cpMessage by defining CP_OVERRIDE_MESSAGE
 - API: The maxForce property now have effect on DampedSpring and

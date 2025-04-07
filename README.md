@@ -12,8 +12,8 @@ creator of Chipmunk2D.
 
 I do not foresee that I have the time, motivation or skills to really revive
 Chipmunk2D. However, I hope to incorporate minor new features, and a bunch of
-fixes. Any changes are driven by what make sense from the Pymunk use case.
-However, I do think many of these changes are useful also to users outside
+fixes. The changes are mainly driven by what make sense from the Pymunk use
+case. However, I do think many of these changes are useful also to users outside
 Pymunk, and you are of course free to use the fork for other projects /
 languages as well.
 
@@ -40,7 +40,7 @@ licensed under the permissive MIT license. I hope you enjoy using Munk2D!
   than Chipmunk2D.
 - While Munk2D will not try to actively break features or targets, breakage is
   more likely than with Chipmunk2D. Testing of Munk2D will mainly happen through
-  Pymunk, parts not useful from Pymunk (e.g ObjectiveC support), will be
+  Pymunk, parts not useful from Pymunk (e.g. ObjectiveC support), will be
   untested and therefor likely to break over time.
 - While Munk2D is focused on Pymunk, I will happily accept PRs to fix or improve
   other parts of the code, or improvements to tests, documentation and so on.
