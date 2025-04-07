@@ -91,18 +91,11 @@ getImpulse(cpDampedSpring *spring)
 	return spring->jAcc;
 }
 
-static void
-resetAcc(cpDampedSpring *spring)
-{
-	spring->jAcc = 0.0f;
-}
-
 static const cpConstraintClass klass = {
 	(cpConstraintPreStepImpl)preStep,
 	(cpConstraintApplyCachedImpulseImpl)applyCachedImpulse,
 	(cpConstraintApplyImpulseImpl)applyImpulse,
 	(cpConstraintGetImpulseImpl)getImpulse,
-	(cpConstraintResetAccImpl)resetAcc,
 };
 
 cpDampedSpring *

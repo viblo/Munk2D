@@ -75,18 +75,11 @@ getImpulse(cpGearJoint *joint)
 	return cpfabs(joint->jAcc);
 }
 
-static void
-resetAcc(cpGearJoint *joint)
-{
-	joint->jAcc = 0.0f;
-}
-
 static const cpConstraintClass klass = {
 	(cpConstraintPreStepImpl)preStep,
 	(cpConstraintApplyCachedImpulseImpl)applyCachedImpulse,
 	(cpConstraintApplyImpulseImpl)applyImpulse,
 	(cpConstraintGetImpulseImpl)getImpulse,
-	(cpConstraintResetAccImpl)resetAcc,
 };
 
 cpGearJoint *

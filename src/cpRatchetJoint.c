@@ -95,18 +95,11 @@ getImpulse(cpRatchetJoint *joint)
 	return cpfabs(joint->jAcc);
 }
 
-static void
-resetAcc(cpRatchetJoint *joint)
-{
-	joint->jAcc = 0.0f;
-}
-
 static const cpConstraintClass klass = {
 	(cpConstraintPreStepImpl)preStep,
 	(cpConstraintApplyCachedImpulseImpl)applyCachedImpulse,
 	(cpConstraintApplyImpulseImpl)applyImpulse,
 	(cpConstraintGetImpulseImpl)getImpulse,
-	(cpConstraintResetAccImpl)resetAcc,
 };
 
 cpRatchetJoint *
