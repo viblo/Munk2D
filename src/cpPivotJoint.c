@@ -71,9 +71,9 @@ applyImpulse(cpPivotJoint *joint, cpFloat dt)
 }
 
 static cpFloat
-getImpulse(cpConstraint *joint)
+getImpulse(cpPivotJoint *joint)
 {
-	return cpvlength(((cpPivotJoint *)joint)->jAcc);
+	return cpvlength(joint->jAcc);
 }
 
 static const cpConstraintClass klass = {

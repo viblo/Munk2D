@@ -90,17 +90,16 @@ applyImpulse(cpSlideJoint *joint, cpFloat dt)
 }
 
 static cpFloat
-getImpulse(cpConstraint *joint)
+getImpulse(cpSlideJoint *joint)
 {
-	return cpfabs(((cpSlideJoint *)joint)->jnAcc);
+	return cpfabs(joint->jnAcc);
 }
 
 static const cpConstraintClass klass = {
 	(cpConstraintPreStepImpl)preStep,
 	(cpConstraintApplyCachedImpulseImpl)applyCachedImpulse,
 	(cpConstraintApplyImpulseImpl)applyImpulse,
-	(cpConstraintGetImpulseImpl)getImpulse,
-	(cpConstraintResetAccImpl)resetAcc,
+	(cpConstraintGetImpulseImpl)getImpulse
 };
 
 cpSlideJoint *

@@ -18,7 +18,6 @@ Changes:
 - API: Now possible to to override cpMessage by defining CP_OVERRIDE_MESSAGE
 - API: The maxForce property now have effect on DampedSpring and
   DampedRotarySpring
-- API: Reset velocity and constraint jAcc when body type changes to DYNAMIC
 - API: Add transform property to cpSpaceDebugDrawOptions
 - API: Use CGFloat as the float type if CP_USE_CGTYPES is set.
 - BUG: Fixed total impulse calculation of DampedRotarySpring
