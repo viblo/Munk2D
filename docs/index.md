@@ -31,7 +31,7 @@ out the [Chipmunk2D Pro](http://chipmunk-physics.net/chipmunkPro.php).
 You might want to start by looking at some
 [sample code](http://chipmunk-physics.net/downloads.php). From there, you
 probably want to skim over the latest
-[documentatio](http://files.slembcke.net/chipmunk/release/ChipmunkLatest-Docs/).
+[documentation](http://files.slembcke.net/chipmunk/release/ChipmunkLatest-Docs/).
 While geared towards C developers, it introduces all the important building
 blocks. The Objective-C API simply takes things to the next logical step.
 

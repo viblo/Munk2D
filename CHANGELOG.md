@@ -1,6 +1,6 @@
 # Changelog
 
-## 8.0.0 The first Munk2D release!
+## 1.0.0 The first Munk2D release!
 
 This is the first release of Munk2D, the friendly Chipmunk2D fork!
 
@@ -41,17 +41,19 @@ Changes:
 - DOC: Reworked the documentation to be easier to maintain
 - DOC: Unified license texts everywhere
 
-## 7.0.3
+## Chipmunk versions
+
+### 7.0.3
 
 - MISC: Replacing GLFW with Sokol in the demo application. No need to push GLFW
   binaries and has a nice x-platform renderer to build on.
 - MISC: Fixed some 'const' warnings for MSCV.
 
-## 7.0.2
+### 7.0.2
 
 - MISC: Merging pull requests. Build fixes and the like.
 
-## 7.0.1
+### 7.0.1
 
 - BUG: Remove references to M_PI sinces it's not actually part of C and causes
   problems with MSVC.
@@ -62,7 +64,7 @@ Changes:
 - BUG: cpPolyshapeNewRaw() was undefined.
 - BUG: Changing gravity will wake up all objects in a space.
 
-## 7.0.0
+### 7.0.0
 
 - All features from Chipmunk Pro are now free and open source! (threaded and
   NEON solver, autogeometry)
@@ -102,12 +104,12 @@ Changes:
 - MISC: cpPolyline structs are passed by reference instead of value. (I've
   regretted that decision for years!)
 
-## 6.2.2
+### 6.2.2
 
 - Fixed some issues on arm64.
 - PRO: Added a 64 bit NEON solver to use on arm64.
 
-## 6.2.1
+### 6.2.1
 
 - Added Android support to the CMake files. (Thanks Eric Wing!)
 - Added a MSVC 2012 project file. (Thanks Leonid Usov!)
@@ -116,7 +118,7 @@ Changes:
 - BUG: Fixed a crash issue with the ChipmunkTileCache and
   ChipmunkPointCloudSampler classes. (Pro only).
 
-## 6.2.0
+### 6.2.0
 
 - Collision detection now primarily uses the GJK and EPA algorithms instead of
   SAT. Internally this was a rather huge change. o_O
@@ -147,7 +149,7 @@ Changes:
 - MISC: Demo app now uses GLFW instead of GLUT, and has improved drawing and
   text rendering routines.
 
-## 6.1.5
+### 6.1.5
 
 - API: Added cpArbiter\*SurfaceVelocity() to allow for custom surface velocity
   calculation.
@@ -175,12 +177,12 @@ Changes:
 - MISC: [ChipmunkSpace addBounds:...] now returns a NSArray of the bounding
   segments. (Pro only)
 
-## 6.1.4
+### 6.1.4
 
 - MISC: Fixed a build script issue that was preventing the documentation from
   being generated.
 
-## 6.1.3
+### 6.1.3
 
 - BUG: Fixed a couple of very specific but fatal bugs that occur when sleeping
   is enabled and filtering collisions.
@@ -190,7 +192,7 @@ Changes:
   joints.
 - MISC: Added more functions to chipmunk_ffi.h
 
-## 6.1.2
+### 6.1.2
 
 - API: Added a cpArbiter.data pointer. Now you can tag collisions with custom
   persistent data.
@@ -219,12 +221,12 @@ Changes:
 - MISC: Updated Objective-Chipmunk build scripts to always use the latest iOS
   SDK.
 
-## 6.1.1
+### 6.1.1
 
 - API: Renamed the new block based iterators as soon as possible to match the
   Apple convention ("\_b" suffix).
 
-## 6.1.0
+### 6.1.0
 
 - API: Added a pthread based, multi-threaded solver to accelerate the game on
   multi-core systems. (Pro only)
@@ -259,7 +261,7 @@ Changes:
 - MISC: Added a new demos of the convex hull functions and a self balancing
   Unicycle.
 
-## 6.0.3
+### 6.0.3
 
 - API: Added a cpBBForCircle() convenience function.
 - API: Added cpBBSegmentQuery() to check where a segment hits a cpBB.
@@ -288,7 +290,7 @@ Changes:
 - MISC: All ChipmunkObject instances added to a space are now retained, even
   composite ones.
 
-## 6.0.2
+### 6.0.2
 
 - API: Added cpSpaceIsLocked() to check if you are in a callback or not.
 - API: Removed the long deprecated [ChipmunkSpace addShapeAHandler:] and
@@ -319,7 +321,7 @@ Changes:
 - MISC: Updated the MSVC10 project file.
 - MISC: Updated the FFI defs.
 
-## 6.0.1
+### 6.0.1
 
 - BUG: Calling cpBodySetPos() on a sleeping body was delaying the Separate()
   handler callback if one existed.
@@ -332,7 +334,7 @@ Changes:
   most recent) timestep.
 - MISC: Got rid of anonymous unions so that it is C99 clean again.
 
-## 6.0.0
+### 6.0.0
 
 Chipmunk 6.x's API is not quite 100% compatible with 5.x. Make sure you read the
 list of changes carefully. Keep in mind that this is a x.0.0 release and that
@@ -383,7 +385,7 @@ it's finally time for 6!
   provide much better performance for scenes with objects of differening size
   and works without any tuning for any scale.
 
-## 5.3.5
+### 5.3.5
 
 - FIX: Fixed spelling of cpArbiterGetDepth(). Was cpArbiteGetDepth() before.
   Apparently nobody ever used this function.
@@ -403,7 +405,7 @@ it's finally time for 6!
 - MISC: Added a benchmarking mode to the demo app. -trial runs it in time trial
   mode and -bench makes it run some benchmarking demos.
 
-## 5.3.4
+### 5.3.4
 
 - FIX: cpBodyActivate() can now be called from collision and query callbacks.
   This way you can use the setter functions to change properties without
@@ -415,7 +417,7 @@ it's finally time for 6!
   added as static shapes.
 - MISC: Applied a user patch to update the MSVC project and add a .def file.
 
-## 5.3.3
+### 5.3.3
 
 - API: Added cpArbiteGetCount() to return the number of contact points.
 - API: Added helper functions for calculating areas of Chipmunk shapes as well
@@ -439,7 +441,7 @@ it's finally time for 6!
   trying to do.
 - MISC: Allow CGPoints to be used as cpVect on Mac OS X as well as iOS.
 
-## 5.3.2
+### 5.3.2
 
 - FIX: Collision begin callbacks were being called continuously for sensors or
   collisions rejected from the pre-solve callback.
@@ -459,7 +461,7 @@ it's finally time for 6!
 - NEW: Added setter functions for the groove joint endpoints.
 - MISC: A number of other minor optimizations and fixes.
 
-## 5.3.1
+### 5.3.1
 
 - NEW: Added a brand new tutorial for Objective-Chipmunk:
   SimpleObjectiveChipmunk that can be found in the Objective-Chipmunk folder.
@@ -468,7 +470,7 @@ it's finally time for 6!
 - FIX: Fixed a rare memory crash in the sensor demo.
 - FIX: Fixed some warnings that users submitted.
 
-## 5.3.0
+### 5.3.0
 
 - FIX: Fixed the source so it can compile as C, C++, Objective-C, and
   Objective-C++.
@@ -488,7 +490,7 @@ it's finally time for 6!
 - NEW: New MSVC projects.
 - NEW: Added boolean and time stamp types for clarity.
 
-## 5.2.0
+### 5.2.0
 
 - OPTIMIZATION: Chipmunk structs used within the solver are now allocated
   linearly in large blocks. This is much more CPU cache friendly. Programs have
@@ -504,7 +506,7 @@ it's finally time for 6!
 - NEW: Added convenience functions for creating box shapes and calculating
   moments.
 
-## 5.1.0
+### 5.1.0
 
 - FIX: fixed a NaN issue that was causing raycasts for horizontal or vertical
   lines to end up in an infinite loop
@@ -523,7 +525,7 @@ it's finally time for 6!
 - NEW: Added an AABB query to complement point and segment queries
 - NEW: CP_NO_GROUP and CP_ALL_LAYERS constants
 
-## 5.0.0
+### 5.0.0
 
 - Brand new Joint/Constraint API: New constraints can be added easily and are
   much more flexible than the old joint system
