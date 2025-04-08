@@ -69,8 +69,8 @@ licensed under the permissive MIT license. I hope you enjoy using Munk2D!
 - Maintains a contact graph of all colliding objects.
 - Lightweight C99 implementation with no external dependencies outside the Std.
   C library.
-- "Many language bindings available":http://chipmunk2d.net/bindingsAndPorts.php.
-- Simple, read the "documentation":https://viblo.github.io/Munk2D/ and see!
+- Many language bindings available: http://chipmunk2d.net/bindingsAndPorts.php.
+- Simple, read the documentation: https://viblo.github.io/Munk2D/ and see!
 - Unrestrictive MIT license
 
 ## BUILDING
@@ -94,7 +94,7 @@ application. A number of people have had build errors on Ubuntu due to not
 having GLUT or libxmu installed.
 
 Windows: Visual Studio projects are included in the msvc/ directory. While I try
-to make sure the MSVC 10 project is up to date, I don't have MSVC 9 to keep that
+to make sure the MSVC 10 project is up-to-date, I don't have MSVC 9 to keep that
 project updated regularly. It may not work. I'd appreciate a hand fixing it if
 that's the case.
 
@@ -103,11 +103,11 @@ that's the case.
 If you got the source from a point release download, you might want to consider
 getting the latest source from GitHub. Bugs are fixed, and new features are
 added regularly. Big changes are done in branches and tested before merging them
-in it's rare for the point release downloads to be better or more bug free than
+in, it's rare for the point release downloads to be better or more bug free than
 the latest code.
 
-Head on over to "GitHub":https://github.com/viblo/Munk2D and experience the
-future TODAY! (Okay, so maybe it's not that exciting.)
+Head on over to https://github.com/viblo/Munk2D and experience the future TODAY!
+(Okay, so maybe it's not that exciting.)
 
 ## GETTING STARTED
 
@@ -126,11 +126,11 @@ undocumented/private APIs of Munk2D.
 There is a forum for Chipmunk2D at http://chipmunk2d.net/forum/ Unfortunately
 its very inactive nowadays, but much of the discussions are still relevant.
 
-The best way to get support is to visit the "Chipmunk
-Forums":http://chipmunk2d.net/forum/. There are plenty of people around using
-Chipmunk on the just about every platform I've ever heard of. If you are working
-on a commercial project and want some more direct help, Howling Moon Software is
-also available for "contracting":http://howlingmoonsoftware.com/.
+The best way to get support is to visit the Chipmunk Forums at
+http://chipmunk2d.net/forum/. There are plenty of people around using Chipmunk
+on the just about every platform I've ever heard of. If you are working on a
+commercial project and want some more direct help, Howling Moon Software is also
+available for contracting, http://howlingmoonsoftware.com/.
 
 ## CONTRACTING
 
