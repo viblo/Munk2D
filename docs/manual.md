@@ -140,7 +140,7 @@ int main(void){
   // We attach it to a static body to tell Chipmunk it shouldn't be movable.
   cpShape *ground = cpSegmentShapeNew(cpSpaceGetStaticBody(space), cpv(-20, 5), cpv(20, -5), 0);
   cpShapeSetFriction(ground, 1);
-    cpSpaceAddShape(space, ground);
+  cpSpaceAddShape(space, ground);
 
   // Now let's make a ball that falls onto the line and rolls off.
   // First we need to make a cpBody to hold the physical properties of the object.

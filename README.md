@@ -13,16 +13,11 @@ creator of Chipmunk2D.
 I do not foresee that I have the time, motivation or skills to really revive
 Chipmunk2D. However, I hope to incorporate minor new features, and a bunch of
 fixes. The changes are mainly driven by what make sense from the Pymunk use
-case. However, I do think many of these changes are useful also to users outside
+case. I do think many of these changes can be useful also to users outside
 Pymunk, and you are of course free to use the fork for other projects /
 languages as well.
 
-At the moment I don't have any formal release of this fork, but I plan to make
-some kind of rename and a release if/when enough changes are accumulated. Until
-a proper release is out I do not recommend usage of Munk2D, since I will force
-push file structure changes while I try to make the documentation ok!
-
-/Victor 2025-01-25
+/Victor 2025-04-08
 
 ## ABOUT
 

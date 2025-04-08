@@ -13,6 +13,9 @@ New in this release compared to latest stable Chipmunk is mainly a number of bug
 fixes together with documentation updates which became a requirement to have
 documentation of this fork.
 
+Note that especially the documentation is very much work in progress, but good
+enough to not hold back this release anymore.
+
 Changes:
 
 - API: Now possible to to override cpMessage by defining CP_OVERRIDE_MESSAGE
