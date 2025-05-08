@@ -174,10 +174,15 @@ cpArbiterTotalKE(const cpArbiter *arb)
 }
 
 cpBool
-cpArbiterIgnore(cpArbiter *arb)
+cpArbiterGetProcessCollision(const cpArbiter *arb)
 {
-	arb->state = CP_ARBITER_STATE_IGNORE;
-	return cpFalse;
+	return arb->state != CP_ARBITER_STATE_IGNORE;
+}
+
+void
+cpArbiterSetProcessCollision(cpArbiter *arb, cpBool processCollision)
+{
+	arb->state = processCollision ? CP_ARBITER_STATE_NORMAL : CP_ARBITER_STATE_IGNORE;
 }
 
 cpFloat
@@ -247,76 +252,9 @@ void cpArbiterGetBodies(const cpArbiter *arb, cpBody **a, cpBody **b)
 	(*b) = shape_b->body;
 }
 
-cpBool
-cpArbiterCallWildcardBeginA(cpArbiter *arb, cpSpace *space)
-{
-	cpCollisionHandler *handler = arb->handlerA;
-	return handler->beginFunc(arb, space, handler->userData);
-}
-
-cpBool
-cpArbiterCallWildcardBeginB(cpArbiter *arb, cpSpace *space)
-{
-	cpCollisionHandler *handler = arb->handlerB;
-	arb->swapped = !arb->swapped;
-	cpBool retval = handler->beginFunc(arb, space, handler->userData);
-	arb->swapped = !arb->swapped;
-	return retval;
-}
-
-cpBool
-cpArbiterCallWildcardPreSolveA(cpArbiter *arb, cpSpace *space)
-{
-	cpCollisionHandler *handler = arb->handlerA;
-	return handler->preSolveFunc(arb, space, handler->userData);
-}
-
-cpBool
-cpArbiterCallWildcardPreSolveB(cpArbiter *arb, cpSpace *space)
-{
-	cpCollisionHandler *handler = arb->handlerB;
-	arb->swapped = !arb->swapped;
-	cpBool retval = handler->preSolveFunc(arb, space, handler->userData);
-	arb->swapped = !arb->swapped;
-	return retval;
-}
-
-void
-cpArbiterCallWildcardPostSolveA(cpArbiter *arb, cpSpace *space)
-{
-	cpCollisionHandler *handler = arb->handlerA;
-	handler->postSolveFunc(arb, space, handler->userData);
-}
-
-void
-cpArbiterCallWildcardPostSolveB(cpArbiter *arb, cpSpace *space)
-{
-	cpCollisionHandler *handler = arb->handlerB;
-	arb->swapped = !arb->swapped;
-	handler->postSolveFunc(arb, space, handler->userData);
-	arb->swapped = !arb->swapped;
-}
-
-void
-cpArbiterCallWildcardSeparateA(cpArbiter *arb, cpSpace *space)
-{
-	cpCollisionHandler *handler = arb->handlerA;
-	handler->separateFunc(arb, space, handler->userData);
-}
-
-void
-cpArbiterCallWildcardSeparateB(cpArbiter *arb, cpSpace *space)
-{
-	cpCollisionHandler *handler = arb->handlerB;
-	arb->swapped = !arb->swapped;
-	handler->separateFunc(arb, space, handler->userData);
-	arb->swapped = !arb->swapped;
-}
-
 cpArbiter*
 cpArbiterInit(cpArbiter *arb, cpShape *a, cpShape *b)
 {
-	arb->handler = NULL;
 	arb->swapped = cpFalse;
 	
 	arb->handler = NULL;
@@ -347,11 +285,11 @@ cpArbiterInit(cpArbiter *arb, cpShape *a, cpShape *b)
 }
 
 static inline cpCollisionHandler *
-cpSpaceLookupHandler(cpSpace *space, cpCollisionType a, cpCollisionType b, cpCollisionHandler *defaultValue)
+cpSpaceLookupHandler(cpSpace *space, cpCollisionType a, cpCollisionType b)
 {
 	cpCollisionType types[] = {a, b};
 	cpCollisionHandler *handler = (cpCollisionHandler *)cpHashSetFind(space->collisionHandlers, CP_HASH_PAIR(a, b), types);
-	return (handler ? handler : defaultValue);
+	return (handler ? handler : &cpCollisionHandlerDoNothing);
 }
 
 void
@@ -398,18 +336,15 @@ cpArbiterUpdate(cpArbiter *arb, struct cpCollisionInfo *info, cpSpace *space)
 	arb->surface_vr = cpvsub(surface_vr, cpvmult(info->n, cpvdot(surface_vr, info->n)));
 	
 	cpCollisionType typeA = info->a->type, typeB = info->b->type;
-	cpCollisionHandler *defaultHandler = &space->defaultHandler;
-	cpCollisionHandler *handler = arb->handler = cpSpaceLookupHandler(space, typeA, typeB, defaultHandler);
+	cpCollisionHandler *handler = arb->handler = cpSpaceLookupHandler(space, typeA, typeB);
 	
 	// Check if the types match, but don't swap for a default handler which use the wildcard for type A.
 	cpBool swapped = arb->swapped = (typeA != handler->typeA && handler->typeA != CP_WILDCARD_COLLISION_TYPE);
 	
-	if(handler != defaultHandler || space->usesWildcards){
-		// The order of the main handler swaps the wildcard handlers too. Uffda.
-		arb->handlerA = cpSpaceLookupHandler(space, (swapped ? typeB : typeA), CP_WILDCARD_COLLISION_TYPE, &cpCollisionHandlerDoNothing);
-		arb->handlerB = cpSpaceLookupHandler(space, (swapped ? typeA : typeB), CP_WILDCARD_COLLISION_TYPE, &cpCollisionHandlerDoNothing);
-	}
-		
+	// The order of the main handler swaps the wildcard handlers too. Uffda.
+	arb->handlerA = cpSpaceLookupHandler(space, (swapped ? typeB : typeA), CP_WILDCARD_COLLISION_TYPE);
+	arb->handlerB = cpSpaceLookupHandler(space, (swapped ? typeA : typeB), CP_WILDCARD_COLLISION_TYPE);
+			
 	// mark it as new if it's been cached
 	if(arb->state == CP_ARBITER_STATE_CACHED) arb->state = CP_ARBITER_STATE_FIRST_COLLISION;
 }

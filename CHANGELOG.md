@@ -1,5 +1,13 @@
 # Changelog
 
+## Next
+
+Changes:
+
+- API:
+
+TODO: Describe changes in collision handlers.
+
 ## 1.0.0 The first Munk2D release!
 
 This is the first release of Munk2D, the friendly Chipmunk2D fork!

@@ -62,45 +62,11 @@ handlerSetTrans(cpCollisionHandler *handler, void *unused)
 //MARK: Misc Helper Funcs
 
 // Default collision functions.
-
-static cpBool
-DefaultBegin(cpArbiter *arb, cpSpace *space, cpDataPointer data){
-	cpBool retA = cpArbiterCallWildcardBeginA(arb, space);
-	cpBool retB = cpArbiterCallWildcardBeginB(arb, space);
-	return retA && retB;
-}
-
-static cpBool
-DefaultPreSolve(cpArbiter *arb, cpSpace *space, cpDataPointer data){
-	cpBool retA = cpArbiterCallWildcardPreSolveA(arb, space);
-	cpBool retB = cpArbiterCallWildcardPreSolveB(arb, space);
-	return retA && retB;
-}
-
-static void
-DefaultPostSolve(cpArbiter *arb, cpSpace *space, cpDataPointer data){
-	cpArbiterCallWildcardPostSolveA(arb, space);
-	cpArbiterCallWildcardPostSolveB(arb, space);
-}
-
-static void
-DefaultSeparate(cpArbiter *arb, cpSpace *space, cpDataPointer data){
-	cpArbiterCallWildcardSeparateA(arb, space);
-	cpArbiterCallWildcardSeparateB(arb, space);
-}
-
-// Use the wildcard identifier since  the default handler should never match any type pair.
-static cpCollisionHandler cpCollisionHandlerDefault = {
-	CP_WILDCARD_COLLISION_TYPE, CP_WILDCARD_COLLISION_TYPE,
-	DefaultBegin, DefaultPreSolve, DefaultPostSolve, DefaultSeparate, NULL
-};
-
-static cpBool AlwaysCollide(cpArbiter *arb, cpSpace *space, cpDataPointer data){return cpTrue;}
 static void DoNothing(cpArbiter *arb, cpSpace *space, cpDataPointer data){}
-
+// Use the wildcard identifier since the global handler should never match any type pair.
 cpCollisionHandler cpCollisionHandlerDoNothing = {
 	CP_WILDCARD_COLLISION_TYPE, CP_WILDCARD_COLLISION_TYPE,
-	AlwaysCollide, AlwaysCollide, DoNothing, DoNothing, NULL
+	DoNothing, DoNothing, DoNothing, DoNothing, NULL
 };
 
 // function to get the estimated velocity of a shape for the cpBBTree.
@@ -164,8 +130,7 @@ cpSpaceInit(cpSpace *space)
 	
 	space->constraints = cpArrayNew(0);
 	
-	space->usesWildcards = cpFalse;
-	memcpy(&space->defaultHandler, &cpCollisionHandlerDoNothing, sizeof(cpCollisionHandler));
+	memcpy(&space->globalHandler, &cpCollisionHandlerDoNothing, sizeof(cpCollisionHandler));
 	space->collisionHandlers = cpHashSetNew(0, (cpHashSetEqlFunc)handlerSetEql);
 	
 	space->postStepCallbacks = cpArrayNew(0);
@@ -380,36 +345,24 @@ cpSpaceIsLocked(cpSpace *space)
 
 //MARK: Collision Handler Function Management
 
-static void
-cpSpaceUseWildcardDefaultHandler(cpSpace *space)
-{
-	// Spaces default to using the slightly faster "do nothing" default handler until wildcards are potentially needed.
-	if(!space->usesWildcards){
-		space->usesWildcards = cpTrue;
-		memcpy(&space->defaultHandler, &cpCollisionHandlerDefault, sizeof(cpCollisionHandler));
-	}
-}
 
-cpCollisionHandler *cpSpaceAddDefaultCollisionHandler(cpSpace *space)
+cpCollisionHandler *cpSpaceAddGlobalCollisionHandler(cpSpace *space)
 {
-	cpSpaceUseWildcardDefaultHandler(space);
-	return &space->defaultHandler;
+	return &space->globalHandler;
 }
 
 cpCollisionHandler *cpSpaceAddCollisionHandler(cpSpace *space, cpCollisionType a, cpCollisionType b)
 {
 	cpHashValue hash = CP_HASH_PAIR(a, b);
-	cpCollisionHandler handler = {a, b, DefaultBegin, DefaultPreSolve, DefaultPostSolve, DefaultSeparate, NULL};
+	cpCollisionHandler handler = {a, b, DoNothing, DoNothing, DoNothing, DoNothing, NULL};
 	return (cpCollisionHandler*)cpHashSetInsert(space->collisionHandlers, hash, &handler, (cpHashSetTransFunc)handlerSetTrans, NULL);
 }
 
 cpCollisionHandler *
 cpSpaceAddWildcardHandler(cpSpace *space, cpCollisionType type)
-{
-	cpSpaceUseWildcardDefaultHandler(space);
-	
+{	
 	cpHashValue hash = CP_HASH_PAIR(type, CP_WILDCARD_COLLISION_TYPE);
-	cpCollisionHandler handler = {type, CP_WILDCARD_COLLISION_TYPE, AlwaysCollide, AlwaysCollide, DoNothing, DoNothing, NULL};
+	cpCollisionHandler handler = {type, CP_WILDCARD_COLLISION_TYPE, DoNothing, DoNothing, DoNothing, DoNothing, NULL};
 	return (cpCollisionHandler*)cpHashSetInsert(space->collisionHandlers, hash, &handler, (cpHashSetTransFunc)handlerSetTrans, NULL);
 }
 

@@ -26,12 +26,11 @@
 //MARK: Definitions
 
 /// Collision begin event function callback type.
-/// Returning false from a begin callback causes the collision to be ignored until
-/// the the separate callback is called when the objects stop colliding.
-typedef cpBool (*cpCollisionBeginFunc)(cpArbiter *arb, cpSpace *space, cpDataPointer userData);
+/// You can call cpArbiterSetProcessCollision to disable collision processing
+typedef void (*cpCollisionBeginFunc)(cpArbiter *arb, cpSpace *space, cpDataPointer userData);
 /// Collision pre-solve event function callback type.
-/// Returning false from a pre-step callback causes the collision to be ignored until the next step.
-typedef cpBool (*cpCollisionPreSolveFunc)(cpArbiter *arb, cpSpace *space, cpDataPointer userData);
+/// You can call cpArbiterSetProcessCollision to disable collision processing
+typedef void (*cpCollisionPreSolveFunc)(cpArbiter *arb, cpSpace *space, cpDataPointer userData);
 /// Collision post-solve event function callback type.
 typedef void (*cpCollisionPostSolveFunc)(cpArbiter *arb, cpSpace *space, cpDataPointer userData);
 /// Collision separate event function callback type.
@@ -142,10 +141,9 @@ CP_EXPORT cpBool cpSpaceIsLocked(cpSpace *space);
 
 //MARK: Collision Handlers
 
-/// Create or return the existing collision handler that is called for all collisions that are not handled by a more specific collision handler.
-CP_EXPORT cpCollisionHandler *cpSpaceAddDefaultCollisionHandler(cpSpace *space);
+/// Create or return the existing collision handler that is called for all collisions
+CP_EXPORT cpCollisionHandler *cpSpaceAddGlobalCollisionHandler(cpSpace *space);
 /// Create or return the existing collision handler for the specified pair of collision types.
-/// If wildcard handlers are used with either of the collision types, it's the responibility of the custom handler to invoke the wildcard handlers.
 CP_EXPORT cpCollisionHandler *cpSpaceAddCollisionHandler(cpSpace *space, cpCollisionType a, cpCollisionType b);
 /// Create or return the existing wildcard collision handler for the specified type.
 CP_EXPORT cpCollisionHandler *cpSpaceAddWildcardHandler(cpSpace *space, cpCollisionType type);
