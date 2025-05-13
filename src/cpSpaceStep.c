@@ -252,28 +252,45 @@ cpSpaceCollideShapes(cpShape *a, cpShape *b, cpCollisionID id, cpSpace *space)
 	cpArbiter *arb = (cpArbiter *)cpHashSetInsert(space->cachedArbiters, arbHashID, shape_pair, (cpHashSetTransFunc)cpSpaceArbiterSetTrans, space);
 	cpArbiterUpdate(arb, &info, space);
 	
-	cpCollisionHandler *handler = arb->handler;
-	cpCollisionHandler *handlerA = arb->handlerA;
-	cpCollisionHandler *handlerB = arb->handlerB;
-	cpCollisionHandler *handlerGlobal = &space->globalHandler;
+	const cpCollisionHandler *handlers [] = { arb->handlerAB, arb->handlerBA, arb->handlerA, arb->handlerB, &space->globalHandler};
+
+	// cpCollisionHandler *handler = arb->handler;
+	// cpCollisionHandler *handlerA = arb->handlerA;
+	// cpCollisionHandler *handlerB = arb->handlerB;
+	// cpCollisionHandler *handlerGlobal = &space->globalHandler;
 	
 	// Call the begin function first if it's the first step
 	if(arb->state == CP_ARBITER_STATE_FIRST_COLLISION) {
-		handler->beginFunc(arb, space, handler->userData);
-		handlerA->beginFunc(arb, space, handlerA->userData);
-		arb->swapped = !arb->swapped;
-		handlerB->beginFunc(arb, space, handlerB->userData);
-		arb->swapped = !arb->swapped;
-		handlerGlobal->beginFunc(arb, space, handlerGlobal->userData);
+		for (int i=0; i<5; i++) {
+			if (i%2 == 0) {
+				handlers[i]->beginFunc(arb, space, handlers[i]->userData);	
+			}
+			else {
+				arb->swapped = !arb->swapped;
+				handlers[i]->beginFunc(arb, space, handlers[i]->userData);	
+				arb->swapped = !arb->swapped;
+			}
+			
+		}
+
+		// handler->beginFunc(arb, space, handler->userData);
+		// handlerA->beginFunc(arb, space, handlerA->userData);
+		// arb->swapped = !arb->swapped;
+		// handlerB->beginFunc(arb, space, handlerB->userData);
+		// arb->swapped = !arb->swapped;
+		// handlerGlobal->beginFunc(arb, space, handlerGlobal->userData);
 	}
 
+	for (int i=0; i<5; i++){
+		handlers[i]->preSolveFunc(arb, space, handlers[i]->userData);	
+	}
 	// Call the preSolve function
-	handler->preSolveFunc(arb, space, handler->userData);
-	handlerA->preSolveFunc(arb, space, handlerA->userData);
-	arb->swapped = !arb->swapped;
-	handlerB->preSolveFunc(arb, space, handlerB->userData);
-	arb->swapped = !arb->swapped;
-	handlerGlobal->preSolveFunc(arb, space, handlerGlobal->userData);
+	// handler->preSolveFunc(arb, space, handler->userData);
+	// handlerA->preSolveFunc(arb, space, handlerA->userData);
+	// arb->swapped = !arb->swapped;
+	// handlerB->preSolveFunc(arb, space, handlerB->userData);
+	// arb->swapped = !arb->swapped;
+	// handlerGlobal->preSolveFunc(arb, space, handlerGlobal->userData);
 	if(
 		// Ignore the arbiter if it has been flagged from the begin or preSolve funcs.
 		(arb->state != CP_ARBITER_STATE_IGNORE) &&
@@ -321,16 +338,20 @@ cpSpaceArbiterSetFilter(cpArbiter *arb, cpSpace *space)
 	// Arbiter was used last frame, but not this one
 	if(ticks >= 1 && arb->state != CP_ARBITER_STATE_CACHED){
 		arb->state = CP_ARBITER_STATE_CACHED;
-		cpCollisionHandler *handler = arb->handler;
-		cpCollisionHandler *handlerA = arb->handlerA;
-		cpCollisionHandler *handlerB = arb->handlerB;
-		cpCollisionHandler *handlerGlobal = &space->globalHandler;
-		handler->separateFunc(arb, space, handler->userData);
-		handlerA->separateFunc(arb, space, handlerA->userData);
-		arb->swapped = !arb->swapped;
-		handlerB->separateFunc(arb, space, handlerB->userData);
-		arb->swapped = !arb->swapped;
-		handlerGlobal->separateFunc(arb, space, handlerGlobal->userData);
+		const cpCollisionHandler *handlers [] = { arb->handlerAB, arb->handlerBA, arb->handlerA, arb->handlerB, &space->globalHandler};
+		for (int i=0; i<5; i++){
+			handlers[i]->separateFunc(arb, space, handlers[i]->userData);	
+		}
+		// cpCollisionHandler *handler = arb->handler;
+		// cpCollisionHandler *handlerA = arb->handlerA;
+		// cpCollisionHandler *handlerB = arb->handlerB;
+		// cpCollisionHandler *handlerGlobal = &space->globalHandler;
+		// handler->separateFunc(arb, space, handler->userData);
+		// handlerA->separateFunc(arb, space, handlerA->userData);
+		// arb->swapped = !arb->swapped;
+		// handlerB->separateFunc(arb, space, handlerB->userData);
+		// arb->swapped = !arb->swapped;
+		// handlerGlobal->separateFunc(arb, space, handlerGlobal->userData);
 	}
 	
 	if(ticks >= space->collisionPersistence){
@@ -457,17 +478,21 @@ cpSpaceStep(cpSpace *space, cpFloat dt)
 		// run the post-solve callbacks
 		for(int i=0; i<arbiters->num; i++){
 			cpArbiter *arb = (cpArbiter *) arbiters->arr[i];
-			
-			cpCollisionHandler *handler = arb->handler;
-			cpCollisionHandler *handlerA = arb->handlerA;
-			cpCollisionHandler *handlerB = arb->handlerB;
-			cpCollisionHandler *handlerGlobal = &space->globalHandler;
-			handler->postSolveFunc(arb, space, handler->userData);
-			handlerA->postSolveFunc(arb, space, handlerA->userData);
-			arb->swapped = !arb->swapped;
-			handlerB->postSolveFunc(arb, space, handlerB->userData);
-			arb->swapped = !arb->swapped;
-			handlerGlobal->postSolveFunc(arb, space, handlerGlobal->userData);
+			arb->state = CP_ARBITER_STATE_CACHED;
+			const cpCollisionHandler *handlers [] = { arb->handlerAB, arb->handlerBA, arb->handlerA, arb->handlerB, &space->globalHandler};
+			for (int i=0; i<5; i++){
+				handlers[i]->postSolveFunc(arb, space, handlers[i]->userData);	
+			}
+			// cpCollisionHandler *handler = arb->handler;
+			// cpCollisionHandler *handlerA = arb->handlerA;
+			// cpCollisionHandler *handlerB = arb->handlerB;
+			// cpCollisionHandler *handlerGlobal = &space->globalHandler;
+			// handler->postSolveFunc(arb, space, handler->userData);
+			// handlerA->postSolveFunc(arb, space, handlerA->userData);
+			// arb->swapped = !arb->swapped;
+			// handlerB->postSolveFunc(arb, space, handlerB->userData);
+			// arb->swapped = !arb->swapped;
+			// handlerGlobal->postSolveFunc(arb, space, handlerGlobal->userData);
 		}
 	} cpSpaceUnlock(space, cpTrue);
 }

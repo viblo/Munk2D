@@ -716,8 +716,10 @@ cpHastySpaceStep(cpSpace *space, cpFloat dt)
 		for(int i=0; i<arbiters->num; i++){
 			cpArbiter *arb = (cpArbiter *) arbiters->arr[i];
 			
-			cpCollisionHandler *handler = arb->handler;
-			handler->postSolveFunc(arb, space, handler->userData);
+			const cpCollisionHandler *handlers [] = { arb->handlerAB, arb->handlerBA, arb->handlerA, arb->handlerB, &space->globalHandler};
+			for (int i=0; i<5; i++){
+				handlers[i]->separateFunc(arb, space, handlers[i]->userData);	
+			}
 		}
 	} cpSpaceUnlock(space, cpTrue);
 }

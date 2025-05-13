@@ -137,8 +137,8 @@ struct cpArbiter {
 	struct cpContact *contacts;
 	cpVect n;
 	
-	// Regular, wildcard A and wildcard B collision handlers.
-	cpCollisionHandler *handler, *handlerA, *handlerB;
+	// CollisionHandlers.
+	cpCollisionHandler *handlerAB, *handlerBA, *handlerA, *handlerB;
 	cpBool swapped;
 	
 	cpTimestamp stamp;

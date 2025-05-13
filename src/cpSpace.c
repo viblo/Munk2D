@@ -44,8 +44,8 @@ static cpBool
 handlerSetEql(cpCollisionHandler *check, cpCollisionHandler *pair)
 {
 	return (
-		(check->typeA == pair->typeA && check->typeB == pair->typeB) ||
-		(check->typeB == pair->typeA && check->typeA == pair->typeB)
+		(check->typeA == pair->typeA && check->typeB == pair->typeB)// ||
+		//(check->typeB == pair->typeA && check->typeA == pair->typeB)
 	);
 }
 
@@ -345,7 +345,6 @@ cpSpaceIsLocked(cpSpace *space)
 
 //MARK: Collision Handler Function Management
 
-
 cpCollisionHandler *cpSpaceAddGlobalCollisionHandler(cpSpace *space)
 {
 	return &space->globalHandler;
@@ -353,7 +352,11 @@ cpCollisionHandler *cpSpaceAddGlobalCollisionHandler(cpSpace *space)
 
 cpCollisionHandler *cpSpaceAddCollisionHandler(cpSpace *space, cpCollisionType a, cpCollisionType b)
 {
-	cpHashValue hash = CP_HASH_PAIR(a, b);
+	if (a == b && a == CP_WILDCARD_COLLISION_TYPE){
+		return &space->globalHandler;
+	}
+
+	cpHashValue hash = CP_HASH_PAIR_ORDERED(a, b);
 	cpCollisionHandler handler = {a, b, DoNothing, DoNothing, DoNothing, DoNothing, NULL};
 	return (cpCollisionHandler*)cpHashSetInsert(space->collisionHandlers, hash, &handler, (cpHashSetTransFunc)handlerSetTrans, NULL);
 }
@@ -361,7 +364,7 @@ cpCollisionHandler *cpSpaceAddCollisionHandler(cpSpace *space, cpCollisionType a
 cpCollisionHandler *
 cpSpaceAddWildcardHandler(cpSpace *space, cpCollisionType type)
 {	
-	cpHashValue hash = CP_HASH_PAIR(type, CP_WILDCARD_COLLISION_TYPE);
+	cpHashValue hash = CP_HASH_PAIR_ORDERED(type, CP_WILDCARD_COLLISION_TYPE);
 	cpCollisionHandler handler = {type, CP_WILDCARD_COLLISION_TYPE, DoNothing, DoNothing, DoNothing, DoNothing, NULL};
 	return (cpCollisionHandler*)cpHashSetInsert(space->collisionHandlers, hash, &handler, (cpHashSetTransFunc)handlerSetTrans, NULL);
 }
@@ -449,9 +452,11 @@ cachedArbitersFilter(cpArbiter *arb, struct arbiterFilterContext *context)
 		if(shape && arb->state != CP_ARBITER_STATE_CACHED){
 			// Invalidate the arbiter since one of the shapes was removed.
 			arb->state = CP_ARBITER_STATE_INVALIDATED;
-			
-			cpCollisionHandler *handler = arb->handler;
-			handler->separateFunc(arb, context->space, handler->userData);
+
+			const cpCollisionHandler *handlers [] = { arb->handlerAB, arb->handlerBA, arb->handlerA, arb->handlerB, &context->space->globalHandler};
+			for (int i=0; i<5; i++){
+				handlers[i]->separateFunc(arb, context->space, handlers[i]->userData);	
+			}
 		}
 		
 		cpArbiterUnthread(arb);

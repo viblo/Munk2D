@@ -26,8 +26,13 @@
 #include "chipmunk/chipmunk.h"
 #include "chipmunk/chipmunk_structs.h"
 
-#define CP_HASH_COEF (3344921057ul)
-#define CP_HASH_PAIR(A, B) ((cpHashValue)(A)*CP_HASH_COEF ^ (cpHashValue)(B)*CP_HASH_COEF)
+
+#define CP_HASH_COEF_A (3344921057ul)
+#define CP_HASH_COEF_B (1566083941ul)
+// Hash to single value. CP_HASH_PAIR(A, B) == CP_HASH_PAIR(B, A)
+#define CP_HASH_PAIR(A, B) ((cpHashValue)(A)*CP_HASH_COEF_A ^ (cpHashValue)(B)*CP_HASH_COEF_A)
+// Hash to single value. CP_HASH_PAIR(A, B) != CP_HASH_PAIR(B, A)
+#define CP_HASH_PAIR_ORDERED(A, B) ((cpHashValue)(A)*CP_HASH_COEF_A ^ (cpHashValue)(B)*CP_HASH_COEF_B)
 
 // TODO: Eww. Magic numbers.
 #define MAGIC_EPSILON 1e-5

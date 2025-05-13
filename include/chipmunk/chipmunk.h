@@ -51,6 +51,7 @@ extern "C" {
 #endif
 
 CP_EXPORT void cpMessage(const char *condition, const char *file, int line, int isError, int isHardError, const char *message, ...);
+//#define DBGMSG(...) cpMessage("xxx", __FILE__, __LINE__, 0, 0, __VA_ARGS__)
 #ifdef NDEBUG
 	#define	cpAssertWarn(__condition__, ...)
 	#define	cpAssertSoft(__condition__, ...)
