@@ -4,7 +4,9 @@
 
 Changes:
 
-- API:
+- API: Sensor shapes are now included in all cpSpaceQuery functions
+  (cpSpacePointQuery, cpSpacePointQueryNearest, cpSpaceSegmentQuery,
+  cpSpaceSegmentQueryFirst, cpSpaceBBQuery, cpSpaceShapeQuery)
 
 TODO: Describe changes in collision handlers.
 

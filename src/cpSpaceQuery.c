@@ -62,7 +62,7 @@ static cpCollisionID
 NearestPointQueryNearest(struct PointQueryContext *context, cpShape *shape, cpCollisionID id, cpPointQueryInfo *out)
 {
 	if(
-		!cpShapeFilterReject(shape->filter, context->filter) && !shape->sensor
+		!cpShapeFilterReject(shape->filter, context->filter)
 	){
 		cpPointQueryInfo info;
 		cpShapePointQuery(shape, context->point, &info);
@@ -143,7 +143,7 @@ SegmentQueryFirst(struct SegmentQueryContext *context, cpShape *shape, cpSegment
 	cpSegmentQueryInfo info;
 	
 	if(
-		!cpShapeFilterReject(shape->filter, context->filter) && !shape->sensor &&
+		!cpShapeFilterReject(shape->filter, context->filter) && 
 		cpShapeSegmentQuery(shape, context->start, context->end, context->radius, &info) &&
 		info.alpha < out->alpha
 	){
