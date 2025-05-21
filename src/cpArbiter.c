@@ -176,13 +176,13 @@ cpArbiterTotalKE(const cpArbiter *arb)
 cpBool
 cpArbiterGetProcessCollision(const cpArbiter *arb)
 {
-	return arb->state != CP_ARBITER_STATE_IGNORE;
+	return arb->processCollision;
 }
 
 void
 cpArbiterSetProcessCollision(cpArbiter *arb, cpBool processCollision)
 {
-	arb->state = processCollision ? CP_ARBITER_STATE_NORMAL : CP_ARBITER_STATE_IGNORE;
+	arb->processCollision = processCollision;
 }
 
 cpFloat
@@ -279,7 +279,8 @@ cpArbiterInit(cpArbiter *arb, cpShape *a, cpShape *b)
 	
 	arb->stamp = 0;
 	arb->state = CP_ARBITER_STATE_FIRST_COLLISION;
-	
+	arb->processCollision = cpTrue;
+
 	arb->data = NULL;
 	
 	return arb;
@@ -359,9 +360,12 @@ cpArbiterUpdate(cpArbiter *arb, struct cpCollisionInfo *info, cpSpace *space)
 	// The order of the main handler swaps the wildcard handlers too. Uffda.
 	//arb->handlerA = cpSpaceLookupHandler(space, (swapped ? typeB : typeA), CP_WILDCARD_COLLISION_TYPE);
 	//arb->handlerB = cpSpaceLookupHandler(space, (swapped ? typeA : typeB), CP_WILDCARD_COLLISION_TYPE);
-			
+	
 	// mark it as new if it's been cached
-	if(arb->state == CP_ARBITER_STATE_CACHED) arb->state = CP_ARBITER_STATE_FIRST_COLLISION;
+	if(arb->state == CP_ARBITER_STATE_CACHED) {
+		arb->state = CP_ARBITER_STATE_FIRST_COLLISION;
+		arb->processCollision = cpTrue;
+	}
 }
 
 void

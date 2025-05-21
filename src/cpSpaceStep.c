@@ -268,6 +268,7 @@ cpSpaceCollideShapes(cpShape *a, cpShape *b, cpCollisionID id, cpSpace *space)
 		}
 	}
 
+	// Call the preSolve function
 	for (int i=0; i<5; i++){
 		if (i%2 == 0) {
 			handlers[i]->preSolveFunc(arb, space, handlers[i]->userData);	
@@ -278,10 +279,11 @@ cpSpaceCollideShapes(cpShape *a, cpShape *b, cpCollisionID id, cpSpace *space)
 			arb->swapped = !arb->swapped;
 		}
 	}
-	// Call the preSolve function
 	if(
 		// Ignore the arbiter if it has been flagged from the begin or preSolve funcs.
 		(arb->state != CP_ARBITER_STATE_IGNORE) &&
+		// Ignore the arbiter if it has been flagged from the begin or preSolve functions.
+		(arb->processCollision) &&
 		// Process, but don't add collisions for sensors.
 		!(a->sensor || b->sensor) &&
 		// Don't process collisions between two infinite mass bodies.
