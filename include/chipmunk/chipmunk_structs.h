@@ -87,7 +87,6 @@ enum cpArbiterState {
 	// Arbiter is active and its not the first collision.
 	CP_ARBITER_STATE_NORMAL,
 	// Collision has been explicitly ignored.
-	// Can be set/unset from begin or preStep callback functions.
 	CP_ARBITER_STATE_IGNORE,
 	// Collison is no longer active. A space will cache an arbiter for up to cpSpace.collisionPersistence more steps.
 	CP_ARBITER_STATE_CACHED,

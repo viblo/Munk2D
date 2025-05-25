@@ -3,12 +3,12 @@ file(GLOB chipmunk_public_header "${chipmunk_SOURCE_DIR}/include/chipmunk/*.h")
 
 include_directories(${chipmunk_SOURCE_DIR}/include)
 
-# Chipmunk2D 7.0.3
-set(CHIPMUNK_VERSION_MAJOR 7)
-set(CHIPMUNK_VERSION_MINOR 0)
-set(CHIPMUNK_VERSION_PATCH 3)
-set(CHIPMUNK_VERSION "${CHIPMUNK_VERSION_MAJOR}.${CHIPMUNK_VERSION_MINOR}.${CHIPMUNK_VERSION_PATCH}")
-message("Configuring Chipmunk2D version ${CHIPMUNK_VERSION}")
+# Munk2D 2.0.0
+set(MUNK2D_VERSION_MAJOR 2)
+set(MUNK2D_VERSION_MINOR 0)
+set(MUNK2D_VERSION_PATCH 0)
+set(MUNK2D_VERSION "${MUNK2D_VERSION_MAJOR}.${MUNK2D_VERSION_MINOR}.${MUNK2D_VERSION_PATCH}")
+message("Configuring Munk2D version ${MUNK2D_VERSION}")
 
 
 if(BUILD_SHARED)
@@ -24,8 +24,8 @@ if(BUILD_SHARED)
   # But avoid on Android because symlinks to version numbered .so's don't work with Android's Java-side loadLibrary.
   if(NOT ANDROID)
     set_target_properties(chipmunk PROPERTIES
-      SOVERSION ${CHIPMUNK_VERSION_MAJOR}
-      VERSION ${CHIPMUNK_VERSION})
+      SOVERSION ${MUNK2D_VERSION_MAJOR}
+      VERSION ${MUNK2D_VERSION})
   endif(NOT ANDROID)
   if(ANDROID OR UNIX)
 	  # need to explicitly link to the math library because the CMake/Android toolchains may not do it automatically

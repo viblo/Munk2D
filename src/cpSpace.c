@@ -44,8 +44,7 @@ static cpBool
 handlerSetEql(cpCollisionHandler *check, cpCollisionHandler *pair)
 {
 	return (
-		(check->typeA == pair->typeA && check->typeB == pair->typeB)// ||
-		//(check->typeB == pair->typeA && check->typeA == pair->typeB)
+		(check->typeA == pair->typeA && check->typeB == pair->typeB)//
 	);
 }
 

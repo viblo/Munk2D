@@ -2,13 +2,25 @@
 
 ## Next
 
+This is the second release of Munk2D, the friendly Chipmunk2D fork!
+
+This release maps to Pymunk 7.0, and contains breaking changes compared to 1.0
+and the latest Chipmunk2D version.
+
 Changes:
 
 - API: Sensor shapes are now included in all cpSpaceQuery functions
   (cpSpacePointQuery, cpSpacePointQueryNearest, cpSpaceSegmentQuery,
   cpSpaceSegmentQueryFirst, cpSpaceBBQuery, cpSpaceShapeQuery)
-
-TODO: Describe changes in collision handlers.
+- API: CollisionHandler for A,B is not distinct from B,A.
+- API: begin, preSolve and separate collision callbacks will always be called
+- API: Removed cpArbiterIgnore.
+- API: Added new cpArbiterGetProcessCollision/cpArbiterSetProcessCollision that
+  can be used to ignore a collision from collision callbacks.
+- API: The ProcessCollision value is not reset on each step even if set from a
+  preSolve callback.
+- API: The ordering of CollisionHandler callbacks is that the most specific
+  callback is invoked first.
 
 ## 1.0.0 The first Munk2D release!
 

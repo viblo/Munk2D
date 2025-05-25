@@ -65,7 +65,6 @@ CP_EXPORT cpBool cpArbiterGetProcessCollision(const cpArbiter *arb);
 /// Setting this to false from a begin callback causes the collision to be ignored until
 /// the the separate callback is called when the objects stop colliding. 
 /// Returning false from a pre-step callback causes the collision to be ignored until the next step.
-/// It should not be called from post-solve or separate callbacks.
 CP_EXPORT void cpArbiterSetProcessCollision(cpArbiter *arb, cpBool processCollision);
 
 
