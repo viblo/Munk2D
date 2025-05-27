@@ -1,6 +1,6 @@
 # Changelog
 
-## Next
+## 2.0.0
 
 This is the second release of Munk2D, the friendly Chipmunk2D fork!
 

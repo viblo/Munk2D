@@ -34,9 +34,10 @@ licensed under the permissive MIT license. I hope you enjoy using Munk2D!
 - Munk2D will try to avoid API breaking changes, but ultimately be less strict
   than Chipmunk2D.
 - While Munk2D will not try to actively break features or targets, breakage is
-  more likely than with Chipmunk2D. Testing of Munk2D will mainly happen through
-  Pymunk, parts not useful from Pymunk (e.g. ObjectiveC support), will be
-  untested and therefor likely to break over time.
+  more likely than with Chipmunk2D.
+- Testing of Munk2D will mainly happen through Pymunk, parts not useful from
+  Pymunk (e.g. ObjectiveC support), will be untested and therefor likely to
+  break over time.
 - While Munk2D is focused on Pymunk, I will happily accept PRs to fix or improve
   other parts of the code, or improvements to tests, documentation and so on.
 
