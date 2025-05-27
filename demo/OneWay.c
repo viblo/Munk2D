@@ -33,17 +33,15 @@ typedef struct OneWayPlatform {
 
 static OneWayPlatform platformInstance;
 
-static cpBool
+static void
 PreSolve(cpArbiter *arb, cpSpace *space, void *ignore)
 {
 	CP_ARBITER_GET_SHAPES(arb, a, b);
 	OneWayPlatform *platform = (OneWayPlatform *)cpShapeGetUserData(a);
 		
 	if(cpvdot(cpArbiterGetNormal(arb), platform->n) < 0){
-		return cpArbiterIgnore(arb);
+		cpArbiterSetProcessCollision(arb, cpFalse);
 	}
-	
-	return cpTrue;
 }
 
 static void

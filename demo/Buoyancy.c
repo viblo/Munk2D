@@ -43,7 +43,7 @@ k_scalar_body(cpBody *body, cpVect point, cpVect n)
 	return 1.0f/cpBodyGetMass(body) + rcn*rcn/cpBodyGetMoment(body);
 }
 
-static cpBool
+static void
 waterPreSolve(cpArbiter *arb, cpSpace *space, void *ptr)
 {
 	CP_ARBITER_GET_SHAPES(arb, water, poly);
@@ -108,8 +108,6 @@ waterPreSolve(cpArbiter *arb, cpSpace *space, void *ptr)
 	cpVect cog = cpBodyLocalToWorld(body, cpBodyGetCenterOfGravity(body));
 	cpFloat w_damping = cpMomentForPoly(FLUID_DRAG*FLUID_DENSITY*clippedArea, clippedCount, clipped, cpvneg(cog), 0.0f);
 	cpBodySetAngularVelocity(body, cpBodyGetAngularVelocity(body)*cpfexp(-w_damping*dt/cpBodyGetMoment(body)));
-	
-	return cpTrue;
 }
 
 static cpSpace *

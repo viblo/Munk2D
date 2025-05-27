@@ -83,7 +83,7 @@ StickyPreSolve(cpArbiter *arb, cpSpace *space, void *data)
 	// Position correction and velocity are handled separately so changing
 	// the overlap distance alone won't prevent the collision from occuring.
 	// Explicitly the collision for this frame if the shapes don't overlap using the new distance.
-	return (deepest <= 0.0f);
+	cpArbiterSetProcessCollision(arb, deepest <= 0.0f);
 	
 	// Lots more that you could improve upon here as well:
 	// * Modify the joint over time to make it plastic.
