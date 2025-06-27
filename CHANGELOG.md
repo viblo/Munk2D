@@ -1,5 +1,12 @@
 # Changelog
 
+## NEXT RELEASE (2.0.1?)
+
+Changes:
+
+- BUG: The wildcard CollisionHandler will be invoked twice when two shapes of
+  same type collides (one time in swapped order).
+
 ## 2.0.0
 
 This is the second release of Munk2D, the friendly Chipmunk2D fork!
@@ -12,7 +19,7 @@ Changes:
 - API: Sensor shapes are now included in all cpSpaceQuery functions
   (cpSpacePointQuery, cpSpacePointQueryNearest, cpSpaceSegmentQuery,
   cpSpaceSegmentQueryFirst, cpSpaceBBQuery, cpSpaceShapeQuery)
-- API: CollisionHandler for A,B is not distinct from B,A.
+- API: CollisionHandler for A,B is distinct from B,A.
 - API: begin, preSolve and separate collision callbacks will always be called
 - API: Removed cpArbiterIgnore.
 - API: Added new cpArbiterGetProcessCollision/cpArbiterSetProcessCollision that
