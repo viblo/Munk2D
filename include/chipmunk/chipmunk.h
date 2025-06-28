@@ -134,7 +134,7 @@ typedef struct cpSpace cpSpace;
 // Munk2D 2.0.0
 #define CP_VERSION_MAJOR 2
 #define CP_VERSION_MINOR 0
-#define CP_VERSION_RELEASE 0
+#define CP_VERSION_RELEASE 1
 
 /// Version string.
 CP_EXPORT extern const char *cpVersionString;
