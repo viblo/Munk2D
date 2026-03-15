@@ -27,6 +27,42 @@
 
 static inline cpSpatialIndexClass *Klass(void);
 
+// Growable node stack for iterative tree traversal.
+// Starts with a stack-allocated array of CP_BBTREE_STACK_INIT_SIZE entries.
+// If more space is needed, switches to a heap-allocated buffer that doubles in size.
+// This handles arbitrarily deep (degenerate/unbalanced) trees without stack overflow.
+#define CP_BBTREE_STACK_INIT_SIZE 64
+
+#include "string.h"
+
+#define CP_STACK_INIT(name) \
+	Node *name##_local[CP_BBTREE_STACK_INIT_SIZE]; \
+	Node **name = name##_local; \
+	int name##_top = 0; \
+	int name##_cap = CP_BBTREE_STACK_INIT_SIZE;
+
+#define CP_STACK_PUSH(name, val) do { \
+	if(name##_top >= name##_cap){ \
+		int new_cap = name##_cap * 2; \
+		if(name == name##_local){ \
+			name = (Node **)cpcalloc(new_cap, sizeof(Node *)); \
+			memcpy(name, name##_local, name##_cap * sizeof(Node *)); \
+		} else { \
+			name = (Node **)cprealloc(name, new_cap * sizeof(Node *)); \
+		} \
+		name##_cap = new_cap; \
+	} \
+	name[name##_top++] = (val); \
+} while(0)
+
+#define CP_STACK_POP(name) (name[--name##_top])
+
+#define CP_STACK_NOTEMPTY(name) (name##_top > 0)
+
+#define CP_STACK_FREE(name) do { \
+	if(name != name##_local) cpfree(name); \
+} while(0)
+
 typedef struct Node Node;
 typedef struct Pair Pair;
 
@@ -331,21 +367,40 @@ SubtreeInsert(Node *subtree, Node *leaf, cpBBTree *tree)
 	} else if(NodeIsLeaf(subtree)){
 		return NodeNew(tree, leaf, subtree);
 	} else {
-		cpFloat cost_a = cpBBArea(subtree->B->bb) + cpBBMergedArea(subtree->A->bb, leaf->bb);
-		cpFloat cost_b = cpBBArea(subtree->A->bb) + cpBBMergedArea(subtree->B->bb, leaf->bb);
-		
-		if(cost_a == cost_b){
-			cost_a = cpBBProximity(subtree->A->bb, leaf->bb);
-			cost_b = cpBBProximity(subtree->B->bb, leaf->bb);
+		// Walk down the tree iteratively to find the leaf to pair with.
+		Node *node = subtree;
+		while(!NodeIsLeaf(node)){
+			cpFloat cost_a = cpBBArea(node->B->bb) + cpBBMergedArea(node->A->bb, leaf->bb);
+			cpFloat cost_b = cpBBArea(node->A->bb) + cpBBMergedArea(node->B->bb, leaf->bb);
+			
+			if(cost_a == cost_b){
+				cost_a = cpBBProximity(node->A->bb, leaf->bb);
+				cost_b = cpBBProximity(node->B->bb, leaf->bb);
+			}
+			
+			if(cost_b < cost_a){
+				node = node->B;
+			} else {
+				node = node->A;
+			}
 		}
 		
-		if(cost_b < cost_a){
-			NodeSetB(subtree, SubtreeInsert(subtree->B, leaf, tree));
+		// node is now a leaf. Create a new internal node joining it with the new leaf.
+		Node *parent = node->parent;
+		Node *newNode = NodeNew(tree, leaf, node);
+		
+		// Attach the new node to the parent in place of the old leaf.
+		if(parent->A == node){
+			NodeSetA(parent, newNode);
 		} else {
-			NodeSetA(subtree, SubtreeInsert(subtree->A, leaf, tree));
+			NodeSetB(parent, newNode);
 		}
 		
-		subtree->bb = cpBBMerge(subtree->bb, leaf->bb);
+		// Walk back up using parent pointers and update bounding boxes.
+		for(Node *n = parent; n; n = n->parent){
+			n->bb = cpBBMerge(n->bb, leaf->bb);
+		}
+		
 		return subtree;
 	}
 }
@@ -353,46 +408,76 @@ SubtreeInsert(Node *subtree, Node *leaf, cpBBTree *tree)
 static void
 SubtreeQuery(Node *subtree, void *obj, cpBB bb, cpSpatialIndexQueryFunc func, void *data)
 {
-	if(cpBBIntersects(subtree->bb, bb)){
-		if(NodeIsLeaf(subtree)){
-			func(obj, subtree->obj, 0, data);
-		} else {
-			SubtreeQuery(subtree->A, obj, bb, func, data);
-			SubtreeQuery(subtree->B, obj, bb, func, data);
+	CP_STACK_INIT(stack);
+	
+	CP_STACK_PUSH(stack, subtree);
+	
+	while(CP_STACK_NOTEMPTY(stack)){
+		Node *node = CP_STACK_POP(stack);
+		if(cpBBIntersects(node->bb, bb)){
+			if(NodeIsLeaf(node)){
+				func(obj, node->obj, 0, data);
+			} else {
+				// Push B first, then A, so that A is processed first (LIFO order)
+				// to maintain the same traversal order as the original recursive version.
+				CP_STACK_PUSH(stack, node->B);
+				CP_STACK_PUSH(stack, node->A);
+			}
 		}
 	}
+	
+	CP_STACK_FREE(stack);
 }
 
 
 static cpFloat
 SubtreeSegmentQuery(Node *subtree, void *obj, cpVect a, cpVect b, cpFloat t_exit, cpSpatialIndexSegmentQueryFunc func, void *data)
 {
-	if(NodeIsLeaf(subtree)){
-		return func(obj, subtree->obj, data);
-	} else {
-		cpFloat t_a = cpBBSegmentQuery(subtree->A->bb, a, b);
-		cpFloat t_b = cpBBSegmentQuery(subtree->B->bb, a, b);
-		
-		if(t_a < t_b){
-			if(t_a < t_exit) t_exit = cpfmin(t_exit, SubtreeSegmentQuery(subtree->A, obj, a, b, t_exit, func, data));
-			if(t_b < t_exit) t_exit = cpfmin(t_exit, SubtreeSegmentQuery(subtree->B, obj, a, b, t_exit, func, data));
+	CP_STACK_INIT(stack);
+	
+	CP_STACK_PUSH(stack, subtree);
+	
+	while(CP_STACK_NOTEMPTY(stack)){
+		Node *node = CP_STACK_POP(stack);
+		if(NodeIsLeaf(node)){
+			t_exit = cpfmin(t_exit, func(obj, node->obj, data));
 		} else {
-			if(t_b < t_exit) t_exit = cpfmin(t_exit, SubtreeSegmentQuery(subtree->B, obj, a, b, t_exit, func, data));
-			if(t_a < t_exit) t_exit = cpfmin(t_exit, SubtreeSegmentQuery(subtree->A, obj, a, b, t_exit, func, data));
+			cpFloat t_a = cpBBSegmentQuery(node->A->bb, a, b);
+			cpFloat t_b = cpBBSegmentQuery(node->B->bb, a, b);
+			
+			// Push the farther child first so the nearer child is processed first (LIFO).
+			// This maximizes early pruning via t_exit.
+			if(t_a < t_b){
+				if(t_b < t_exit) CP_STACK_PUSH(stack, node->B);
+				if(t_a < t_exit) CP_STACK_PUSH(stack, node->A);
+			} else {
+				if(t_a < t_exit) CP_STACK_PUSH(stack, node->A);
+				if(t_b < t_exit) CP_STACK_PUSH(stack, node->B);
+			}
 		}
-		
-		return t_exit;
 	}
+	
+	CP_STACK_FREE(stack);
+	return t_exit;
 }
 
 static void
 SubtreeRecycle(cpBBTree *tree, Node *node)
 {
-	if(!NodeIsLeaf(node)){
-		SubtreeRecycle(tree, node->A);
-		SubtreeRecycle(tree, node->B);
-		NodeRecycle(tree, node);
+	CP_STACK_INIT(stack);
+	
+	CP_STACK_PUSH(stack, node);
+	
+	while(CP_STACK_NOTEMPTY(stack)){
+		Node *current = CP_STACK_POP(stack);
+		if(!NodeIsLeaf(current)){
+			CP_STACK_PUSH(stack, current->B);
+			CP_STACK_PUSH(stack, current->A);
+			NodeRecycle(tree, current);
+		}
 	}
+	
+	CP_STACK_FREE(stack);
 }
 
 static inline Node *
@@ -426,19 +511,28 @@ typedef struct MarkContext {
 static void
 MarkLeafQuery(Node *subtree, Node *leaf, cpBool left, MarkContext *context)
 {
-	if(cpBBIntersects(leaf->bb, subtree->bb)){
-		if(NodeIsLeaf(subtree)){
-			if(left){
-				PairInsert(leaf, subtree, context->tree);
+	CP_STACK_INIT(stack);
+	
+	CP_STACK_PUSH(stack, subtree);
+	
+	while(CP_STACK_NOTEMPTY(stack)){
+		Node *node = CP_STACK_POP(stack);
+		if(cpBBIntersects(leaf->bb, node->bb)){
+			if(NodeIsLeaf(node)){
+				if(left){
+					PairInsert(leaf, node, context->tree);
+				} else {
+					if(node->STAMP < leaf->STAMP) PairInsert(node, leaf, context->tree);
+					context->func(leaf->obj, node->obj, 0, context->data);
+				}
 			} else {
-				if(subtree->STAMP < leaf->STAMP) PairInsert(subtree, leaf, context->tree);
-				context->func(leaf->obj, subtree->obj, 0, context->data);
+				CP_STACK_PUSH(stack, node->B);
+				CP_STACK_PUSH(stack, node->A);
 			}
-		} else {
-			MarkLeafQuery(subtree->A, leaf, left, context);
-			MarkLeafQuery(subtree->B, leaf, left, context);
 		}
 	}
+	
+	CP_STACK_FREE(stack);
 }
 
 static void
@@ -472,12 +566,21 @@ MarkLeaf(Node *leaf, MarkContext *context)
 static void
 MarkSubtree(Node *subtree, MarkContext *context)
 {
-	if(NodeIsLeaf(subtree)){
-		MarkLeaf(subtree, context);
-	} else {
-		MarkSubtree(subtree->A, context);
-		MarkSubtree(subtree->B, context); // TODO: Force TCO here?
+	CP_STACK_INIT(stack);
+	
+	CP_STACK_PUSH(stack, subtree);
+	
+	while(CP_STACK_NOTEMPTY(stack)){
+		Node *node = CP_STACK_POP(stack);
+		if(NodeIsLeaf(node)){
+			MarkLeaf(node, context);
+		} else {
+			CP_STACK_PUSH(stack, node->B);
+			CP_STACK_PUSH(stack, node->A);
+		}
 	}
+	
+	CP_STACK_FREE(stack);
 }
 
 //MARK: Leaf Functions
