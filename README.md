@@ -89,6 +89,17 @@ This will require you to have CMake installed. To build run 'cmake .' then
 application. A number of people have had build errors on Ubuntu due to not
 having GLUT or libxmu installed.
 
+To build and run the portable C test suite without the demos, use:
+
+```sh
+cmake -B build -S . -DBUILD_DEMOS=OFF -DBUILD_TESTING=ON
+cmake --build build
+ctest --test-dir build --output-on-failure
+```
+
+The current CI pipeline uses this path and runs the tests on Linux, Windows and
+macOS while still building the demos to catch compile issues there too.
+
 Windows: Visual Studio projects are included in the msvc/ directory. While I try
 to make sure the MSVC 10 project is up-to-date, I don't have MSVC 9 to keep that
 project updated regularly. It may not work. I'd appreciate a hand fixing it if
