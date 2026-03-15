@@ -37,6 +37,8 @@ else()
   option(INSTALL_STATIC "Install the static library" ON)
 endif()
 
+include(CTest)
+
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
   option(FORCE_CLANG_BLOCKS "Force enable Clang blocks" YES)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-nan-infinity-disabled")
@@ -52,6 +54,10 @@ if(BUILD_DEMOS OR INSTALL_STATIC)
   set(BUILD_STATIC ON FORCE)
 endif()
 
+if(BUILD_TESTING)
+  set(BUILD_STATIC ON FORCE)
+endif()
+
 if(NOT MSVC)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99") # always use gnu99
   if(FORCE_CLANG_BLOCKS)
@@ -62,6 +68,10 @@ if(NOT MSVC)
 endif()
 
 add_subdirectory(src)
+
+if(BUILD_TESTING)
+  add_subdirectory(tests)
+endif()
 
 if(BUILD_DEMOS)
   add_subdirectory(demo)
