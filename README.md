@@ -1,6 +1,6 @@
 # Munk2D
 
-![Munk2D logo](assets/branding/logos/Munk2D%20logo.svg)
+<img src="assets/branding/logos/Munk2D%20logo.svg" alt="Munk2D logo" width="336" />
 
 ## FORK INFO
 

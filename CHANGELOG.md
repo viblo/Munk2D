@@ -9,6 +9,8 @@ Changes:
 - TEST: Add a first portable CMake/CTest-based C test executable.
 - CI: Run the portable C test suite in the GitHub Actions build matrix.
 - DOC: Document how to build and run the portable test suite with CMake/CTest.
+- DOC: Add Munk2D logo and icon branding assets, and use the logo/favicon in the
+  README and generated docs.
 
 ## 2.0.1
 
