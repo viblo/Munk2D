@@ -51,7 +51,7 @@ PROJECT_BRIEF          =
 # pixels and the maximum width should not exceed 200 pixels. Doxygen will copy
 # the logo to the output directory.
 
-PROJECT_LOGO           =
+PROJECT_LOGO           = "../assets/branding/logos/Munk2D logo.svg"
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) path
 # into which the generated documentation will be written. If a relative path is
@@ -1257,7 +1257,13 @@ HTML_EXTRA_STYLESHEET  = doxygen-awesome-css/2.3.4/doxygen-awesome.css \
 # files will be copied as-is; there are no commands or markers available.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_FILES       = doxygen-awesome-css/2.3.4/doxygen-awesome-darkmode-toggle.js
+HTML_EXTRA_FILES       = doxygen-awesome-css/2.3.4/doxygen-awesome-darkmode-toggle.js \
+                         ../assets/branding/favicons/browser/apple-touch-icon.png \
+                         ../assets/branding/favicons/browser/favicon-16x16.png \
+                         ../assets/branding/favicons/browser/favicon-32x32.png \
+                         ../assets/branding/favicons/browser/favicon.ico \
+                         ../assets/branding/favicons/browser/android-chrome-192x192.png \
+                         ../assets/branding/favicons/browser/android-chrome-512x512.png
 
 # The HTML_COLORSTYLE_HUE tag controls the color of the HTML output. Doxygen
 # will adjust the colors in the style sheet and background images according to

@@ -3,6 +3,8 @@ name: Build documentation
 on:
   push:
     branches: master
+  pull_request:
+    branches: master
 
 jobs:
   build:
@@ -31,6 +33,7 @@ jobs:
 
   deploy:
     needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'viblo/Munk2D'
     permissions:
       pages: write # to deploy to Pages
       id-token: write # to verify the deployment originates from an appropriate source
