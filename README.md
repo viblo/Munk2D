@@ -1,5 +1,7 @@
 # Munk2D
 
+![Munk2D logo](assets/branding/logos/Munk2D%20logo.svg)
+
 ## FORK INFO
 
 The main purpose of this fork is to be a companion for the Python 2D physics
