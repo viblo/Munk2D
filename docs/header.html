@@ -48,6 +48,71 @@
       async
       src="//gc.zgo.at/count.js"
     ></script>
+    <style type="text/css">
+      #titlearea table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      #titlearea tbody,
+      #titlearea tr {
+        display: flex;
+        align-items: center;
+        width: 100%;
+      }
+
+      #projectalign {
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+
+      #projectsearch {
+        flex: 0 0 auto;
+        padding-left: 1rem;
+      }
+
+      @media screen and (max-width: 767px) {
+        #titlearea tbody,
+        #titlearea tr {
+          flex-wrap: wrap;
+          align-items: flex-start;
+        }
+
+        #projectsearch {
+          width: 100%;
+          padding-left: 0;
+          padding-top: 0.75rem;
+        }
+
+        #projectsearch #MSearchBox {
+          width: 100%;
+        }
+
+        #projectsearch #MSearchField {
+          width: calc(100% - 64px);
+        }
+      }
+
+      @media screen and (min-width: 768px) {
+        html {
+          --side-nav-fixed-width: 380px;
+          --top-height: 150px;
+        }
+
+        #top {
+          overflow: visible;
+        }
+
+        #titlearea {
+          padding-top: calc(var(--searchbar-height) + var(--spacing-large) + 8px);
+        }
+
+        #projectname {
+          white-space: normal;
+          line-height: 1.2;
+        }
+      }
+    </style>
   </head>
   <body>
     <div id="top">
@@ -85,7 +150,7 @@
               <!--END !PROJECT_NAME-->
               <!--BEGIN DISABLE_INDEX-->
               <!--BEGIN SEARCHENGINE-->
-              <td>$searchbox</td>
+              <td id="projectsearch">$searchbox</td>
               <!--END SEARCHENGINE-->
               <!--END DISABLE_INDEX-->
             </tr>
