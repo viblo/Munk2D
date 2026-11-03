@@ -26,7 +26,9 @@ Write-Host 'PASS parser, NaN/zero/infinity/duplicate/protocol guards, median and
 & powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File (Join-Path $Package 'Run.ps1') -Mode CI -OutputDirectory $Results
 if ($LASTEXITCODE -ne 0) { throw 'End-to-end native Windows runner failed.' }
 $meta=Get-Content (Join-Path $Results 'metadata.json') -Raw | ConvertFrom-Json
-$rows=@(Get-Content (Join-Path $Results 'timing-pairs.json') -Raw | ConvertFrom-Json)
-$valid=@(Get-Content (Join-Path $Results 'validation.json') -Raw | ConvertFrom-Json)
-if ($meta.Status -ne 'PASS' -or $rows.Count -ne 24 -or $valid.Count -ne 4 -or -not (Test-Path ($Results+'.zip'))) { throw 'Wrong self-test output shape.' }
+# Windows PowerShell 5.1 emits a JSON root array as ONE pipeline object.
+# Assign directly rather than wrapping that pipeline in an extra @(...).
+$rows=Get-Content (Join-Path $Results 'timing-pairs.json') -Raw | ConvertFrom-Json
+$valid=Get-Content (Join-Path $Results 'validation.json') -Raw | ConvertFrom-Json
+if ($meta.Status -ne 'PASS' -or $rows.Count -ne 24 -or $valid.Count -ne 4 -or -not (Test-Path ($Results+'.zip'))) { throw "Wrong self-test output: status=$($meta.Status), rows=$($rows.Count), validations=$($valid.Count), zip=$(Test-Path ($Results+'.zip'))." }
 Write-Host 'PASS native Windows end-to-end self-test: all 26-scene exact checks plus paired CSV/control pipeline.'
