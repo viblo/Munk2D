@@ -18,10 +18,17 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Report compiler target defaults
+        run: cc -Q --help=target | grep -E 'march=|mtune=|mfma '
+
       - name: Configure CMake
+        # Match the portable baseline used by the runtime-guard job rather
+        # than inheriting a newer runner compiler's default x86 ISA/FMA.
         run: >
           cmake -B ${{ github.workspace }}/build-munkbench
           -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          -DCMAKE_C_FLAGS="-march=x86-64 -mtune=generic"
+          -DCMAKE_CXX_FLAGS="-march=x86-64 -mtune=generic"
           -DBUILD_DEMOS=OFF
           -DBUILD_TESTING=ON
           -DBUILD_BENCHMARKS=ON
@@ -510,6 +517,7 @@ jobs:
           - os: ubuntu-latest
             c_compiler: gcc
             cpp_compiler: g++
+            baseline_flags: -march=x86-64 -mtune=generic
           - os: ubuntu-latest
             c_compiler: clang
             cpp_compiler: clang++
@@ -554,6 +562,8 @@ jobs:
           cmake -B ${{ steps.strings.outputs.build-output-dir }}
           -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_C_COMPILER=${{
           matrix.c_compiler }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DCMAKE_C_FLAGS="${{ matrix.baseline_flags || '' }}"
+          -DCMAKE_CXX_FLAGS="${{ matrix.baseline_flags || '' }}"
           -DBUILD_TESTING=ON -S ${{ github.workspace }}
 
       - name: Build
