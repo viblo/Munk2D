@@ -89,6 +89,7 @@ foreach ($r in $refs) {
 }
 [IO.File]::WriteAllText((Join-Path $Out 'dependencies.txt'),$dependencies,$Utf8)
 foreach ($file in @('Run.cmd','Run.ps1','README.txt')) { Copy-Item -LiteralPath (Join-Path $Tools $file) -Destination $Package }
+Copy-Item -LiteralPath (Join-Path $Root 'baseline/LICENSE.txt') -Destination (Join-Path $Package 'LICENSE.txt')
 $manifest=[ordered]@{
     kit='Munk2D PR #15 Windows x64 AVX2 comparison'; baseline=$refs[0].Ref; candidate=$refs[1].Ref;
     compiler=(Get-Item $cl).VersionInfo.FileVersion; generator='Visual Studio 17 2022 / x64'; configuration='Release / default LTO ON / static library / static CRT (/MT)';
