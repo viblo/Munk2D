@@ -12,6 +12,19 @@ $Invariant = [Globalization.CultureInfo]::InvariantCulture
 $Utf8 = New-Object Text.UTF8Encoding($false)
 $script:ActiveProcess = $null
 
+# Do not depend on the optional Get-FileHash command/module being available.
+function Get-FileSha256([string]$Path) {
+    $stream = $null
+    $algorithm = $null
+    try {
+        $stream = [IO.File]::OpenRead($Path)
+        $algorithm = [Security.Cryptography.SHA256]::Create()
+        return ([BitConverter]::ToString($algorithm.ComputeHash($stream))).Replace('-','').ToLowerInvariant()
+    } finally {
+        if ($algorithm -ne $null) { $algorithm.Dispose() }
+        if ($stream -ne $null) { $stream.Dispose() }
+    }
+}
 function Save-Text([string]$Path, [string]$Text) {
     [IO.File]::WriteAllText($Path, $Text, $Utf8)
 }
@@ -113,7 +126,7 @@ try {
     $metadata.Source = $manifest
     foreach ($item in $manifest.executables) {
         $file = Join-Path $Package $item.name
-        $hash = (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLowerInvariant()
+        $hash = Get-FileSha256 $file
         if ($hash -cne $item.sha256) { throw "Executable checksum mismatch: $($item.name). Re-extract the original package." }
         $metadata.Executables += [pscustomobject]@{ Name=$item.name; SHA256=$hash }
     }
@@ -227,7 +240,7 @@ try {
     $metadata['EndedUtc']=[DateTime]::UtcNow.ToString('o')
     Save-Json (Join-Path $OutputDirectory 'metadata.json') $metadata
     foreach ($item in $metadata.Executables) {
-        try { if ((Get-FileHash -LiteralPath (Join-Path $Package $item.Name) -Algorithm SHA256).Hash.ToLowerInvariant() -cne $item.SHA256) { throw 'Executable changed while testing.' } } catch { $metadata.Status='FAIL'; $exitCode=1; Save-Text (Join-Path $OutputDirectory 'HASH-ERROR.txt') ($_.Exception.ToString()) }
+        try { if ((Get-FileSha256 (Join-Path $Package $item.Name)) -cne $item.SHA256) { throw 'Executable changed while testing.' } } catch { $metadata.Status='FAIL'; $exitCode=1; Save-Text (Join-Path $OutputDirectory 'HASH-ERROR.txt') ($_.Exception.ToString()) }
     }
     Save-Json (Join-Path $OutputDirectory 'metadata.json') $metadata
     Compress-Archive -Path (Join-Path $OutputDirectory '*') -DestinationPath ($OutputDirectory + '.zip') -CompressionLevel Optimal
