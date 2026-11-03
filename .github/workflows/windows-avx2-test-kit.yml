@@ -1,0 +1,50 @@
+name: Build native Windows AVX2 comparison kit
+
+on:
+  push:
+    branches: [build/windows-avx2-test-kit]
+    paths:
+      - .github/workflows/windows-avx2-test-kit.yml
+      - packaging/windows-avx2-test-kit/**
+
+permissions:
+  contents: read
+
+jobs:
+  windows-kit:
+    runs-on: windows-2022
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: 3d2070976911b7e4b659a5365b0313f99dc98788
+          path: baseline
+      - uses: actions/checkout@v4
+        with:
+          ref: 5784f8f48728e4fdd71638f0dc11aa26fa07f8ce
+          path: candidate
+      - name: Build both pinned engines, verify native binaries and package
+        shell: pwsh
+        run: ./packaging/windows-avx2-test-kit/Build.ps1
+      - name: Upload verified two-executable package
+        uses: actions/upload-artifact@v4
+        with:
+          name: munk2d-avx2-windows-x64
+          path: out/munk2d-avx2-windows-x64.zip
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload build and runner verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-avx2-kit-verification
+          path: |
+            out/*.log
+            out/dependencies.txt
+            out/self-test/
+            out/self-test.zip
+            build-baseline/Testing/Temporary/LastTest.log
+            build-candidate/Testing/Temporary/LastTest.log
+          if-no-files-found: warn
+          retention-days: 14
