@@ -1,0 +1,91 @@
+name: Build Linux Mint AVX2 comparison kit
+
+on:
+  push:
+    branches: [build/linux-avx2-test-kit]
+    paths:
+      - .github/workflows/linux-avx2-test-kit.yml
+      - packaging/linux-avx2-test-kit/**
+
+permissions:
+  contents: read
+
+jobs:
+  linux-kit:
+    runs-on: ubuntu-22.04
+    container: ubuntu:20.04
+    timeout-minutes: 30
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      LC_ALL: C
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Install build-host tools only
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends build-essential cmake git python3 binutils file ca-certificates
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: 3d2070976911b7e4b659a5365b0313f99dc98788
+          path: baseline
+      - uses: actions/checkout@v4
+        with:
+          ref: 5784f8f48728e4fdd71638f0dc11aa26fa07f8ce
+          path: candidate
+      - name: Build pinned engines and verify the complete runner
+        shell: bash
+        run: bash packaging/linux-avx2-test-kit/build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: munk2d-avx2-linux-x86_64
+          path: |
+            out/munk2d-avx2-linux-x86_64.tar.gz
+            out/package.sha256
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: linux-kit-verification-focal
+          path: |
+            out/*.log
+            out/abi-verification.txt
+            out/self-test/
+            out/self-test.tar.gz
+          if-no-files-found: warn
+          retention-days: 14
+
+  mint22-runtime-compatibility:
+    needs: linux-kit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: munk2d-avx2-linux-x86_64
+          path: download
+      - name: Verify prebuilt package on the Mint 22 base OS without rebuilding
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir runtime
+          tar -xzf download/munk2d-avx2-linux-x86_64.tar.gz -C runtime
+          python3 runtime/munk2d-avx2-linux-x86_64/run.py --mode ci --warmup-seconds 1 --output "$GITHUB_WORKSPACE/compat-results"
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('compat-results')
+          assert json.loads((p/'metadata.json').read_text())['Status']=='PASS'
+          assert len(json.loads((p/'timing-pairs.json').read_text()))==24
+          print('PASS unchanged prebuilt binaries and runner on Ubuntu 24.04 / Mint 22 base')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: linux-kit-verification-noble
+          path: |
+            compat-results/
+            compat-results.tar.gz
+          if-no-files-found: warn
+          retention-days: 14
