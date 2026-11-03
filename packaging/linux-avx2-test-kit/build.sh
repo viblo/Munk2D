@@ -16,7 +16,8 @@ for i in 0 1; do
   cmake -S "$source" -B "$build" -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_DEMOS=OFF -DBUILD_SHARED=OFF -DBUILD_STATIC=ON -DBUILD_TESTING=ON \
     -DBUILD_BENCHMARKS=ON -DMUNK2D_ENABLE_LTO=ON \
-    '-DCMAKE_C_FLAGS=-march=x86-64 -mtune=generic' '-DCMAKE_CXX_FLAGS=-march=x86-64 -mtune=generic'
+    '-DCMAKE_C_FLAGS=-march=x86-64 -mtune=generic -pthread' '-DCMAKE_CXX_FLAGS=-march=x86-64 -mtune=generic -pthread' \
+    '-DCMAKE_EXE_LINKER_FLAGS=-pthread'
   cmake --build "$build" --parallel 2
   (cd "$build" && ctest --output-on-failure) | tee "$out/tests-$label.log"
   cp "$build/benchmarks/munkbench" "$package/munkbench-$label"
@@ -45,7 +46,7 @@ for label in ('baseline','candidate'):
 assert (root/'baseline/benchmarks/munkbench.c').read_bytes()==(root/'candidate/benchmarks/munkbench.c').read_bytes()
 manifest={'kit':'Munk2D PR #15 native Linux x86-64 comparison','baseline':'3d2070976911b7e4b659a5365b0313f99dc98788','candidate':'5784f8f48728e4fdd71638f0dc11aa26fa07f8ce',
  'compiler':subprocess.check_output(['cc','--version'],universal_newlines=True).splitlines()[0],'buildOS':Path('/etc/os-release').read_text(),
- 'configuration':'Release/O3/default LTO ON, static chipmunk, system glibc/libm; baseline -march=x86-64 -mtune=generic, AVX2 only in its existing TU',
+ 'configuration':'Release/O3/default LTO ON, static chipmunk, system glibc/libm/pthread; -march=x86-64 -mtune=generic -pthread, AVX2 only in its existing TU',
  'timer':'Unmodified MunkBench clock(): Linux process CPU time inside complete physics stepping; setup/cleanup excluded',
  'benchmarkSHA256':hashlib.sha256((root/'baseline/benchmarks/munkbench.c').read_bytes()).hexdigest(),
  'buildRun':'https://github.com/'+os.environ.get('GITHUB_REPOSITORY','vibloteket/munk2d')+'/actions/runs/'+os.environ.get('GITHUB_RUN_ID','local'),

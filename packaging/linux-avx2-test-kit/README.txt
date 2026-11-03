@@ -21,7 +21,7 @@ Windows package or an ARM binary. AVX2 CPU/OS support is checked by the engine;
 unsupported machines fail with diagnostics, rather than forcing AVX2 execution.
 
 The two executables use the same native GCC build/settings, static Chipmunk and
-only standard Mint system libraries (glibc/libm; exact dependencies in manifest).
+only standard Mint system libraries (glibc/libm/pthread; see the manifest).
 They are built against Ubuntu 20.04's older glibc ABI, with required GLIBC symbols
 no newer than 2.31, to avoid requiring the build server's newer libc on Mint.
 They are NOT globally AVX2/native-tuned; only the existing AVX2 source gets that

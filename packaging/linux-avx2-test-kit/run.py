@@ -60,15 +60,30 @@ def number(path, divisor=1):
         return None
 
 
+def optional_glob(path, pattern):
+    try:
+        return sorted(Path(path).glob(pattern))
+    except OSError:
+        return []
+
+
+def cpu_description(cpu):
+    for section in (read_text("/proc/cpuinfo") or "").split("\n\n"):
+        lines = section.splitlines()
+        if lines and lines[0].split(":")[-1].strip() == str(cpu):
+            return section
+    return None
+
+
 def telemetry(cpu):
     root = Path("/sys/devices/system/cpu/cpu%d/cpufreq" % cpu)
     thermal = []
-    for zone in sorted(Path("/sys/class/thermal").glob("thermal_zone*")):
+    for zone in optional_glob("/sys/class/thermal", "thermal_zone*"):
         kind = read_text(zone / "type")
         if kind in ("x86_pkg_temp", "acpitz", "cpu-thermal", "soc_thermal"):
             thermal.append({"Type": kind, "Celsius": number(zone / "temp", 1000)})
     power = []
-    for device in sorted(Path("/sys/class/power_supply").glob("*")):
+    for device in optional_glob("/sys/class/power_supply", "*"):
         kind = read_text(device / "type")
         if kind in ("Mains", "USB", "USB_C", "Battery"):
             power.append({"Type": kind, "Online": number(device / "online"), "Status": read_text(device / "status"), "CapacityPercent": number(device / "capacity")})
@@ -316,7 +331,7 @@ def main(argv=None):
     old_term = signal.signal(signal.SIGTERM, interrupted)
     metadata = {"Status": "Running", "StartedUtc": utc(), "Mode": args.mode, "Protocol": "Linux adjacent ABBA v1: full8/quick4 balanced pairs", "AffinityCpu": cpu,
                 "Python": platform.python_version(), "Kernel": platform.release(), "Architecture": platform.machine(), "OSRelease": read_text("/etc/os-release"),
-                "Libc": os.confstr("CS_GNU_LIBC_VERSION"), "CpuInfo": (read_text("/proc/cpuinfo") or "").split("\n\n")[0],
+                "Libc": os.confstr("CS_GNU_LIBC_VERSION"), "CpuInfo": cpu_description(cpu),
                 "GatherDataSamplingStatus": read_text("/sys/devices/system/cpu/vulnerabilities/gather_data_sampling"), "Source": None, "RunnerSHA256": sha256(Path(__file__)), "Executables": []}
     code = 0
     try:
