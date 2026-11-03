@@ -37,7 +37,7 @@ function Parse-Timings([string]$Text, [string[]]$ExpectedScenes) {
         $time = [double]::Parse($r.run_time, $Invariant)
         $size = [int]::Parse($r.size, $Invariant)
         $batch = [int]::Parse($r.batch, $Invariant)
-        if ([double]::IsNaN($time) -or [double]::IsInfinity($time) -or $time -le 0 -or $size -lt 1 -or $batch -lt 1 -or $r.sample -ne '0') { throw 'Invalid benchmark timing or metadata.' }
+        if ([double]::IsNaN($time) -or [double]::IsInfinity($time) -or $time -le 0 -or $size -lt 1 -or $batch -lt 1 -or $r.sample -ne '1') { throw "Invalid timing/metadata for $($r.benchmark): time=$time, size=$size, batch=$batch, sample=$($r.sample) (expected sample 1)." }
         $parsed.Add([pscustomobject]@{ Benchmark=$r.benchmark; Size=$size; Batch=$batch; Time=$time })
     }
     return $parsed.ToArray()

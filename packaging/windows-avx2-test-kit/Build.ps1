@@ -29,8 +29,6 @@ function Patch-Timer([string]$Source) {
 '@
     if ([regex]::Matches($text,'#include <time\.h>').Count -ne 1) { throw 'Timer include did not match exactly once.' }
     $text=$text.Replace('#include <time.h>',$include)
-    $pattern='static double\s+now_seconds\(void\)\s*\{\s*return \(double\)clock\(\)/(double)CLOCKS_PER_SEC;\s*\}'
-    # Escape the cast's literal parentheses, not a regex capture.
     $pattern='static double\s+now_seconds\(void\)\s*\{\s*return \(double\)clock\(\)/\(double\)CLOCKS_PER_SEC;\s*\}'
     if ([regex]::Matches($text,$pattern).Count -ne 1) { throw 'Timer function did not match exactly once.' }
     $replacement=@'

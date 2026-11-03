@@ -5,15 +5,16 @@ $ErrorActionPreference='Stop'
 . (Join-Path $Package 'Run.ps1') -HelpersOnly
 if ((Median @(0.8,0.9,1.2)) -ne 0.9 -or (Median @(0.8,1.0)) -ne 0.9) { throw 'Median fixture failed.' }
 $header='version,benchmark,size,sample,batch,init_time,run_time'
-$good="$header`n2.1.0,Test,10,0,4,0.1,2.0`n"
+$good="$header`n2.1.0,Test,10,1,4,0.1,2.0`n"
 $a=@(Parse-Timings $good @('Test'))
 if ($a.Count -ne 1 -or $a[0].Time -ne 2.0) { throw 'CSV parser positive fixture failed.' }
 $badCases=@(
-    "$header`n2.1.0,Test,10,0,4,0.1,NaN`n",
-    "$header`n2.1.0,Test,10,0,4,0.1,0`n",
-    "$header`n2.1.0,Test,10,0,4,0.1,Infinity`n",
-    "$header`n2.1.0,Test,10,0,4,0.1,2`n2.1.0,Test,10,0,4,0.1,2`n",
-    "$header`n2.1.0,Wrong,10,0,4,0.1,2`n"
+    "$header`n2.1.0,Test,10,1,4,0.1,NaN`n",
+    "$header`n2.1.0,Test,10,1,4,0.1,0`n",
+    "$header`n2.1.0,Test,10,1,4,0.1,Infinity`n",
+    "$header`n2.1.0,Test,10,1,4,0.1,2`n2.1.0,Test,10,1,4,0.1,2`n",
+    "$header`n2.1.0,Wrong,10,1,4,0.1,2`n",
+    "$header`n2.1.0,Test,10,0,4,0.1,2`n"
 )
 foreach ($text in $badCases) { $rejected=$false; try { $null=Parse-Timings $text @('Test') } catch { $rejected=$true }; if (-not $rejected) { throw 'Malformed CSV was accepted.' } }
 $b=@(Parse-Timings ($good.Replace(',4,',',5,')) @('Test'))
