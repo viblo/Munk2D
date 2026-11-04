@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Store the opt-in AVX2 contact solver's scratch velocities by body and use
+  bounded four-plus-two-double loads/stores with SIMD transposes. Contact
+  ordering, arithmetic, precision, fallbacks, and the original default are
+  unchanged; no additional scratch memory or global ISA flags are required.
+
 ## 2.1.0
 
 Released 2026-10-11.

@@ -119,8 +119,9 @@ and does not use application `userData` or a process-global registry.
 A context is allocated only on successful opt-in. It owns separate reusable
 arenas for graph metadata and solver working data. Large solver buffers are
 reserved only after graph eligibility is established. Active hash length and
-velocity stride depend on current work, not on retained peak capacity. No graph
-coloring is cached across steps.
+packed body count depend on current work, not on retained peak capacity. Scratch
+velocities use six adjacent doubles per body. No graph coloring is cached across
+steps.
 
 Preparation initializes only color/kind groups that are actually used, while
 retaining the same ascending color/kind order and order within each group.
@@ -177,10 +178,13 @@ targeted optimization, not a universal acceleration.
 
 ### Older AVX2 CPUs and indexed loads
 
-The vector kernel assembles each velocity vector from four ordinary scalar
-loads instead of using a hardware gather instruction. The arithmetic is still
-four-lane SIMD; lane order, double values, graph scheduling and fallback decisions
-are unchanged. This avoids costly gathers on older CPUs, notably Intel systems
+The vector kernel avoids hardware gather instructions. It loads four plus two
+doubles per body and transposes these body-major values into four SIMD lanes.
+Stores transpose back, touching only active, writable bodies: dummy lanes cannot
+clobber real lanes or shared frozen bodies. Loads do not read beyond six doubles
+at the final body, and scratch memory usage is unchanged. Lane order, double
+values, arithmetic, graph scheduling and fallback decisions are unchanged.
+Avoiding hardware gathers is useful on older CPUs, notably Intel systems
 with Gather Data Sampling (GDS) microcode mitigation. Intel documents the added
 gather-result latency and recommends reducing gather use in affected workloads
 in its [GDS guidance](https://www.intel.com/content/www/us/en/developer/articles/technical/software-security-guidance/technical-documentation/gather-data-sampling.html).

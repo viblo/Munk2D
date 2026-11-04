@@ -188,7 +188,6 @@ prepare(cpContactSolverContext *s, cpArray *arbiters)
   for(int kind = 0, bits = (int)usedKinds[color]; bits; ++kind, bits >>= 1)
    if(bits & 1) packets += (sizes[color*CP_CONTACT_SOLVER_KINDS + kind] + 3)/4;
  if(!reserveSolver(s, s->bodyCount, packets)) return cpFalse;
- s->bodyStride = s->bodyCount;
  /* Enumerate in the same color/kind order as the original full scan. */
  for(int color = 0; color < CP_CONTACT_SOLVER_COLORS; ++color)
   for(int groupKind = 0, bits = (int)usedKinds[color]; bits; ++groupKind, bits >>= 1){
@@ -241,10 +240,9 @@ prepare(cpContactSolverContext *s, cpArray *arbiters)
    }
   }
  for(int i = 0; i < s->bodyCount; ++i){
-  cpBody *b = s->bodies[i]; int stride = s->bodyStride;
-  s->velocity[i] = b->v.x; s->velocity[stride+i] = b->v.y;
-  s->velocity[2*stride+i] = b->w; s->velocity[3*stride+i] = b->v_bias.x;
-  s->velocity[4*stride+i] = b->v_bias.y; s->velocity[5*stride+i] = b->w_bias;
+  cpBody *b = s->bodies[i]; double *v = s->velocity + 6*i;
+  v[0] = b->v.x; v[1] = b->v.y; v[2] = b->w;
+  v[3] = b->v_bias.x; v[4] = b->v_bias.y; v[5] = b->w_bias;
  }
  return cpTrue;
 }
@@ -260,10 +258,10 @@ cpContactSolverStep(cpSpace *space, cpContactSolverContext *s)
  }
  s->kernel(s, space->iterations);
  for(int i = 0; i < s->bodyCount; ++i){
-  cpBody *b = s->bodies[i]; int stride = s->bodyStride;
+  cpBody *b = s->bodies[i]; const double *v = s->velocity + 6*i;
   if(b->m_inv == 0 && b->i_inv == 0) continue;
-  b->v = cpv(s->velocity[i], s->velocity[stride+i]); b->w = s->velocity[2*stride+i];
-  b->v_bias = cpv(s->velocity[3*stride+i], s->velocity[4*stride+i]); b->w_bias = s->velocity[5*stride+i];
+  b->v = cpv(v[0], v[1]); b->w = v[2];
+  b->v_bias = cpv(v[3], v[4]); b->w_bias = v[5];
  }
  for(int i = 0; i < s->packetCount; ++i){
   cpContactSolverPacket *p = &s->packets[i];

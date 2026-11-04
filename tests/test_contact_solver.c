@@ -58,7 +58,7 @@ static void features(void)
 }
 /* Exercise the runtime-selected kernel without relying on scheduler packing.
  * Exact-sized allocations put the last body's angular bias at the allocation
- * boundary, so ASan also checks that indexed loads read only one double. */
+ * boundary, so ASan also checks the four-plus-two-double body loads. */
 static void packetKernels(cpContactSolverKernel kernel)
 {
  enum { STRIDE = 19, COMPONENTS = 6 };
@@ -70,7 +70,7 @@ static void packetKernels(cpContactSolverKernel kernel)
  CHECK(actual && expected && kernel);
  for(int component=0;component<COMPONENTS;component++)for(int body=0;body<STRIDE;body++){
   /* Include signed zero in frozen/unreferenced storage as well as live input. */
-  initial[component*STRIDE+body] = (body+component)%7==0 ? -0.0 :
+  initial[body*COMPONENTS+component] = (body+component)%7==0 ? -0.0 :
    ((body*7+component*11)%23-11)*0.125;
  }
  for(int layout=0;layout<2;layout++)for(int lanes=1;lanes<=4;lanes++)
@@ -123,7 +123,7 @@ static void packetKernels(cpContactSolverKernel kernel)
    memcpy(actual,initial,bytes);memcpy(expected,initial,bytes);
    memset(&vectorContext,0,sizeof(vectorContext));
    vectorContext.velocity=actual;vectorContext.packets=&vectorPacket;
-   vectorContext.bodyCount=vectorContext.bodyStride=STRIDE;
+   vectorContext.bodyCount=STRIDE;
    vectorContext.packetCount=1;vectorContext.kernel=kernel;
    scalarContext=vectorContext;scalarContext.velocity=expected;
    scalarContext.packets=&scalarPacket;scalarContext.kernel=cpContactSolverKernelScalar;
@@ -135,7 +135,7 @@ static void packetKernels(cpContactSolverKernel kernel)
     CHECK(memcmp(actual,expected,bytes)==0);
    }
    for(int component=0;component<COMPONENTS;component++)for(int body=0;body<STRIDE;body++){
-    int index=component*STRIDE+body;
+    int index=body*COMPONENTS+component;
     CHECK(isfinite(actual[index]));
     if(!writable[body])CHECK(memcmp(actual+index,initial+index,sizeof(double))==0);
    }
@@ -221,7 +221,7 @@ int main(void)
  void *graph=ctx->graphMemory,*solver=ctx->solverMemory;int capacity=ctx->graphCapacity;
  cpSpaceStep(a.space,1.0/60);CHECK(ctx->graphMemory==graph&&ctx->solverMemory==solver);
  for(int i=8;i<160;i++)addBody(&a,i,cpFalse);cpSpaceStep(a.space,1.0/60);CHECK(ctx->graphCapacity>capacity);CHECK(ctx->solverBodyCapacity>=160);
- while(a.count>8)removeLast(&a);cpSpaceStep(a.space,1.0/60);CHECK(ctx->usedLastStep);CHECK(ctx->bodyStride<=9);CHECK(ctx->bodyCount==0&&ctx->packetCount==0);
+ while(a.count>8)removeLast(&a);cpSpaceStep(a.space,1.0/60);CHECK(ctx->usedLastStep);CHECK(ctx->bodyCount==0&&ctx->packetCount==0);
  /* Free shapes/bodies while context still exists: destroy must not dereference them. */
  cleanup(&a);cleanup(&b);
 

@@ -1,18 +1,21 @@
 /* Instantiated for vector and scalar arithmetic; keep operation order identical. */
 typedef struct {V x,y,w,bx,by,bw;} Velocity;
 static inline Velocity getVelocity(cpContactSolverContext *p,const int *ids){
- int s=p->bodyStride;double *v=p->velocity;Velocity b={gather(v,ids),gather(v+s,ids),gather(v+2*s,ids),gather(v+3*s,ids),gather(v+4*s,ids),gather(v+5*s,ids)};return b;
-}
-static inline void scatter(double *p,const int *ids,int lanes,V value){
+ Velocity b;
 #ifdef PACKET_SCALAR
- (void)lanes;p[ids[0]]=value;
+ const double *v=p->velocity+6*ids[0];b.x=v[0];b.y=v[1];b.w=v[2];b.bx=v[3];b.by=v[4];b.bw=v[5];
 #else
- double x[CP_CONTACT_SOLVER_LANES];store(x,value);for(int l=0;l<lanes;l++)p[ids[l]]=x[l];
+ getAoS(p->velocity,ids,&b.x,&b.y,&b.w,&b.bx,&b.by,&b.bw);
 #endif
+ return b;
 }
-
 static inline void putVelocity(cpContactSolverContext *p,const int *ids,int lanes,Velocity b){
- int s=p->bodyStride;double *v=p->velocity;scatter(v,ids,lanes,b.x);scatter(v+s,ids,lanes,b.y);scatter(v+2*s,ids,lanes,b.w);scatter(v+3*s,ids,lanes,b.bx);scatter(v+4*s,ids,lanes,b.by);scatter(v+5*s,ids,lanes,b.bw);
+#ifdef PACKET_SCALAR
+ (void)lanes;
+ double *v=p->velocity+6*ids[0];v[0]=b.x;v[1]=b.y;v[2]=b.w;v[3]=b.bx;v[4]=b.by;v[5]=b.bw;
+#else
+ putAoS(p->velocity,ids,lanes,b.x,b.y,b.w,b.bx,b.by,b.bw);
+#endif
 }
 static inline V dot(V ax,V ay,V bx,V by){return add(mul(ax,bx),mul(ay,by));}
 static inline void impulse(Velocity *v,V m,V i,V rx,V ry,V jx,V jy,V jbx,V jby){

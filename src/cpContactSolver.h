@@ -37,9 +37,10 @@ struct cpContactSolverContext {
  int *hash;
  unsigned int *colors;
  cpContactSolverLink *links;
+ /* Body-major vx, vy, w, bias vx, bias vy, bias w (six doubles/body). */
  double *velocity;
  cpContactSolverPacket *packets;
- int bodyCount, bodyStride, packetCount, hashMask;
+ int bodyCount, packetCount, hashMask;
  cpContactSolverKernel kernel;
  cpBool usedLastStep;
 };
