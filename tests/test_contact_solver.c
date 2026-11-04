@@ -3,6 +3,11 @@
 #include <string.h>
 #include <fenv.h>
 #include "../src/cpContactSolver.h"
+#ifdef __EMSCRIPTEN__
+#define TEST_CONTACT_SOLVER CP_CONTACT_SOLVER_WASM_SIMD
+#else
+#define TEST_CONTACT_SOLVER CP_CONTACT_SOLVER_AVX2
+#endif
 #include "chipmunk/cpHastySpace.h"
 #define CHECK(x) do { if(!(x)){fprintf(stderr,"FAIL %s:%d: %s\n",__FILE__,__LINE__,#x);exit(1);} } while(0)
 
@@ -73,7 +78,7 @@ static void packetKernels(cpContactSolverKernel kernel)
   initial[body*COMPONENTS+component] = (body+component)%7==0 ? -0.0 :
    ((body*7+component*11)%23-11)*0.125;
  }
- for(int layout=0;layout<2;layout++)for(int lanes=1;lanes<=4;lanes++)
+ for(int layout=0;layout<2;layout++)for(int lanes=1;lanes<=CP_CONTACT_SOLVER_LANES;lanes++)
  for(int count=1;count<=2;count++)for(int mode=0;mode<=2;mode++)
  for(int friction=0;friction<=1;friction++){
   cpContactSolverPacket seed;
@@ -113,7 +118,7 @@ static void packetKernels(cpContactSolverKernel kernel)
   }
   /* Match scheduler padding: valid duplicate indices, zero coefficients.
    * A full-width scatter would overwrite lane zero with its dummy velocity. */
-  for(int lane=lanes;lane<4;lane++){
+  for(int lane=lanes;lane<CP_CONTACT_SOLVER_LANES;lane++){
    seed.a[lane]=seed.a[0];seed.b[lane]=seed.b[0];
   }
   for(size_t run=0;run<sizeof(iterations)/sizeof(iterations[0]);run++){
@@ -158,16 +163,23 @@ static int callbackCount,postStepCount;
 static void switchAfterStep(cpSpace *s,void *key,void *data){(void)key;(void)data;CHECK(!cpSpaceIsLocked(s));CHECK(cpSpaceSetContactSolver(s,CP_CONTACT_SOLVER_ORIGINAL));postStepCount++;}
 static void postSolve(cpArbiter *arb,cpSpace *s,void *data)
 {
- (void)arb;(void)data;CHECK(cpSpaceIsLocked(s));CHECK(!cpSpaceSetContactSolver(s,CP_CONTACT_SOLVER_ORIGINAL));CHECK(cpSpaceGetContactSolver(s)==CP_CONTACT_SOLVER_AVX2);callbackCount++;
+ (void)arb;(void)data;CHECK(cpSpaceIsLocked(s));CHECK(!cpSpaceSetContactSolver(s,CP_CONTACT_SOLVER_ORIGINAL));CHECK(cpSpaceGetContactSolver(s)==TEST_CONTACT_SOLVER);callbackCount++;
  cpSpaceAddPostStepCallback(s,switchAfterStep,&callbackCount,NULL);
 }
 static cpContactSolverKernel poisonKernel;
 static int poisonKernelCalls;
 static void checkedPoisonKernel(cpContactSolverContext *s,int iterations)
 {
+ /* WebAssembly has no observable floating-point exception flags. Keep the
+  * poisoned-buffer and exact finite-result checks there, and fenv on native. */
+#if defined(FE_INVALID) && defined(FE_DIVBYZERO)
  feclearexcept(FE_INVALID|FE_DIVBYZERO);
+#endif
  poisonKernel(s,iterations);
- CHECK(!(fetestexcept(FE_INVALID|FE_DIVBYZERO)));poisonKernelCalls++;
+#if defined(FE_INVALID) && defined(FE_DIVBYZERO)
+ CHECK(!(fetestexcept(FE_INVALID|FE_DIVBYZERO)));
+#endif
+ poisonKernelCalls++;
 }
 static void poisonScratch(cpContactSolverContext *s)
 {
@@ -179,7 +191,7 @@ static void poisonScratch(cpContactSolverContext *s)
 static void poisonedPackets(void)
 {
  Fixture a,b;make(&a,4,cpFalse);make(&b,4,cpFalse);
- CHECK(cpSpaceSetContactSolver(a.space,CP_CONTACT_SOLVER_AVX2));CHECK(cpSpaceSetContactSolver(b.space,CP_CONTACT_SOLVER_AVX2));
+ CHECK(cpSpaceSetContactSolver(a.space,TEST_CONTACT_SOLVER));CHECK(cpSpaceSetContactSolver(b.space,TEST_CONTACT_SOLVER));
  cpContactSolverContext *s=cpContactSolverGet(a.space);poisonKernel=s->kernel;s->kernel=checkedPoisonKernel;
  cpContactSolverGet(b.space)->kernel=cpContactSolverKernelScalar;
  for(int cycle=0;cycle<20;cycle++){
@@ -208,13 +220,21 @@ static void poisonedPackets(void)
 int main(void)
 {
  features();CHECK(cpContactSolverIsAvailable(CP_CONTACT_SOLVER_ORIGINAL));CHECK(!cpContactSolverIsAvailable((cpContactSolverType)99));
+#ifdef __EMSCRIPTEN__
+ CHECK(!cpContactSolverIsAvailable(CP_CONTACT_SOLVER_AVX2));
+#else
+ CHECK(!cpContactSolverIsAvailable(CP_CONTACT_SOLVER_WASM_SIMD));
+#endif
  Fixture a,b;make(&a,8,cpFalse);CHECK(cpSpaceGetContactSolver(a.space)==CP_CONTACT_SOLVER_ORIGINAL);CHECK(!cpSpaceSetContactSolver(a.space,(cpContactSolverType)99));
- cpSpaceLock(a.space);CHECK(!cpSpaceSetContactSolver(a.space,CP_CONTACT_SOLVER_ORIGINAL));CHECK(!cpSpaceSetContactSolver(a.space,CP_CONTACT_SOLVER_AVX2));cpSpaceUnlock(a.space,cpTrue);
- if(!cpContactSolverIsAvailable(CP_CONTACT_SOLVER_AVX2)){
-  CHECK(!cpSpaceSetContactSolver(a.space,CP_CONTACT_SOLVER_AVX2));CHECK(cpSpaceGetContactSolver(a.space)==CP_CONTACT_SOLVER_ORIGINAL);cpSpaceStep(a.space,1.0/60);cleanup(&a);
+ cpSpaceLock(a.space);CHECK(!cpSpaceSetContactSolver(a.space,CP_CONTACT_SOLVER_ORIGINAL));CHECK(!cpSpaceSetContactSolver(a.space,TEST_CONTACT_SOLVER));cpSpaceUnlock(a.space,cpTrue);
+ if(!cpContactSolverIsAvailable(TEST_CONTACT_SOLVER)){
+  CHECK(!cpSpaceSetContactSolver(a.space,TEST_CONTACT_SOLVER));CHECK(cpSpaceGetContactSolver(a.space)==CP_CONTACT_SOLVER_ORIGINAL);cpSpaceStep(a.space,1.0/60);cleanup(&a);
   puts("PASS: CPU/OS feature matrix, unavailable build/CPU and original-default API.");return 0;
  }
- CHECK(cpSpaceSetContactSolver(a.space,CP_CONTACT_SOLVER_AVX2));cpContactSolverContext *ctx=cpContactSolverGet(a.space);CHECK(ctx&&!ctx->graphMemory&&!ctx->solverMemory);
+ CHECK(cpSpaceSetContactSolver(a.space,TEST_CONTACT_SOLVER));cpContactSolverContext *ctx=cpContactSolverGet(a.space);CHECK(ctx&&!ctx->graphMemory&&!ctx->solverMemory);
+ CHECK(cpSpaceGetContactSolver(a.space)==TEST_CONTACT_SOLVER);
+ CHECK(!cpSpaceSetContactSolver(a.space,(cpContactSolverType)99));
+ CHECK(cpContactSolverGet(a.space)==ctx&&cpSpaceGetContactSolver(a.space)==TEST_CONTACT_SOLVER);
  packetKernels(ctx->kernel);
  make(&b,8,cpFalse);
  for(int i=0;i<8;i++){cpSpaceStep(a.space,1.0/60);cpSpaceStep(b.space,1.0/60);compare(&a,&b);}CHECK(ctx->usedLastStep);
@@ -225,22 +245,22 @@ int main(void)
  /* Free shapes/bodies while context still exists: destroy must not dereference them. */
  cleanup(&a);cleanup(&b);
 
- make(&a,16,cpTrue);make(&b,16,cpTrue);CHECK(cpSpaceSetContactSolver(a.space,CP_CONTACT_SOLVER_AVX2));CHECK(cpSpaceSetContactSolver(b.space,CP_CONTACT_SOLVER_AVX2));cpContactSolverGet(b.space)->kernel=cpContactSolverKernelScalar;
+ make(&a,16,cpTrue);make(&b,16,cpTrue);CHECK(cpSpaceSetContactSolver(a.space,TEST_CONTACT_SOLVER));CHECK(cpSpaceSetContactSolver(b.space,TEST_CONTACT_SOLVER));cpContactSolverGet(b.space)->kernel=cpContactSolverKernelScalar;
  for(int step=0;step<600;step++){int iterations=step%3==0?1:step%3==1?10:20;cpSpaceSetIterations(a.space,iterations);cpSpaceSetIterations(b.space,iterations);cpFloat dt=step%2?1.0/60:1.0/120;cpSpaceStep(a.space,dt);cpSpaceStep(b.space,dt);compare(&a,&b);}cleanup(&a);cleanup(&b);
 
- make(&a,8,cpFalse);make(&b,8,cpFalse);a.joint=cpSpaceAddConstraint(a.space,cpPinJointNew(a.body[0],a.body[1],cpvzero,cpvzero));b.joint=cpSpaceAddConstraint(b.space,cpPinJointNew(b.body[0],b.body[1],cpvzero,cpvzero));CHECK(cpSpaceSetContactSolver(a.space,CP_CONTACT_SOLVER_AVX2));
+ make(&a,8,cpFalse);make(&b,8,cpFalse);a.joint=cpSpaceAddConstraint(a.space,cpPinJointNew(a.body[0],a.body[1],cpvzero,cpvzero));b.joint=cpSpaceAddConstraint(b.space,cpPinJointNew(b.body[0],b.body[1],cpvzero,cpvzero));CHECK(cpSpaceSetContactSolver(a.space,TEST_CONTACT_SOLVER));
  for(int i=0;i<30;i++){cpSpaceStep(a.space,1.0/60);cpSpaceStep(b.space,1.0/60);compare(&a,&b);CHECK(!cpContactSolverGet(a.space)->usedLastStep);}
  CHECK(!cpContactSolverGet(a.space)->solverMemory);CHECK(cpSpaceSetContactSolver(a.space,CP_CONTACT_SOLVER_ORIGINAL));CHECK(cpContactSolverGet(a.space)==NULL);cleanup(&a);cleanup(&b);
 
  /*13 contacts on one writable body cannot fit in12 colors; no data is committed. */
- cpSpace *space=cpSpaceNew();CHECK(cpSpaceSetContactSolver(space,CP_CONTACT_SOLVER_AVX2));cpBody *body=cpBodyNew(1,1);cpArbiter arbs[13];struct cpContact contacts[13];memset(arbs,0,sizeof(arbs));memset(contacts,0,sizeof(contacts));
+ cpSpace *space=cpSpaceNew();CHECK(cpSpaceSetContactSolver(space,TEST_CONTACT_SOLVER));cpBody *body=cpBodyNew(1,1);cpArbiter arbs[13];struct cpContact contacts[13];memset(arbs,0,sizeof(arbs));memset(contacts,0,sizeof(contacts));
  for(int i=0;i<13;i++){arbs[i].body_a=body;arbs[i].body_b=cpSpaceGetStaticBody(space);arbs[i].count=1;arbs[i].contacts=&contacts[i];cpArrayPush(space->arbiters,&arbs[i]);}
  ctx=cpContactSolverGet(space);CHECK(!cpContactSolverStep(space,ctx));CHECK(!ctx->solverMemory);CHECK(ctx->bodyCount==0&&ctx->packetCount==0);CHECK(body->v.x==0&&body->v.y==0);space->arbiters->num=0;cpBodyFree(body);cpSpaceFree(space);
 
- make(&a,8,cpFalse);CHECK(cpSpaceSetContactSolver(a.space,CP_CONTACT_SOLVER_AVX2));cpSpaceAddGlobalCollisionHandler(a.space)->postSolveFunc=postSolve;cpSpaceStep(a.space,1.0/60);CHECK(callbackCount>0&&postStepCount==1);CHECK(cpSpaceGetContactSolver(a.space)==CP_CONTACT_SOLVER_ORIGINAL);cleanup(&a);
- space=cpSpaceNew();CHECK(cpSpaceSetContactSolver(space,CP_CONTACT_SOLVER_AVX2));cpSpaceDestroy(space);memset(space,0,sizeof(*space));cpSpaceInit(space);CHECK(cpSpaceGetContactSolver(space)==CP_CONTACT_SOLVER_ORIGINAL);cpSpaceFree(space);
- make(&a,8,cpFalse);cpSpaceSetSleepTimeThreshold(a.space,0.5);cpBodySleep(a.body[0]);CHECK(cpBodyIsSleeping(a.body[0]));CHECK(cpSpaceSetContactSolver(a.space,CP_CONTACT_SOLVER_AVX2));CHECK(cpBodyIsSleeping(a.body[0]));CHECK(cpSpaceSetContactSolver(a.space,CP_CONTACT_SOLVER_ORIGINAL));CHECK(cpBodyIsSleeping(a.body[0]));cleanup(&a);
- makeWithSpace(&a,8,cpFalse,cpHastySpaceNew());makeWithSpace(&b,8,cpFalse,cpHastySpaceNew());a.hasty=b.hasty=cpTrue;cpHastySpaceSetThreads(a.space,1);cpHastySpaceSetThreads(b.space,1);CHECK(cpSpaceSetContactSolver(a.space,CP_CONTACT_SOLVER_AVX2));
+ make(&a,8,cpFalse);CHECK(cpSpaceSetContactSolver(a.space,TEST_CONTACT_SOLVER));cpSpaceAddGlobalCollisionHandler(a.space)->postSolveFunc=postSolve;cpSpaceStep(a.space,1.0/60);CHECK(callbackCount>0&&postStepCount==1);CHECK(cpSpaceGetContactSolver(a.space)==CP_CONTACT_SOLVER_ORIGINAL);cleanup(&a);
+ space=cpSpaceNew();CHECK(cpSpaceSetContactSolver(space,TEST_CONTACT_SOLVER));cpSpaceDestroy(space);memset(space,0,sizeof(*space));cpSpaceInit(space);CHECK(cpSpaceGetContactSolver(space)==CP_CONTACT_SOLVER_ORIGINAL);cpSpaceFree(space);
+ make(&a,8,cpFalse);cpSpaceSetSleepTimeThreshold(a.space,0.5);cpBodySleep(a.body[0]);CHECK(cpBodyIsSleeping(a.body[0]));CHECK(cpSpaceSetContactSolver(a.space,TEST_CONTACT_SOLVER));CHECK(cpBodyIsSleeping(a.body[0]));CHECK(cpSpaceSetContactSolver(a.space,CP_CONTACT_SOLVER_ORIGINAL));CHECK(cpBodyIsSleeping(a.body[0]));cleanup(&a);
+ makeWithSpace(&a,8,cpFalse,cpHastySpaceNew());makeWithSpace(&b,8,cpFalse,cpHastySpaceNew());a.hasty=b.hasty=cpTrue;cpHastySpaceSetThreads(a.space,1);cpHastySpaceSetThreads(b.space,1);CHECK(cpSpaceSetContactSolver(a.space,TEST_CONTACT_SOLVER));
  for(int i=0;i<12;i++){cpHastySpaceStep(a.space,1.0/60);cpHastySpaceStep(b.space,1.0/60);compare(&a,&b);}CHECK(!cpContactSolverGet(a.space)->graphMemory);cleanup(&a);cleanup(&b);
  poisonedPackets();
  puts("PASS: CPU/OS gating, API, original default, arena reuse/grow/shrink, direct packet/kernel and scalar equivalence, poisoned buffers, varying dt/iterations, fallback, callback locks, sleep, HastySpace independence and lifecycle.");return 0;

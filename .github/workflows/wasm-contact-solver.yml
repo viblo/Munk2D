@@ -1,0 +1,48 @@
+name: Wasm contact solver
+
+on:
+  push:
+    branches: [master]
+    paths: ['src/**', 'include/**', 'tests/**', 'benchmarks/**', 'CMakeLists.txt', '.github/workflows/wasm-contact-solver.yml']
+  pull_request:
+    paths: ['src/**', 'include/**', 'tests/**', 'benchmarks/**', 'CMakeLists.txt', '.github/workflows/wasm-contact-solver.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  wasm:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Pyodide 0.29.x and 314.0.x respectively.
+        emscripten: ['4.0.9', '5.0.3']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: ${{ matrix.emscripten }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build SIMD and baseline modules; run existing CTest suite
+        run: |
+          tests/build-wasm.sh build-wasm
+          SIMD=OFF tests/build-wasm.sh build-wasm-scalar
+      - name: Verify module-level SIMD loading requirement
+        run: |
+          "$EMSDK/upstream/bin/wasm-opt" --all-features --disable-simd --disable-relaxed-simd build-wasm-scalar/browser/munkbench.wasm -o /dev/null
+          if "$EMSDK/upstream/bin/wasm-opt" --all-features --disable-simd --disable-relaxed-simd build-wasm/browser/munkbench.wasm -o /dev/null > simd-rejection.log 2>&1; then
+            echo 'Expected SIMD-disabled validation to reject the SIMD module'; exit 1
+          fi
+          grep 'SIMD operations require SIMD' simd-rejection.log
+      - name: Install browser test dependency
+        run: |
+          npm install --no-save --package-lock=false playwright@1.63.0
+          npx playwright install --with-deps chromium firefox
+      - name: Run existing solver tests in real browsers
+        run: |
+          node tests/run-wasm-browser.mjs build-wasm/browser chromium
+          node tests/run-wasm-browser.mjs build-wasm/browser firefox
+          SIMD=OFF node tests/run-wasm-browser.mjs build-wasm-scalar/browser chromium

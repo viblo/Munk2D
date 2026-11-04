@@ -4,6 +4,8 @@ The original contact solver remains the default. The AVX2 solver is an explicit
 per-space opt-in for `cpSpaceStep()`, not a replacement for all workloads.
 It uses double precision, groups independent contacts with a bounded graph
 coloring, and uses four-lane SIMD. It does not add worker threads.
+For Emscripten, see the separate [WebAssembly SIMD backend](wasm-contact-solver.md);
+its SIMD module-loading requirement differs from native AVX2 CPU dispatch.
 
 ## Selecting a solver
 

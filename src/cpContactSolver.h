@@ -1,4 +1,4 @@
-/* Private contact-solver state. No ISA types escape the AVX2 translation unit. */
+/* Private contact-solver state. No ISA types escape the backend translation units. */
 #ifndef CP_CONTACT_SOLVER_INTERNAL_H
 #define CP_CONTACT_SOLVER_INTERNAL_H
 #include "chipmunk/chipmunk_private.h"
@@ -8,21 +8,28 @@
 #ifndef CP_AVX2_CONTACT_SOLVER
 #define CP_AVX2_CONTACT_SOLVER 0
 #endif
+#ifndef CP_WASM_SIMD_CONTACT_SOLVER
+#define CP_WASM_SIMD_CONTACT_SOLVER 0
+#endif
+/* Logical packet width, not ISA width. Wasm solves a four-contact packet in
+ * independent two-double halves. A two-contact layout was also evaluated. */
+#ifndef CP_CONTACT_SOLVER_LANES
 #define CP_CONTACT_SOLVER_LANES 4
+#endif
 #define CP_CONTACT_SOLVER_COLORS 12
 #define CP_CONTACT_SOLVER_KINDS 12
 
 typedef struct cpContactSolverContact {
- double r1x[4], r1y[4], r2x[4], r2y[4];
- double nMass[4], tMass[4], bias[4], bounce[4];
- double jBias[4], jnAcc[4], jtAcc[4];
- struct cpContact *original[4];
+ double r1x[CP_CONTACT_SOLVER_LANES], r1y[CP_CONTACT_SOLVER_LANES], r2x[CP_CONTACT_SOLVER_LANES], r2y[CP_CONTACT_SOLVER_LANES];
+ double nMass[CP_CONTACT_SOLVER_LANES], tMass[CP_CONTACT_SOLVER_LANES], bias[CP_CONTACT_SOLVER_LANES], bounce[CP_CONTACT_SOLVER_LANES];
+ double jBias[CP_CONTACT_SOLVER_LANES], jnAcc[CP_CONTACT_SOLVER_LANES], jtAcc[CP_CONTACT_SOLVER_LANES];
+ struct cpContact *original[CP_CONTACT_SOLVER_LANES];
 } cpContactSolverContact;
 
 typedef struct cpContactSolverPacket {
- int a[4], b[4], lanes, count, mode, friction;
- double nx[4], ny[4], sx[4], sy[4], u[4];
- double am[4], ai[4], bm[4], bi[4];
+ int a[CP_CONTACT_SOLVER_LANES], b[CP_CONTACT_SOLVER_LANES], lanes, count, mode, friction;
+ double nx[CP_CONTACT_SOLVER_LANES], ny[CP_CONTACT_SOLVER_LANES], sx[CP_CONTACT_SOLVER_LANES], sy[CP_CONTACT_SOLVER_LANES], u[CP_CONTACT_SOLVER_LANES];
+ double am[CP_CONTACT_SOLVER_LANES], ai[CP_CONTACT_SOLVER_LANES], bm[CP_CONTACT_SOLVER_LANES], bi[CP_CONTACT_SOLVER_LANES];
  cpContactSolverContact con[2];
 } cpContactSolverPacket;
 
@@ -42,6 +49,7 @@ struct cpContactSolverContext {
  cpContactSolverPacket *packets;
  int bodyCount, packetCount, hashMask;
  cpContactSolverKernel kernel;
+ cpContactSolverType type;
  cpBool usedLastStep;
 };
 
@@ -71,6 +79,9 @@ CP_CONTACT_SOLVER_PRIVATE cpBool cpContactSolverStep(cpSpace *space, cpContactSo
 CP_CONTACT_SOLVER_PRIVATE void cpContactSolverKernelScalar(cpContactSolverContext *context, int iterations);
 #if CP_AVX2_CONTACT_SOLVER && CP_USE_DOUBLES
 CP_CONTACT_SOLVER_PRIVATE void cpContactSolverKernelAvx2(cpContactSolverContext *context, int iterations);
+#endif
+#if CP_WASM_SIMD_CONTACT_SOLVER && CP_USE_DOUBLES
+CP_CONTACT_SOLVER_PRIVATE void cpContactSolverKernelWasm(cpContactSolverContext *context, int iterations);
 #endif
 CP_CONTACT_SOLVER_PRIVATE cpBool cpContactSolverCpuSupported(void);
 /* Pure decision function also permits testing unavailable CPU/OS combinations. */

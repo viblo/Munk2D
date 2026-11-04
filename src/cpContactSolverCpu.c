@@ -59,5 +59,9 @@ cpContactSolverIsAvailable(cpContactSolverType solver)
 {
  if(solver == CP_CONTACT_SOLVER_ORIGINAL) return cpTrue;
  if(solver == CP_CONTACT_SOLVER_AVX2) return cpContactSolverCpuSupported();
+#if CP_WASM_SIMD_CONTACT_SOLVER && CP_USE_DOUBLES
+ /* A SIMD-enabled Wasm module has already passed runtime validation at load. */
+ if(solver == CP_CONTACT_SOLVER_WASM_SIMD) return cpTrue;
+#endif
  return cpFalse;
 }
