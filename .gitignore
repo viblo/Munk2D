@@ -1,4 +1,5 @@
 /node_modules
+/build-browser-cache/
 .DS_Store
 doc/index.html
 

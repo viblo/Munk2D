@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="description" content="Compare Munk2D's original and WebAssembly SIMD contact solvers on your own browser and device.">
+  <title>Munk2D browser benchmark</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+</head>
+<body>
+  <main>
+    <header><span class="eyebrow">Munk2D · WebAssembly · single-threaded physics</span><h1>Does SIMD help <em>your</em> browser?</h1>
+      <p class="lead">Compare complete physics steps, not graphics FPS. Same scenes, same precision, paired runs—with controls to show measurement noise.</p>
+    </header>
+    <section class="panel" aria-labelledby="device-heading">
+      <div class="section-head"><h2 id="device-heading">Your setup</h2><span id="simd-badge" class="badge">Checking…</span></div>
+      <p id="device-summary">Reading available browser and hardware hints…</p>
+      <div class="fields">
+        <label>Device model <span class="optional">optional</span><input id="device" maxlength="200" placeholder="e.g. ThinkPad T14, iPhone 15"></label>
+        <label>CPU model <span class="optional">optional</span><input id="cpu" maxlength="200" placeholder="e.g. i5-8265U, Apple M2"></label>
+        <label>OS / version <span class="optional">optional correction</span><input id="os" maxlength="200" placeholder="e.g. Linux Mint 20.3, Windows 11"></label>
+        <label>Browser / version <span class="optional">optional correction</span><input id="browser" maxlength="200" placeholder="If the reported browser identity is hidden/reduced"></label>
+        <label>Installed RAM <span class="optional">optional</span><input id="ram" maxlength="80" placeholder="e.g. 16 GB"></label>
+        <label>Power source <select id="power"><option value="unknown">Unknown / not specified</option><option value="plugged-in">Plugged in (user confirmed)</option><option value="battery">Battery (user confirmed)</option></select></label>
+      </div>
+      <label>Notes <span class="optional">optional</span><textarea id="notes" rows="2" maxlength="1000" placeholder="Actual browser if its identity is hidden; power-saving mode; other running apps; anything unusual. No personal details needed."></textarea></label>
+      <details><summary>Collected information & privacy</summary><p>Browser/OS versions, exposed architecture/device hints, logical processor and RAM hints, GPU renderer, screen, timer precision and battery status where available. A GPU name is <strong>not</strong> a CPU name. Missing/reduced data stays unknown.</p>
+        <p>No automatic result upload, analytics, geolocation or external hardware lookup. The latest run is saved only in this browser. Download the JSON and share it yourself. Most iOS browser apps share WebKit, so app names do not necessarily mean different engines.</p><pre id="environment">Loading…</pre></details>
+    </section>
+    <section class="panel" aria-labelledby="run-heading">
+      <h2 id="run-heading">Run the test</h2>
+      <p>Keep this tab visible, avoid other heavy work, and keep power settings consistent. Switching tabs or locking the screen stops the run and retains partial results. No physics is rendered while timing.</p>
+      <div class="actions"><button id="quick" class="primary" disabled>Quick · 8 scenes × 2 sizes</button><button id="full" disabled>Full · 26 scenes × 2 sizes</button><button id="stop" class="danger" disabled>Stop</button></div>
+      <p class="muted">Each mode includes correctness checks, warmup, duration calibration and alternating paired measurements. Allow several minutes, especially on phones. Full uses more repeats and controls.</p>
+      <div id="status" role="status" aria-live="polite">Preparing…</div><progress id="progress" value="0" max="1" aria-label="Completed measurement pairs"></progress>
+      <p id="counts" class="muted"></p><p id="warnings" class="warning" role="status"></p>
+    </section>
+    <section class="panel" aria-labelledby="results-heading">
+      <div class="section-head"><h2 id="results-heading">Results</h2><button id="download" disabled>Download results JSON</button></div>
+      <p id="result-description">Results will appear here. Download each run before starting another, then send the JSON file back for analysis.</p>
+      <div id="suite-cards" class="suite-cards"></div>
+      <p class="muted"><strong>Negative Δ time is faster.</strong> “Inconclusive” means the bootstrap interval does not clear the A/A noise margin (at least 1%). Small-sample intervals are exploratory—not a universal confidence guarantee. ORIGINAL and SIMD use different contact schedules; trajectories need not be identical.</p>
+      <p class="muted">The primary comparison uses ORIGINAL and SIMD in the same SIMD-enabled module. <strong>A/A</strong> repeats ORIGINAL to estimate noise. <strong>Module Δ</strong> compares ORIGINAL across scalar-only and SIMD-enabled binaries; it is not a SIMD solver speedup.</p>
+      <div id="tables"></div>
+      <details><summary>Protocol, correctness & raw diagnostics</summary><pre id="diagnostics">No run yet.</pre></details>
+      <button id="clear" class="quiet" disabled>Clear this browser’s saved result</button>
+    </section>
+    <footer><p id="build-info">Build information loading…</p><p>Direct Munk2D/Wasm, not Pyodide/Python-loop timing. The SIMD backend is opt-in and can lose on some workloads. <a href="https://github.com/vibloteket/munk2d/pull/16">Implementation & limitations</a>.</p></footer>
+  </main>
+  <noscript>This benchmark needs JavaScript and WebAssembly.</noscript>
+  <script src="core.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

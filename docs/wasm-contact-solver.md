@@ -105,6 +105,18 @@ callbacks and exact independent-contact comparison with ORIGINAL. Existing
 Pymunk DEFAULT and AUTO behavior is checked unchanged. No downstream Python API
 change is included here.
 
+## Interactive browser benchmark
+
+The [static interactive runner](../benchmarks/browser/README.md) packages these
+modules into a page users can open without installing build or automation tools.
+It offers quick/full runs, correctness checks, warmup, duration calibration,
+paired A/B and A/A/module controls, raw JSON downloads and browser/OS/hardware
+metadata with optional manual corrections. CPU models not exposed by browser
+APIs stay unknown. It runs single-threaded physics in a dedicated JavaScript
+worker for responsiveness, without shared Wasm memory or COOP/COEP requirements.
+Results remain local until explicitly downloaded/shared; no server-side upload
+or analytics is included.
+
 ## Reproduce the targeted checks
 
 ```sh
