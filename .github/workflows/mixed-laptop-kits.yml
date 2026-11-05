@@ -1,0 +1,92 @@
+name: Build native AVX2 mixed laptop kits
+on:
+  push:
+    branches: [build/avx2-mixed-laptop-kits]
+    paths: [.github/workflows/mixed-laptop-kits.yml, packaging/mixed-laptop-kit/**]
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: 0c4b0ff81d1d47040c7043d487c9414058c30faa
+          path: baseline
+      - uses: actions/checkout@v4
+        with:
+          ref: 19dfdeacbf14b0b24a0d789e0330dab15c82a1d3
+          path: candidate
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 1.26.0
+          cache: false
+      - shell: pwsh
+        run: ./packaging/mixed-laptop-kit/Build.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: munk2d-mixed-windows-x64
+          path: out/munk2d-mixed-windows-x64.zip
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mixed-windows-evidence
+          path: |
+            out/*.txt
+            out/*.log
+            out/self-test.zip
+  linux:
+    runs-on: ubuntu-22.04
+    container: ubuntu:20.04
+    timeout-minutes: 35
+    steps:
+      - run: apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq build-essential cmake git ca-certificates binutils util-linux
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: 0c4b0ff81d1d47040c7043d487c9414058c30faa
+          path: baseline
+      - uses: actions/checkout@v4
+        with:
+          ref: 19dfdeacbf14b0b24a0d789e0330dab15c82a1d3
+          path: candidate
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 1.26.0
+          cache: false
+      - run: bash packaging/mixed-laptop-kit/build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: munk2d-mixed-linux-x86_64
+          path: out/munk2d-mixed-linux-x86_64.tar.gz
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mixed-linux-evidence
+          path: |
+            out/*.txt
+            out/*.log
+            out/package.sha256
+            out/self-test.zip
+  linux-compat:
+    needs: linux
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: munk2d-mixed-linux-x86_64
+          path: kit
+      - run: |
+          cd kit
+          tar -xzf munk2d-mixed-linux-x86_64.tar.gz
+          ./munk2d-mixed-linux-x86_64/runner --mode ci --output "$PWD/compat-test"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mixed-linux-compat-evidence
+          path: kit/compat-test.zip

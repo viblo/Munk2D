@@ -1,0 +1,213 @@
+{
+  "purpose": "native-only 26-scene case list",
+  "scenarios": [
+    {
+      "name": "FallingSquares",
+      "steps": 1300,
+      "smokeSize": 10,
+      "referenceSize": 50,
+      "smokeAutoBatch": 1,
+      "referenceAutoBatch": 1
+    },
+    {
+      "name": "FallingCircles",
+      "steps": 1300,
+      "smokeSize": 10,
+      "referenceSize": 50,
+      "smokeAutoBatch": 2,
+      "referenceAutoBatch": 2
+    },
+    {
+      "name": "Tumbler",
+      "steps": 1500,
+      "smokeSize": 50,
+      "referenceSize": 250,
+      "smokeAutoBatch": 1,
+      "referenceAutoBatch": 1
+    },
+    {
+      "name": "AddPair",
+      "steps": 1000,
+      "smokeSize": 100,
+      "referenceSize": 500,
+      "smokeAutoBatch": 4,
+      "referenceAutoBatch": 1
+    },
+    {
+      "name": "MildN2",
+      "steps": 100,
+      "smokeSize": 10,
+      "referenceSize": 50,
+      "smokeAutoBatch": 10,
+      "referenceAutoBatch": 4
+    },
+    {
+      "name": "N2",
+      "steps": 100,
+      "smokeSize": 25,
+      "referenceSize": 100,
+      "smokeAutoBatch": 60,
+      "referenceAutoBatch": 20
+    },
+    {
+      "name": "Multifixture",
+      "steps": 500,
+      "smokeSize": 5,
+      "referenceSize": 25,
+      "smokeAutoBatch": 3,
+      "referenceAutoBatch": 1
+    },
+    {
+      "name": "MostlyStaticSingleBody",
+      "steps": 400,
+      "smokeSize": 10,
+      "referenceSize": 50,
+      "smokeAutoBatch": 160,
+      "referenceAutoBatch": 80
+    },
+    {
+      "name": "MostlyStaticMultiBody",
+      "steps": 400,
+      "smokeSize": 10,
+      "referenceSize": 50,
+      "smokeAutoBatch": 160,
+      "referenceAutoBatch": 80
+    },
+    {
+      "name": "Diagonal",
+      "steps": 1000,
+      "smokeSize": 2,
+      "referenceSize": 10,
+      "smokeAutoBatch": 10,
+      "referenceAutoBatch": 5
+    },
+    {
+      "name": "MixedStaticDynamic",
+      "steps": 400,
+      "smokeSize": 100,
+      "referenceSize": 500,
+      "smokeAutoBatch": 7,
+      "referenceAutoBatch": 5
+    },
+    {
+      "name": "BigMobile",
+      "steps": 1000,
+      "smokeSize": 1,
+      "referenceSize": 6,
+      "smokeAutoBatch": 150,
+      "referenceAutoBatch": 10
+    },
+    {
+      "name": "SlowExplosion",
+      "steps": 1000,
+      "smokeSize": 100,
+      "referenceSize": 1000,
+      "smokeAutoBatch": 25,
+      "referenceAutoBatch": 10
+    },
+    {
+      "name": "FrictionalPyramid",
+      "steps": 900,
+      "smokeSize": 8,
+      "referenceSize": 16,
+      "smokeAutoBatch": 4,
+      "referenceAutoBatch": 4
+    },
+    {
+      "name": "CollisionCallbacks",
+      "steps": 600,
+      "smokeSize": 24,
+      "referenceSize": 60,
+      "smokeAutoBatch": 20,
+      "referenceAutoBatch": 20
+    },
+    {
+      "name": "SleepWake",
+      "steps": 420,
+      "smokeSize": 20,
+      "referenceSize": 50,
+      "smokeAutoBatch": 200,
+      "referenceAutoBatch": 100
+    },
+    {
+      "name": "SurfaceVelocity",
+      "steps": 600,
+      "smokeSize": 24,
+      "referenceSize": 60,
+      "smokeAutoBatch": 20,
+      "referenceAutoBatch": 20
+    },
+    {
+      "name": "SlideConstraints",
+      "steps": 600,
+      "smokeSize": 50,
+      "referenceSize": 500,
+      "smokeAutoBatch": 20,
+      "referenceAutoBatch": 4
+    },
+    {
+      "name": "PivotConstraints",
+      "steps": 600,
+      "smokeSize": 50,
+      "referenceSize": 500,
+      "smokeAutoBatch": 20,
+      "referenceAutoBatch": 4
+    },
+    {
+      "name": "GrooveConstraints",
+      "steps": 600,
+      "smokeSize": 50,
+      "referenceSize": 500,
+      "smokeAutoBatch": 20,
+      "referenceAutoBatch": 4
+    },
+    {
+      "name": "GearConstraints",
+      "steps": 600,
+      "smokeSize": 100,
+      "referenceSize": 1000,
+      "smokeAutoBatch": 30,
+      "referenceAutoBatch": 8
+    },
+    {
+      "name": "RatchetConstraints",
+      "steps": 600,
+      "smokeSize": 100,
+      "referenceSize": 1000,
+      "smokeAutoBatch": 30,
+      "referenceAutoBatch": 8
+    },
+    {
+      "name": "RotaryLimitConstraints",
+      "steps": 600,
+      "smokeSize": 100,
+      "referenceSize": 1000,
+      "smokeAutoBatch": 30,
+      "referenceAutoBatch": 8
+    },
+    {
+      "name": "DampedSpringConstraints",
+      "steps": 600,
+      "smokeSize": 50,
+      "referenceSize": 500,
+      "smokeAutoBatch": 20,
+      "referenceAutoBatch": 4
+    },
+    {
+      "name": "DampedRotarySpringConstraints",
+      "steps": 600,
+      "smokeSize": 100,
+      "referenceSize": 1000,
+      "smokeAutoBatch": 30,
+      "referenceAutoBatch": 8
+    },
+    {
+      "name": "ConstraintMix",
+      "steps": 600,
+      "smokeSize": 100,
+      "referenceSize": 500,
+      "smokeAutoBatch": 10,
+      "referenceAutoBatch": 2
+    }
+  ]
+}
