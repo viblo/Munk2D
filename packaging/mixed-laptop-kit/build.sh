@@ -13,7 +13,11 @@ for variant in baseline candidate; do
  source="$root/$variant"; build="$root/build-$variant"
  cmake -S "$source" -B "$build" -DCMAKE_BUILD_TYPE=Release -DBUILD_DEMOS=OFF -DBUILD_SHARED=OFF -DBUILD_STATIC=ON -DBUILD_TESTING=ON -DBUILD_BENCHMARKS=ON -DMUNK2D_ENABLE_LTO=ON '-DCMAKE_C_FLAGS=-march=x86-64 -mtune=generic -pthread' '-DCMAKE_CXX_FLAGS=-march=x86-64 -mtune=generic -pthread' -DCMAKE_EXE_LINKER_FLAGS=-pthread
  cmake --build "$build" --parallel 2
- ctest --test-dir "$build" --output-on-failure | tee "$root/out/tests-$variant.log"
+ # Focal CTest 3.16 does not support --test-dir; run IN the build tree.
+ expected=18; [[ "$variant" != candidate ]] || expected=19
+ (cd "$build" && ctest -N) | tee "$root/out/test-count-$variant.txt"
+ grep -Eq "Total Tests: $expected$" "$root/out/test-count-$variant.txt"
+ (cd "$build" && ctest --output-on-failure) | tee "$root/out/tests-$variant.log"
  for driver in munkbench munkbench_mixed; do
   cp "$build/benchmarks/$driver" "$package/$driver-$variant";strip --strip-unneeded "$package/$driver-$variant"
   readelf --version-info "$package/$driver-$variant" >> "$root/out/abi.txt"
