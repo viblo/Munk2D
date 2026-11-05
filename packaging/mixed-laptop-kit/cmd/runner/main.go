@@ -225,9 +225,20 @@ func decodeSummary(data []byte) map[string]any {
 		require(!seen[name], "duplicate scene")
 		seen[name] = true
 		cs := b["checkpoints"].([]any)
-		require(len(cs) == 7, "missing checkpoints")
-		for _, p := range cs {
-			require(p.(map[string]any)["invalid_values"] == float64(0), "nonfinite checkpoint")
+		total := b["simulated_steps"].(float64)
+		require(total > 0, "invalid simulated steps")
+		expected := []float64{}
+		for _, step := range []float64{0, 1, 10, 50, 180, 181} {
+			if step < total {
+				expected = append(expected, step)
+			}
+		}
+		expected = append(expected, total)
+		require(len(cs) == len(expected), "missing checkpoints")
+		for i, p := range cs {
+			checkpoint := p.(map[string]any)
+			require(checkpoint["step"] == expected[i], "incorrect checkpoint sequence")
+			require(checkpoint["invalid_values"] == float64(0), "nonfinite checkpoint")
 		}
 	}
 	return x
