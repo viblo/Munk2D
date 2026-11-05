@@ -149,7 +149,7 @@ usage(const char *argv0)
 	printf("Options:\n");
 	printf("  -b, --benchmarks  Run only the named benchmarks.\n");
 	printf("  --profile NAME    Size profile: smoke, reference (default), or extended.\n");
-	printf("  --contact-solver  original (default) or avx2. Unsupported AVX2 is an error.\n");
+	printf("  --contact-solver  original (default), avx2 or wasm-simd. Unavailable backend is an error.\n");
 	printf("  -s, --size        Explicit size override; use -1 for a size sweep.\n");
 	printf("  --warmup n        Untimed independent runs before sampling. Default: 0.\n");
 	printf("  --samples n       Number of raw timing samples to emit. Default: 1.\n");
@@ -1810,8 +1810,9 @@ main(int argc, char **argv)
 			const char *value = argv[++i];
 			if(strcmp(value, "original") == 0) benchmarkContactSolver = CP_CONTACT_SOLVER_ORIGINAL;
 			else if(strcmp(value, "avx2") == 0) benchmarkContactSolver = CP_CONTACT_SOLVER_AVX2;
+			else if(strcmp(value, "wasm-simd") == 0) benchmarkContactSolver = CP_CONTACT_SOLVER_WASM_SIMD;
 			else {
-				fprintf(stderr, "Invalid contact solver: %s. Use original or avx2.\n", value);
+				fprintf(stderr, "Invalid contact solver: %s. Use original, avx2 or wasm-simd.\n", value);
 				free(selected_names);
 				return 2;
 			}

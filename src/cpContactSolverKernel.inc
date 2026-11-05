@@ -45,5 +45,5 @@ static void solvePacket(cpContactSolverContext *p,cpContactSolverPacket *q,int l
   if(q->mode!=1)impulse(&a,load(q->am),load(q->ai),r1x,r1y,neg(jx),neg(jy),neg(jbx),neg(jby));
   if(q->mode!=2)impulse(&b,load(q->bm),load(q->bi),r2x,r2y,jx,jy,jbx,jby);
  }
- if(q->mode!=1)putVelocity(p,q->a+lane,q->lanes,a);if(q->mode!=2)putVelocity(p,q->b+lane,q->lanes,b);
+ if(q->mode!=1)putVelocity(p,q->a+lane,q->lanes-lane,a);if(q->mode!=2)putVelocity(p,q->b+lane,q->lanes-lane,b);
 }

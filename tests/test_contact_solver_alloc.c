@@ -3,6 +3,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../src/cpContactSolver.h"
+#ifdef __EMSCRIPTEN__
+#define TEST_CONTACT_SOLVER CP_CONTACT_SOLVER_WASM_SIMD
+#else
+#define TEST_CONTACT_SOLVER CP_CONTACT_SOLVER_AVX2
+#endif
 static int failAllocation;
 static void *testCalloc(size_t count,size_t size){return failAllocation?NULL:calloc(count,size);}
 #undef cpcalloc
@@ -21,12 +26,12 @@ int main(void)
  size_t bytes=SIZE_MAX-3;CHECK(!addRegion(&bytes,1,8));bytes=0;CHECK(!addRegion(&bytes,SIZE_MAX,8));
  free(s.graphMemory);free(s.solverMemory);
  failAllocation=0;cpSpace *space=cpSpaceNew();
- if(cpContactSolverIsAvailable(CP_CONTACT_SOLVER_AVX2)){
-  failAllocation=1;CHECK(!cpSpaceSetContactSolver(space,CP_CONTACT_SOLVER_AVX2));CHECK(cpSpaceGetContactSolver(space)==CP_CONTACT_SOLVER_ORIGINAL);
-  failAllocation=0;CHECK(cpSpaceSetContactSolver(space,CP_CONTACT_SOLVER_AVX2));
+ if(cpContactSolverIsAvailable(TEST_CONTACT_SOLVER)){
+  failAllocation=1;CHECK(!cpSpaceSetContactSolver(space,TEST_CONTACT_SOLVER));CHECK(cpSpaceGetContactSolver(space)==CP_CONTACT_SOLVER_ORIGINAL);
+  failAllocation=0;CHECK(cpSpaceSetContactSolver(space,TEST_CONTACT_SOLVER));
   for(int i=0;i<4;i++)cpArrayPush(space->arbiters,NULL);
   failAllocation=1;CHECK(!cpContactSolverStep(space,cpContactSolverGet(space)));CHECK(!cpContactSolverGet(space)->usedLastStep);CHECK(!cpContactSolverGet(space)->graphMemory);
-  CHECK(cpSpaceGetContactSolver(space)==CP_CONTACT_SOLVER_AVX2);space->arbiters->num=0;
+  CHECK(cpSpaceGetContactSolver(space)==TEST_CONTACT_SOLVER);space->arbiters->num=0;
  }
  failAllocation=0;cpSpaceFree(space);
  puts("PASS: scratch allocation failure preserves previous arenas; checked sizing; failed selection and step allocation leave state consistent.");return 0;

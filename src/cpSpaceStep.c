@@ -474,7 +474,7 @@ cpSpaceStep(cpSpace *space, cpFloat dt)
 		}
 		
 		// The original loop remains the default and all-or-nothing fallback.
-#if CP_AVX2_CONTACT_SOLVER && CP_USE_DOUBLES
+#if (CP_AVX2_CONTACT_SOLVER || CP_WASM_SIMD_CONTACT_SOLVER) && CP_USE_DOUBLES
 		cpContactSolverContext *contactSolver = cpContactSolverGet(space);
 		if(!(contactSolver && cpContactSolverStep(space, contactSolver)))
 #endif

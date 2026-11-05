@@ -83,25 +83,27 @@ CP_EXPORT int cpSpaceGetIterations(const cpSpace *space);
 CP_EXPORT void cpSpaceSetIterations(cpSpace *space, int iterations);
 
 /// Contact solver used by cpSpaceStep(). The original solver remains the default.
-/// The AVX2 solver uses double precision and a different contact order; trajectories
+/// The AVX2 and Wasm SIMD solvers use doubles and a different contact order; trajectories
 /// may differ. It falls back to the original solver for active cpConstraints,
 /// unsuitable contact graphs, unsupported contacts or scratch allocation failure.
 /// This setting does not change the separate cpHastySpaceStep() solver.
 typedef enum cpContactSolverType {
 	CP_CONTACT_SOLVER_ORIGINAL = 0,
 	CP_CONTACT_SOLVER_AVX2 = 1,
+	CP_CONTACT_SOLVER_WASM_SIMD = 2,
 	/// Reserved, not selectable. Keeps a stable enum width and room for extensions.
 	CP_CONTACT_SOLVER_TYPE_MAX = 0x7fffffff
 } cpContactSolverType;
 
-/// Whether this build and the current CPU/OS support a contact solver.
+/// Whether this build and runtime support a contact solver.
+/// A Wasm SIMD module requires SIMD at load time, even with ORIGINAL selected.
 CP_EXPORT cpBool cpContactSolverIsAvailable(cpContactSolverType solver);
 /// Requested solver; individual steps may still use the documented fallback.
 CP_EXPORT cpContactSolverType cpSpaceGetContactSolver(const cpSpace *space);
 /// Select a solver while the space is unlocked. Returns false for an invalid or
 /// unavailable solver, a locked space, or allocation failure; leaves the previous
 /// selection unchanged. Selecting ORIGINAL releases the optional scratch storage.
-/// Does not wake sleeping bodies. The AVX2 backend is never selected automatically.
+/// Does not wake sleeping bodies. SIMD backends are never selected automatically.
 CP_EXPORT cpBool cpSpaceSetContactSolver(cpSpace *space, cpContactSolverType solver);
 
 /// Gravity to pass to rigid bodies when integrating velocity.

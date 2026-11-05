@@ -104,7 +104,8 @@ cpContactSolverDestroy(cpSpace *space)
 cpContactSolverType
 cpSpaceGetContactSolver(const cpSpace *space)
 {
- return cpContactSolverGet(space) ? CP_CONTACT_SOLVER_AVX2 : CP_CONTACT_SOLVER_ORIGINAL;
+ const cpContactSolverContext *s = cpContactSolverGet(space);
+ return s ? s->type : CP_CONTACT_SOLVER_ORIGINAL;
 }
 
 cpBool
@@ -116,10 +117,15 @@ cpSpaceSetContactSolver(cpSpace *space, cpContactSolverType solver)
   return cpTrue;
  }
  if(cpContactSolverGet(space)) return cpTrue;
-#if CP_AVX2_CONTACT_SOLVER && CP_USE_DOUBLES
+#if (CP_AVX2_CONTACT_SOLVER || CP_WASM_SIMD_CONTACT_SOLVER) && CP_USE_DOUBLES
  cpContactSolverContext *s = (cpContactSolverContext *)cpcalloc(1, sizeof(*s));
  if(!s) return cpFalse;
+ s->type = solver;
+#if CP_WASM_SIMD_CONTACT_SOLVER
+ s->kernel = cpContactSolverKernelWasm;
+#else
  s->kernel = cpContactSolverKernelAvx2;
+#endif
  ((cpSpaceBufferStorage *)space->allocatedBuffers)->solver = s;
  return cpTrue;
 #else
@@ -186,7 +192,7 @@ prepare(cpContactSolverContext *s, cpArray *arbiters)
  int packets = 0;
  for(int color = 0; color < CP_CONTACT_SOLVER_COLORS; ++color)
   for(int kind = 0, bits = (int)usedKinds[color]; bits; ++kind, bits >>= 1)
-   if(bits & 1) packets += (sizes[color*CP_CONTACT_SOLVER_KINDS + kind] + 3)/4;
+   if(bits & 1) packets += (sizes[color*CP_CONTACT_SOLVER_KINDS + kind] + CP_CONTACT_SOLVER_LANES - 1)/CP_CONTACT_SOLVER_LANES;
  if(!reserveSolver(s, s->bodyCount, packets)) return cpFalse;
  /* Enumerate in the same color/kind order as the original full scan. */
  for(int color = 0; color < CP_CONTACT_SOLVER_COLORS; ++color)
@@ -201,7 +207,7 @@ prepare(cpContactSolverContext *s, cpArray *arbiters)
     p->mode = kind/4;
     p->friction = (kind/2)%2;
     p->count = kind%2 + 1;
-    for(int lane = 0; lane < 4 && heads[group] >= 0; ++lane){
+    for(int lane = 0; lane < CP_CONTACT_SOLVER_LANES && heads[group] >= 0; ++lane){
      int index = heads[group];
      cpContactSolverLink *link = &s->links[index];
      heads[group] = link->next;
@@ -225,7 +231,7 @@ prepare(cpContactSolverContext *s, cpArray *arbiters)
       to->jBias[lane] = from->jBias; to->jnAcc[lane] = from->jnAcc; to->jtAcc[lane] = from->jtAcc;
      }
     }
-    for(int lane = p->lanes; lane < 4; ++lane){
+    for(int lane = p->lanes; lane < CP_CONTACT_SOLVER_LANES; ++lane){
      p->a[lane] = p->a[0]; p->b[lane] = p->b[0];
      p->nx[lane] = p->ny[lane] = p->sx[lane] = p->sy[lane] = p->u[lane] = 0;
      p->am[lane] = p->ai[lane] = p->bm[lane] = p->bi[lane] = 0;

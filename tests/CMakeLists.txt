@@ -14,12 +14,14 @@ foreach(test_name contact_solver contact_solver_alloc contact_solver_quality)
 endforeach()
 # Research sanitizer runs need headroom on shared virtual CPUs.
 set_tests_properties(chipmunk_contact_solver_quality_tests PROPERTIES TIMEOUT 300)
-# The allocation-injection test compiles the generic scheduler itself; keep its
-# feature configuration identical to the library whose other objects it uses.
+# These tests inspect private packet layouts; the allocation-injection test also
+# compiles the scheduler. Keep their feature configuration equal to the library.
 get_target_property(_contact_solver_defs chipmunk_static COMPILE_DEFINITIONS)
 foreach(definition IN LISTS _contact_solver_defs)
-  if(definition MATCHES "^CP_AVX2_CONTACT_SOLVER=")
-    target_compile_definitions(chipmunk_contact_solver_alloc_tests PRIVATE "${definition}")
+  if(definition MATCHES "^CP_(AVX2|WASM_SIMD)_CONTACT_SOLVER=")
+    foreach(test_name contact_solver contact_solver_alloc contact_solver_quality)
+      target_compile_definitions(chipmunk_${test_name}_tests PRIVATE "${definition}")
+    endforeach()
   endif()
 endforeach()
 

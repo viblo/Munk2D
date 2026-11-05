@@ -1,4 +1,9 @@
 #include "../src/cpContactSolver.h"
+#ifdef __EMSCRIPTEN__
+#define TEST_CONTACT_SOLVER CP_CONTACT_SOLVER_WASM_SIMD
+#else
+#define TEST_CONTACT_SOLVER CP_CONTACT_SOLVER_AVX2
+#endif
 #include <stdio.h>
 #if CP_USE_DOUBLES
 #include <math.h>
@@ -19,7 +24,7 @@ static void post(cpArbiter *arb,cpSpace *space,void *data){(void)space;World *w=
  for(int i=0;i<set.count;i++){double p=max(0,-set.points[i].distance/w->scale);w->maxPen=max(w->maxPen,p);if(w->step>=w->steps-240)w->tailPen=max(w->tailPen,p);}
  for(int i=0;i<arb->count;i++){struct cpContact *c=&arb->contacts[i];double excess=max(0,fabs(c->jtAcc)-arb->u*c->jnAcc)/(1+fabs(arb->u*c->jnAcc));w->frictionExcess=max(w->frictionExcess,excess);if(!isfinite(c->jnAcc)||!isfinite(c->jtAcc)||!isfinite(c->jBias)||c->jnAcc<0)w->invalid++;}
 }
-static void init(World *w,double scale,double gravity){memset(w,0,sizeof(*w));w->scale=scale;w->space=cpSpaceNew();if(qualityMode){if(!cpSpaceSetContactSolver(w->space,CP_CONTACT_SOLVER_AVX2)){fprintf(stderr,"Cannot enable solver\n");exit(1);}if(qualityMode==1)cpContactSolverGet(w->space)->kernel=cpContactSolverKernelScalar;}cpSpaceSetGravity(w->space,cpv(0,gravity*scale));cpSpaceSetIterations(w->space,qualityIterations);cpSpaceSetCollisionSlop(w->space,0.005*scale);cpSpaceSetSleepTimeThreshold(w->space,INFINITY);cpCollisionHandler *h=cpSpaceAddGlobalCollisionHandler(w->space);h->postSolveFunc=post;h->userData=w;}
+static void init(World *w,double scale,double gravity){memset(w,0,sizeof(*w));w->scale=scale;w->space=cpSpaceNew();if(qualityMode){if(!cpSpaceSetContactSolver(w->space,TEST_CONTACT_SOLVER)){fprintf(stderr,"Cannot enable solver\n");exit(1);}if(qualityMode==1)cpContactSolverGet(w->space)->kernel=cpContactSolverKernelScalar;}cpSpaceSetGravity(w->space,cpv(0,gravity*scale));cpSpaceSetIterations(w->space,qualityIterations);cpSpaceSetCollisionSlop(w->space,0.005*scale);cpSpaceSetSleepTimeThreshold(w->space,INFINITY);cpCollisionHandler *h=cpSpaceAddGlobalCollisionHandler(w->space);h->postSolveFunc=post;h->userData=w;}
 static cpBody *body(World *w,double mass,double moment,cpVect p){cpBody *b=cpSpaceAddBody(w->space,cpBodyNew(mass,moment));cpBodySetPosition(b,p);w->body[w->nb++]=b;return b;}
 static cpShape *shape(World *w,cpShape *s,double friction,double restitution){cpShapeSetFriction(s,friction);cpShapeSetElasticity(s,restitution);cpSpaceAddShape(w->space,s);w->shape[w->ns++]=s;return s;}
 static void floorShape(World *w,double offset){shape(w,cpSegmentShapeNew(cpSpaceGetStaticBody(w->space),cpv(offset-100*w->scale,offset),cpv(offset+100*w->scale,offset),0),1,1);}
@@ -58,14 +63,14 @@ static void runCases(void){for(int k=0;k<3;k++){double s=k==0?0.01:k==1?1:100;st
 
 int main(void){
  const double steps[]={1.0/120,1.0/60,1.0/120,1.0/120};const int iterations[]={10,10,20,5};
- int modes=cpContactSolverIsAvailable(CP_CONTACT_SOLVER_AVX2)?3:1;
+ int modes=cpContactSolverIsAvailable(TEST_CONTACT_SOLVER)?3:1;
  for(int config=0;config<4;config++){
   qualityDt=steps[config];qualityIterations=iterations[config];
   for(qualityMode=0;qualityMode<modes;qualityMode++){qualityIndex=0;runCases();if(qualityIndex!=21)failures++;}
  }
  if(failures)return 1;
- printf("PASS:21 physical probes x4 timestep/iteration configurations x%d solver modes; scalar/AVX exact where available.\n",modes);return 0;
+ printf("PASS:21 physical probes x4 timestep/iteration configurations x%d solver modes; scalar/SIMD exact where available.\n",modes);return 0;
 }
 #else
-int main(void){if(cpContactSolverIsAvailable(CP_CONTACT_SOLVER_AVX2))return 1;puts("PASS: double-only backend unavailable for float builds.");return 0;}
+int main(void){if(cpContactSolverIsAvailable(TEST_CONTACT_SOLVER))return 1;puts("PASS: double-only backend unavailable for float builds.");return 0;}
 #endif
