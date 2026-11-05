@@ -83,9 +83,10 @@ CP_EXPORT int cpSpaceGetIterations(const cpSpace *space);
 CP_EXPORT void cpSpaceSetIterations(cpSpace *space, int iterations);
 
 /// Contact solver used by cpSpaceStep(). The original solver remains the default.
-/// The AVX2 and Wasm SIMD solvers use doubles and a different contact order; trajectories
-/// may differ. It falls back to the original solver for active cpConstraints,
-/// unsuitable contact graphs, unsupported contacts or scratch allocation failure.
+/// Both SIMD solvers use doubles; contact ordering and trajectories may differ.
+/// Native AVX2 supports built-in joints using scalar joint sweeps each iteration.
+/// Wasm SIMD still falls back for active cpConstraints. Both retain original-solver
+/// fallback for unsupported cases or scratch allocation failure.
 /// This setting does not change the separate cpHastySpaceStep() solver.
 typedef enum cpContactSolverType {
 	CP_CONTACT_SOLVER_ORIGINAL = 0,
