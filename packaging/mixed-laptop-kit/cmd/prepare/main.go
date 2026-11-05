@@ -34,6 +34,9 @@ func replace(p, old, new string) {
 	write(p, []byte(strings.Replace(b, old, new, 1)))
 }
 func command(args ...string) string {
+	if args[0] == "git" && len(args) > 2 && args[1] == "-C" {
+		args = append([]string{"git", "-c", "safe.directory=" + args[2]}, args[1:]...)
+	}
 	b, e := exec.Command(args[0], args[1:]...).CombinedOutput()
 	if e != nil {
 		panic(string(b) + e.Error())
@@ -57,6 +60,13 @@ func main() {
 		// Identical public-API mixed fixture and build flags on both engine versions.
 		for _, f := range []string{"mixedbench.c", "CMakeLists.txt"} {
 			write(filepath.Join(*root, "baseline", "benchmarks", f), read(filepath.Join(*root, "candidate", "benchmarks", f)))
+		}
+		// Checkout uses CRLF on Windows; normalize both benchmark-only sources before patching.
+		for _, name := range []string{"baseline", "candidate"} {
+			for _, f := range []string{"munkbench.c", "mixedbench.c"} {
+				p := filepath.Join(*root, name, "benchmarks", f)
+				write(p, []byte(strings.ReplaceAll(string(read(p)), "\r\n", "\n")))
+			}
 		}
 		if runtime.GOOS == "windows" {
 			for _, name := range []string{"baseline", "candidate"} {

@@ -5,6 +5,7 @@ $Out=Join-Path $Root 'out'
 $Package=Join-Path $Out 'munk2d-mixed-windows-x64'
 New-Item -ItemType Directory -Force $Package | Out-Null
 function Native([string]$File,[string[]]$Arguments) { & $File @Arguments; if($LASTEXITCODE -ne 0) { throw "Failed: $File $Arguments" } }
+$env:GOFLAGS='-buildvcs=false'
 Set-Location $Tools
 Native go @('test','./cmd/runner')
 $env:CGO_ENABLED='0';$env:GOAMD64='v1'

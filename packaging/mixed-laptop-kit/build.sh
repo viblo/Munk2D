@@ -4,6 +4,7 @@ root=${GITHUB_WORKSPACE:-$(git rev-parse --show-toplevel)}
 tools="$root/packaging/mixed-laptop-kit"
 package="$root/out/munk2d-mixed-linux-x86_64"
 mkdir -p "$package"
+export GOFLAGS=-buildvcs=false
 cd "$tools"
 go test ./cmd/runner
 CGO_ENABLED=0 GOAMD64=v1 go build -trimpath -ldflags='-s -w' -o "$package/runner" ./cmd/runner

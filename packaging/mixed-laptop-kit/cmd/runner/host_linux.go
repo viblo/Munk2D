@@ -57,7 +57,11 @@ func telemetry(cpu int) map[string]any {
 	for _, s := range []string{"scaling_cur_freq", "scaling_min_freq", "scaling_max_freq", "scaling_governor", "energy_performance_preference"} {
 		freq[s] = readText(p + s)
 	}
-	t := map[string]any{"Utc": utc(), "LoadAverage": strings.Join(strings.Fields(readText("/proc/loadavg"))[:3], " "), "FrequencyDriverInstantaneous": freq}
+	load := strings.Fields(readText("/proc/loadavg"))
+	if len(load) > 3 {
+		load = load[:3]
+	}
+	t := map[string]any{"Utc": utc(), "LoadAverage": strings.Join(load, " "), "FrequencyDriverInstantaneous": freq}
 	for _, line := range strings.Split(readText("/proc/stat"), "\n") {
 		if strings.HasPrefix(line, fmt.Sprintf("cpu%d ", cpu)) {
 			t["CPUStat"] = line

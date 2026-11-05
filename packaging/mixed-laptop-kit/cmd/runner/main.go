@@ -28,8 +28,8 @@ import (
 
 type Entry struct{ Name, SHA256 string }
 type Manifest struct {
-	Baseline, Candidate, Timer, Compiler, BuildRun, PackagingCommit string
-	Executables                                                     []Entry
+	Baseline, Candidate, Timer, Compiler, BuildRun, PackagingCommit, ScenariosSHA256 string
+	Executables                                                                      []Entry
 }
 type Case struct {
 	ID, Driver, Scene, Profile string
@@ -110,10 +110,17 @@ func median(x []float64) float64 {
 }
 func (a *App) verify() {
 	require(len(a.manifest.Executables) == 5, "expected four benchmark drivers and one runner")
+	expected := map[string]bool{}
+	for _, n := range []string{"munkbench-baseline", "munkbench-candidate", "munkbench_mixed-baseline", "munkbench_mixed-candidate", "runner"} {
+		expected[n+suffix()] = true
+	}
 	for _, v := range a.manifest.Executables {
+		require(expected[v.Name], "unexpected or duplicate manifest executable")
+		delete(expected, v.Name)
 		require(filepath.Base(v.Name) == v.Name, "unsafe manifest path")
 		require(sha(filepath.Join(a.root, v.Name)) == v.SHA256, "checksum mismatch: "+v.Name)
 	}
+	require(sha(filepath.Join(a.root, "scenarios.json")) == a.manifest.ScenariosSHA256, "scenario checksum mismatch")
 }
 func suffix() string {
 	if runtime.GOOS == "windows" {
@@ -136,6 +143,7 @@ func (a *App) invoke(stage, driver, variant string, args []string) []byte {
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
+	before := telemetry(a.cpu)
 	start := time.Now()
 	err := cmd.Run()
 	elapsed := time.Since(start).Seconds()
@@ -144,7 +152,7 @@ func (a *App) invoke(stage, driver, variant string, args []string) []byte {
 	if stderr.Len() > 0 {
 		check(os.WriteFile(filepath.Join(a.out, "raw", stem+".stderr"), stderr.Bytes(), 0644))
 	}
-	record := map[string]any{"ID": id, "Stage": stage, "Executable": exe, "Args": args, "StartedUtc": start.UTC().Format(time.RFC3339Nano), "EndedUtc": utc(), "InvocationWallSeconds": elapsed}
+	record := map[string]any{"ID": id, "Stage": stage, "Executable": exe, "Args": args, "StartedUtc": start.UTC().Format(time.RFC3339Nano), "EndedUtc": utc(), "InvocationWallSeconds": elapsed, "Before": before, "After": telemetry(a.cpu)}
 	if cmd.ProcessState != nil {
 		record["InvocationCPUSeconds"] = cmd.ProcessState.UserTime().Seconds() + cmd.ProcessState.SystemTime().Seconds()
 		record["ExitCode"] = cmd.ProcessState.ExitCode()
