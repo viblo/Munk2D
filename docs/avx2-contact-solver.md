@@ -2,8 +2,10 @@
 
 The original contact solver remains the default. The AVX2 solver is an explicit
 per-space opt-in for `cpSpaceStep()`, not a replacement for all workloads.
-It uses double precision, groups independent contacts with a bounded graph
-coloring, and uses four-lane SIMD. It does not add worker threads.
+It uses double precision and four-lane SIMD for independent contacts. Joint-free
+steps keep the bounded graph-coloring fast path. Mixed steps preserve contact
+dependencies and interleave SIMD contacts with existing scalar joint sweeps.
+It does not vectorize the joint formulas or add worker threads.
 For Emscripten, see the separate [WebAssembly SIMD backend](wasm-contact-solver.md);
 its SIMD module-loading requirement differs from native AVX2 CPU dispatch.
 
@@ -58,9 +60,9 @@ Build-time compiler capability and runtime CPU/OS capability are separate:
 
 Even when requested and available, the whole step uses the original solver if:
 
-- there are active `cpConstraint` objects (joints, springs, motors, custom types);
+- an active constraint has an unknown/custom implementation class;
 - fewer than four arbiters are active, or the iteration count is not positive;
-- the graph cannot fit the fixed12-color budget;
+- a joint-free contact graph cannot fit the fixed12-color budget;
 - an arbiter aliases its two bodies, has an unsupported contact count, or both
   bodies have zero inverse mass and inverse inertia;
 - checked scratch sizing/allocation cannot be satisfied.
@@ -68,6 +70,39 @@ Even when requested and available, the whole step uses the original solver if:
 Fallback decisions are made before modifying body velocities or accumulated
 contact impulses. Cached/warm-start impulses retain the original phase/order.
 The backend never skips a collision to make a graph fit.
+
+## Mixed contacts and joints
+
+Native AVX2 supports all ten built-in constraint classes: pin, slide, pivot,
+groove, gear, ratchet, rotary limit, simple motor, damped spring and damped
+rotary spring. Joints in the **same connected group** as the contacts are
+supported; unrelated joints no longer disable all SIMD contact solving.
+
+Each mixed solver iteration performs one contact-packet sweep followed by the
+original scalar joint sweep, in its original joint order. Only physical linear
+and angular velocities of bodies shared by contacts and joints are synchronized
+between scratch and body storage. Joint-only bodies stay in ordinary storage;
+built-in joints do not read/write the contact solver's split-impulse bias
+velocities. Shared frozen endpoints are read back but never overwritten by the
+contact solver. All velocities and contact accumulators are committed before
+post-solve callbacks.
+
+Mixed steps use dependency-aware ready queues instead of graph-color ordering.
+On every writable body, contact solves retain their original arbiter order;
+only independent contacts can enter the same packet. Successors become ready
+only after the whole preceding packet has been selected. Mixed graphs are not
+subject to the joint-free12-color limit. The existing joint-free path and its
+all-iterations kernel remain separate.
+
+Pre-solve, spring force/torque, warm-start, post-solve and post-step phases remain
+in their existing locations. The supported spring callbacks run before packet
+preparation. A custom C constraint class can change unrelated bodies or contact
+coefficients inside its impulse function, so its presence retains complete
+original-solver fallback rather than attempting partial synchronization.
+
+This support is **native AVX2 only**. The Wasm SIMD backend keeps its existing
+whole-step fallback for active constraints; there is no Python AUTO, wheel or
+module-loading policy change.
 
 ## Numerical behavior and quality
 
@@ -119,7 +154,9 @@ contents/order are unchanged; solver state is not a fake arbiter-buffer entry
 and does not use application `userData` or a process-global registry.
 
 A context is allocated only on successful opt-in. It owns separate reusable
-arenas for graph metadata and solver working data. Large solver buffers are
+arenas for graph metadata and solver working data, plus a lazily allocated mixed
+arena for dependencies, packet order and shared-body indices. Joint-free spaces
+do not allocate that mixed arena. Large solver buffers are
 reserved only after graph eligibility is established. Active hash length and
 packed body count depend on current work, not on retained peak capacity. Scratch
 velocities use six adjacent doubles per body. No graph coloring is cached across
@@ -157,6 +194,21 @@ Per-step eligibility fallback still applies. Use alternating paired runs and
 original-versus-original controls, include setup costs, and check results and
 physical quality separately. Small percentage differences can be code-layout or
 measurement effects. Collision-heavy workloads may benefit while others do not.
+
+The additional native `munkbench_mixed` executable exercises light-joint piles,
+dense joint/contact networks and motor-driven mechanisms, without changing the
+published26-scene browser protocol:
+
+```sh
+./build/benchmarks/munkbench_mixed --scene light --solver original --count 256
+./build/benchmarks/munkbench_mixed --scene light --solver avx2 --count 256
+# Also: --scene dense or --scene mechanisms; --steps/--batch/--samples/--warmup.
+```
+
+It reports complete-step CPU time, initialization separately, workload counts,
+finite-state checks and final body/joint hashes. The identical public-API-only
+driver can be linked against an older library for baseline comparisons. These
+synthetic scenes supplement rather than replace application workloads.
 
 ### Measured performance guidance (2.1.0)
 

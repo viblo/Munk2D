@@ -55,5 +55,6 @@ jobs:
             -DBUILD_DEMOS=OFF -DBUILD_TESTING=ON -DBUILD_BENCHMARKS=OFF \
             -DMUNK2D_ENABLE_LTO=OFF -DCMAKE_C_FLAGS=-DCP_USE_DOUBLES=0
           cmake --build build-float --parallel 2 --target \
-            chipmunk_contact_solver_tests chipmunk_contact_solver_alloc_tests chipmunk_contact_solver_quality_tests
+            chipmunk_contact_solver_tests chipmunk_contact_solver_alloc_tests \
+            chipmunk_contact_solver_quality_tests chipmunk_contact_solver_mixed_tests
           ctest --test-dir build-float -R '^chipmunk_contact_solver' --output-on-failure

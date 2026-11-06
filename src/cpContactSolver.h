@@ -34,6 +34,7 @@ typedef struct cpContactSolverPacket {
 } cpContactSolverPacket;
 
 typedef struct cpContactSolverLink { int a, b, kind, next; } cpContactSolverLink;
+typedef struct cpContactSolverDependency { int pending, successors[2]; } cpContactSolverDependency;
 typedef struct cpContactSolverContext cpContactSolverContext;
 typedef void (*cpContactSolverKernel)(cpContactSolverContext *, int);
 
@@ -48,6 +49,15 @@ struct cpContactSolverContext {
  double *velocity;
  cpContactSolverPacket *packets;
  int bodyCount, packetCount, hashMask;
+ /* Mixed steps preserve contact dependencies and synchronize only bodies
+  * shared by contacts and joints. This lazy arena leaves joint-free graph
+  * and packet allocations unchanged. Per-step counts are cleared on return. */
+ void *mixedMemory;
+ int mixedCapacity;
+ cpContactSolverDependency *dependencies;
+ int *mixedOrder, *jointBodies;
+ unsigned char *mixedLanes;
+ int jointBodyCount;
  cpContactSolverKernel kernel;
  cpContactSolverType type;
  cpBool usedLastStep;
