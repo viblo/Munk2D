@@ -16,9 +16,9 @@ static void *testCalloc(size_t count,size_t size){return failAllocation?NULL:cal
 #define CHECK(x) do{if(!(x)){fprintf(stderr,"FAIL allocation test line%d\n",__LINE__);exit(1);}}while(0)
 static void mixedStepFailures(void)
 {
- if(!cpContactSolverIsAvailable(CP_CONTACT_SOLVER_AVX2))return;
+ if(!cpContactSolverIsAvailable(TEST_CONTACT_SOLVER))return;
  failAllocation=0;
- cpSpace *space=cpSpaceNew();CHECK(cpSpaceSetContactSolver(space,CP_CONTACT_SOLVER_AVX2));
+ cpSpace *space=cpSpaceNew();CHECK(cpSpaceSetContactSolver(space,TEST_CONTACT_SOLVER));
  cpContactSolverContext *s=cpContactSolverGet(space);
  cpBody *bodies[4];cpArbiter arbiters[4];struct cpContact contacts[4];
  memset(arbiters,0,sizeof(arbiters));memset(contacts,0,sizeof(contacts));

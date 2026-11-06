@@ -100,9 +100,9 @@ preparation. A custom C constraint class can change unrelated bodies or contact
 coefficients inside its impulse function, so its presence retains complete
 original-solver fallback rather than attempting partial synchronization.
 
-This support is **native AVX2 only**. The Wasm SIMD backend keeps its existing
-whole-step fallback for active constraints; there is no Python AUTO, wheel or
-module-loading policy change.
+The optional [Wasm SIMD backend](wasm-contact-solver.md) also uses this shared
+mixed schedule. Its module-loading requirement and opt-in build policy are
+unchanged; there is no Python AUTO or wheel change here.
 
 ## Numerical behavior and quality
 
@@ -195,7 +195,7 @@ original-versus-original controls, include setup costs, and check results and
 physical quality separately. Small percentage differences can be code-layout or
 measurement effects. Collision-heavy workloads may benefit while others do not.
 
-The additional native `munkbench_mixed` executable exercises light-joint piles,
+The additional standalone `munkbench_mixed` executable exercises light-joint piles,
 dense joint/contact networks and motor-driven mechanisms, without changing the
 published26-scene browser protocol:
 

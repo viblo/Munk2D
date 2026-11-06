@@ -1,5 +1,10 @@
-/* Native mixed contact/joint integration. The Wasm policy is unchanged. */
+/* Mixed contact/joint integration for both runtime-selected packet backends. */
 #include "../src/cpContactSolver.h"
+#ifdef __EMSCRIPTEN__
+#define TEST_CONTACT_SOLVER CP_CONTACT_SOLVER_WASM_SIMD
+#else
+#define TEST_CONTACT_SOLVER CP_CONTACT_SOLVER_AVX2
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -132,7 +137,7 @@ static void make(World *w, int kind, int mode, cpBool stack)
   if(kind == 7) cpDampedSpringSetSpringForceFunc(joint, springForce);
  }
  if(mode){
-  CHECK(cpSpaceSetContactSolver(w->space, CP_CONTACT_SOLVER_AVX2));
+  CHECK(cpSpaceSetContactSolver(w->space, TEST_CONTACT_SOLVER));
   cpContactSolverContext *s = cpContactSolverGet(w->space);
   w->packetKernel = mode == 1 ? cpContactSolverKernelScalar : s->kernel;
   s->kernel = checkedKernel;
@@ -317,8 +322,8 @@ static void growShrink(void)
 
 int main(void)
 {
- if(!cpContactSolverIsAvailable(CP_CONTACT_SOLVER_AVX2)){
-  puts("PASS: native mixed contact/joint backend unavailable; existing fallback retained.");return 0;
+ if(!cpContactSolverIsAvailable(TEST_CONTACT_SOLVER)){
+  puts("PASS: mixed contact/joint backend unavailable; existing fallback retained.");return 0;
  }
  long mixedSteps = 0;
  for(int kind = 0; kind < 10; ++kind) for(int stack = 0; stack < 2; ++stack){

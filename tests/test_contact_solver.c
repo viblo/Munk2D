@@ -249,21 +249,11 @@ int main(void)
  for(int step=0;step<600;step++){int iterations=step%3==0?1:step%3==1?10:20;cpSpaceSetIterations(a.space,iterations);cpSpaceSetIterations(b.space,iterations);cpFloat dt=step%2?1.0/60:1.0/120;cpSpaceStep(a.space,dt);cpSpaceStep(b.space,dt);compare(&a,&b);}cleanup(&a);cleanup(&b);
 
  make(&a,8,cpFalse);make(&b,8,cpFalse);a.joint=cpSpaceAddConstraint(a.space,cpPinJointNew(a.body[0],a.body[1],cpvzero,cpvzero));b.joint=cpSpaceAddConstraint(b.space,cpPinJointNew(b.body[0],b.body[1],cpvzero,cpvzero));CHECK(cpSpaceSetContactSolver(a.space,TEST_CONTACT_SOLVER));
-#ifndef __EMSCRIPTEN__
  CHECK(cpSpaceSetContactSolver(b.space,TEST_CONTACT_SOLVER));cpContactSolverGet(b.space)->kernel=cpContactSolverKernelScalar;
-#endif
  for(int i=0;i<30;i++){cpSpaceStep(a.space,1.0/60);cpSpaceStep(b.space,1.0/60);compare(&a,&b);
-#ifdef __EMSCRIPTEN__
-  CHECK(!cpContactSolverGet(a.space)->usedLastStep);
-#else
   CHECK(cpContactSolverGet(a.space)->usedLastStep);
-#endif
  }
-#ifdef __EMSCRIPTEN__
- CHECK(!cpContactSolverGet(a.space)->solverMemory);
-#else
  CHECK(cpContactSolverGet(a.space)->jointBodies);
-#endif
  CHECK(cpSpaceSetContactSolver(a.space,CP_CONTACT_SOLVER_ORIGINAL));CHECK(cpContactSolverGet(a.space)==NULL);cleanup(&a);cleanup(&b);
 
  /*13 contacts on one writable body cannot fit in12 colors; no data is committed. */

@@ -462,10 +462,10 @@ cpContactSolverStep(cpSpace *space, cpContactSolverContext *s)
  s->usedLastStep = cpFalse;
  s->bodyCount = s->packetCount = s->jointBodyCount = 0;
  cpBool mixed = (space->constraints->num != 0);
- /* Wasm's existing joint fallback is intentionally unchanged. No state is
-  * committed until every allocation and eligibility check has succeeded. */
+ /* Both packet backends share the dependency-preserving mixed schedule. No
+  * state is committed until every allocation/eligibility check succeeds. */
  if(space->iterations <= 0 || space->arbiters->num < 4 ||
-    (mixed && (s->type != CP_CONTACT_SOLVER_AVX2 || !constraintsSupported(space->constraints))) ||
+    (mixed && !constraintsSupported(space->constraints)) ||
     !(mixed ? prepareOrdered(s, space->arbiters) : prepare(s, space->arbiters))){
   s->bodyCount = s->packetCount = s->jointBodyCount = 0;
   return cpFalse;

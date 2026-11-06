@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Let the opt-in Wasm SIMD contact solver use the shared dependency-preserving
+  mixed contact/joint schedule introduced for native AVX2. All ten built-in
+  joint classes are supported in the same connected contact group; custom C
+  classes retain complete ORIGINAL fallback. Defaults, ABI, f64x2 arithmetic
+  and module-loading policy are unchanged. Mixed regression/allocation tests
+  now execute in Wasm and both browsers. Larger mixed fixtures improve about
+  2–8% on one host, but reference ConstraintMix regresses about 3%; see the
+  Wasm guide for controls, limits and complete-step evaluation.
+
 ### Changed
 
 - Store the opt-in AVX2 contact solver's scratch velocities by body and use

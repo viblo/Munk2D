@@ -46,6 +46,7 @@ jobs:
           node tests/run-wasm-browser.mjs build-wasm/browser chromium
           node tests/run-wasm-browser.mjs build-wasm/browser firefox
           SIMD=OFF node tests/run-wasm-browser.mjs build-wasm-scalar/browser chromium
+          SIMD=OFF node tests/run-wasm-browser.mjs build-wasm-scalar/browser firefox
       - name: Check interactive benchmark protocol and static package
         run: |
           node --test benchmarks/browser/core.test.mjs
