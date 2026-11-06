@@ -125,7 +125,10 @@ Emscripten builds can explicitly opt in with
 SIMD **at load time**, even when the original solver is selected. Preserve a
 separate scalar artifact for older runtimes. See the
 [Wasm solver guide](docs/wasm-contact-solver.md) for compilation/linking, browser
-checks, Pyodide integration and fallback policy.
+checks, Pyodide integration and fallback policy. Both optional packet backends
+support mixed contacts with all built-in joints using dependency-preserving
+contact order; unknown/custom C constraints retain full original fallback.
+Joint kernels themselves remain scalar.
 
 Windows: Visual Studio projects are included in the msvc/ directory. While I try
 to make sure the MSVC 10 project is up-to-date, I don't have MSVC 9 to keep that

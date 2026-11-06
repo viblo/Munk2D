@@ -12,7 +12,7 @@ cmake --build "$build" -j "${JOBS:-2}"
 ctest --test-dir "$build" --output-on-failure
 mkdir -p "$build/browser"
 if [ "$simd" = ON ]; then simdflags='-msimd128 -DCP_WASM_SIMD_CONTACT_SOLVER=1'; else simdflags=; fi
-for name in contact_solver contact_solver_alloc contact_solver_quality; do
+for name in contact_solver contact_solver_alloc contact_solver_quality contact_solver_mixed; do
   emcc -O3 -ffp-contract=off $simdflags ${EXTRA_CFLAGS:-} -I"$root/include" \
     "$root/tests/test_$name.c" "$build/src/libchipmunk.a" \
     -sMODULARIZE=1 -sEXPORT_NAME=createMunkModule -sINVOKE_RUN=0 \
@@ -24,3 +24,8 @@ emcc -O3 $simdflags ${EXTRA_CFLAGS:-} -I"$root/include" \
   -sMODULARIZE=1 -sEXPORT_NAME=createMunkModule -sINVOKE_RUN=0 \
   -sEXPORTED_RUNTIME_METHODS=callMain,stackSave,stackRestore -sALLOW_MEMORY_GROWTH=1 \
   -o "$build/browser/munkbench.js"
+emcc -O3 $simdflags ${EXTRA_CFLAGS:-} -I"$root/include" \
+  "$root/benchmarks/mixedbench.c" "$build/src/libchipmunk.a" \
+  -sMODULARIZE=1 -sEXPORT_NAME=createMunkModule -sINVOKE_RUN=0 \
+  -sEXPORTED_RUNTIME_METHODS=callMain,stackSave,stackRestore -sALLOW_MEMORY_GROWTH=1 \
+  -o "$build/browser/mixedbench.js"

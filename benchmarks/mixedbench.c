@@ -7,6 +7,9 @@
 #include <string.h>
 #include <stdint.h>
 #include <time.h>
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#endif
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -97,7 +100,10 @@ static uint64_t stateHash(Scene *s,int *invalid)
 }
 static double seconds(void)
 {
-#ifdef _WIN32
+#ifdef __EMSCRIPTEN__
+ /* Monotonic browser/Node wall time, in the same units as native CPU time. */
+ return emscripten_get_now()/1000.0;
+#elif defined(_WIN32)
  /* MSVC clock() reports elapsed wall time, unlike the POSIX CPU clock. */
  FILETIME created,exited,kernel,user;
  REQUIRE(GetProcessTimes(GetCurrentProcess(),&created,&exited,&kernel,&user));
@@ -125,9 +131,10 @@ int main(int argc,char **argv)
  }
  REQUIRE(count>=8&&count<=16384&&steps>0&&steps<=100000&&batch>0&&batch<=4096&&samples>0&&samples<=100&&warmup>=0&&warmup<=20);
  REQUIRE(!strcmp(name,"light")||!strcmp(name,"dense")||!strcmp(name,"mechanisms"));
- REQUIRE(!strcmp(solverName,"original")||!strcmp(solverName,"avx2"));
- cpContactSolverType solver=!strcmp(solverName,"avx2")?CP_CONTACT_SOLVER_AVX2:CP_CONTACT_SOLVER_ORIGINAL;
- REQUIRE(cpContactSolverIsAvailable(solver));
+ REQUIRE(!strcmp(solverName,"original")||!strcmp(solverName,"avx2")||!strcmp(solverName,"wasm-simd"));
+ cpContactSolverType solver=!strcmp(solverName,"avx2")?CP_CONTACT_SOLVER_AVX2:
+  !strcmp(solverName,"wasm-simd")?CP_CONTACT_SOLVER_WASM_SIMD:CP_CONTACT_SOLVER_ORIGINAL;
+ if(!cpContactSolverIsAvailable(solver)){fprintf(stderr,"mixedbench: requested solver unavailable: %s\n",solverName);return 2;}
  for(int sample=-warmup;sample<samples;sample++){
   double initSeconds=0,runSeconds=0;uint64_t hash=0;int invalid=0,joints=0,shapes=0;
   for(int repetition=0;repetition<batch;repetition++){

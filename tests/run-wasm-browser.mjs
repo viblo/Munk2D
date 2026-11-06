@@ -24,7 +24,7 @@ try {
   await page.goto(`http://127.0.0.1:${server.address().port}/`);
   const results = await page.evaluate(async (simdEnabled) => {
     const results = {};
-    for (const name of ['contact_solver', 'contact_solver_alloc', 'contact_solver_quality', 'munkbench']) {
+    for (const name of ['contact_solver', 'contact_solver_alloc', 'contact_solver_quality', 'contact_solver_mixed', 'munkbench', 'mixedbench']) {
       await new Promise((yes, no) => {
         const script = document.createElement('script');
         script.src = name + '.js'; script.onload = yes; script.onerror = no;
@@ -32,6 +32,31 @@ try {
       });
       const out = [], err = [];
       const m = await globalThis.createMunkModule({ print: x => out.push(x), printErr: x => err.push(x) });
+      if (name === 'mixedbench') {
+        const runs = [];
+        for (const scene of ['light', 'dense', 'mechanisms']) {
+          const hashes = [];
+          for (const mode of ['original', 'wasm-simd']) {
+            out.length = err.length = 0;
+            const stack = m.stackSave();
+            let status;
+            try { status = m.callMain(['--scene', scene, '--solver', mode, '--count', '64', '--steps', '120']); }
+            finally { m.stackRestore(stack); }
+            if (mode === 'wasm-simd' && !simdEnabled) {
+              if (status !== 2 || !err.some(x => x.includes('unavailable'))) throw new Error('Disabled mixed SIMD CLI was not rejected');
+            } else {
+              if (status || err.length) throw new Error(JSON.stringify({ name, scene, mode, status, out, err }));
+              const value = JSON.parse(out.join('\n'));
+              if (value.invalid !== 0) throw new Error('Invalid mixed benchmark state');
+              hashes.push(value.stateHash);
+            }
+            runs.push({ scene, mode, status });
+          }
+          if (simdEnabled && hashes[0] !== hashes[1]) throw new Error('Mixed ORIGINAL/SIMD mismatch: ' + scene);
+        }
+        results[name] = runs;
+        continue;
+      }
       const args = name === 'munkbench'
         ? ['--contact-solver', 'original', '--profile', 'smoke', '-b', 'FrictionalPyramid', '--summary-json', '--checkpoints', '1,10'] : [];
       const savedStack = m.stackSave();
