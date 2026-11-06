@@ -1,22 +1,48 @@
 # Changelog
 
-## Unreleased
+## 2.2.0
 
-- Let the opt-in Wasm SIMD contact solver use the shared dependency-preserving
-  mixed contact/joint schedule introduced for native AVX2. All ten built-in
-  joint classes are supported in the same connected contact group; custom C
-  classes retain complete ORIGINAL fallback. Defaults, ABI, f64x2 arithmetic
-  and module-loading policy are unchanged. Mixed regression/allocation tests
-  now execute in Wasm and both browsers. Larger mixed fixtures improve about
-  2–8% on one host, but reference ConstraintMix regresses about 3%; see the
-  Wasm guide for controls, limits and complete-step evaluation.
+Released 2026-11-06.
+
+### Added
+
+- Opt-in, double-precision WebAssembly SIMD contact solver using standard
+  `f64x2` instructions. Select `CP_CONTACT_SOLVER_WASM_SIMD` explicitly and build
+  with `MUNK2D_ENABLE_WASM_SIMD_CONTACT_SOLVER=ON` (default OFF). Strict arithmetic
+  is isolated to the SIMD kernel; no relaxed SIMD, threads or fast-math needed.
+- A self-service browser benchmark, plus Emscripten 4.0.9/5.0.3 and
+  Chromium/Firefox checks of the solver, loading contract and physical quality.
 
 ### Changed
 
+- Both optional packet backends now support contacts sharing the same connected
+  group with all ten built-in joint classes. Dependency-preserving contact
+  queues retain original arbiter order on each writable body; joint impulses
+  remain scalar and in their original order. Only shared physical velocities
+  are synchronized each iteration. Custom C constraint classes retain complete
+  ORIGINAL fallback, and allocation failures occur before committing results.
 - Store the opt-in AVX2 contact solver's scratch velocities by body and use
-  bounded four-plus-two-double loads/stores with SIMD transposes. Contact
-  ordering, arithmetic, precision, fallbacks, and the original default are
-  unchanged; no additional scratch memory or global ISA flags are required.
+  bounded four-plus-two-double loads/stores with SIMD transposes. No additional
+  scratch memory or global native ISA flags are required.
+- Mixed contact/joint regression and allocation-failure tests now execute on
+  native and Wasm builds, including callback, lifecycle, poisoned-arena,
+  frozen-body, sleep/wake and exact scalar/SIMD comparisons.
+
+### Compatibility and performance
+
+- ORIGINAL remains the default. Public structure layouts, existing enum values,
+  double precision, warm starting and HastySpace behavior are unchanged.
+- A SIMD-enabled Wasm module requires SIMD at validation/loading time, even with
+  ORIGINAL selected. Applications supporting non-SIMD runtimes must retain a
+  separate scalar artifact; C availability checks happen too late to protect
+  module loading. This release alone does not change Pymunk AUTO or its wheels.
+- Solver schedules can change trajectories. Bit-identical results across modes,
+  versions, compilers or platforms are not promised; validate replay/lockstep
+  workloads before upgrading.
+- Speedups are CPU/browser/workload dependent, not universal. Larger mixed Wasm
+  fixtures improve about 2–8% on one measured host, while reference ConstraintMix
+  regresses about 3% and overall suite changes versus prior SIMD are inconclusive.
+  See the AVX2 and Wasm solver guides for native results, controls and limitations.
 
 ## 2.1.0
 
