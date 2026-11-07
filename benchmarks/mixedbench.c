@@ -116,7 +116,7 @@ static double seconds(void)
 }
 int main(int argc,char **argv)
 {
- const char *name="light",*solverName="original";
+ const char *name="light",*solverName="baseline";
  int count=256,steps=1200,batch=1,samples=1,warmup=0;
  for(int i=1;i<argc;i++){
   REQUIRE(i+1<argc);const char *key=argv[i++],*value=argv[i];
@@ -131,9 +131,11 @@ int main(int argc,char **argv)
  }
  REQUIRE(count>=8&&count<=16384&&steps>0&&steps<=100000&&batch>0&&batch<=4096&&samples>0&&samples<=100&&warmup>=0&&warmup<=20);
  REQUIRE(!strcmp(name,"light")||!strcmp(name,"dense")||!strcmp(name,"mechanisms"));
- REQUIRE(!strcmp(solverName,"original")||!strcmp(solverName,"avx2")||!strcmp(solverName,"wasm-simd"));
+ if(strcmp(solverName,"baseline") && strcmp(solverName,"avx2") && strcmp(solverName,"wasm-simd")){
+  fprintf(stderr,"Invalid contact solver: %s. Use baseline, avx2 or wasm-simd.\n",solverName);return 2;
+ }
  cpContactSolverType solver=!strcmp(solverName,"avx2")?CP_CONTACT_SOLVER_AVX2:
-  !strcmp(solverName,"wasm-simd")?CP_CONTACT_SOLVER_WASM_SIMD:CP_CONTACT_SOLVER_ORIGINAL;
+  !strcmp(solverName,"wasm-simd")?CP_CONTACT_SOLVER_WASM_SIMD:CP_CONTACT_SOLVER_BASELINE;
  if(!cpContactSolverIsAvailable(solver)){fprintf(stderr,"mixedbench: requested solver unavailable: %s\n",solverName);return 2;}
  for(int sample=-warmup;sample<samples;sample++){
   double initSeconds=0,runSeconds=0;uint64_t hash=0;int invalid=0,joints=0,shapes=0;

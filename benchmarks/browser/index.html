@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="referrer" content="no-referrer">
-  <meta name="description" content="Compare Munk2D's original and WebAssembly SIMD contact solvers on your own browser and device.">
+  <meta name="description" content="Compare Munk2D's baseline and WebAssembly SIMD contact solvers on your own browser and device.">
   <title>Munk2D browser benchmark</title>
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -41,8 +41,8 @@
       <div class="section-head"><h2 id="results-heading">Results</h2><button id="download" disabled>Download results JSON</button></div>
       <p id="result-description">Results will appear here. Download each run before starting another, then send the JSON file back for analysis.</p>
       <div id="suite-cards" class="suite-cards"></div>
-      <p class="muted"><strong>Negative Δ time is faster.</strong> “Inconclusive” means the bootstrap interval does not clear the A/A noise margin (at least 1%). Small-sample intervals are exploratory—not a universal confidence guarantee. ORIGINAL and SIMD use different contact schedules; trajectories need not be identical.</p>
-      <p class="muted">The primary comparison uses ORIGINAL and SIMD in the same SIMD-enabled module. <strong>A/A</strong> repeats ORIGINAL to estimate noise. <strong>Module Δ</strong> compares ORIGINAL across scalar-only and SIMD-enabled binaries; it is not a SIMD solver speedup.</p>
+      <p class="muted"><strong>Negative Δ time is faster.</strong> “Inconclusive” means the bootstrap interval does not clear the A/A noise margin (at least 1%). Small-sample intervals are exploratory—not a universal confidence guarantee. BASELINE and SIMD use different contact schedules; trajectories need not be identical.</p>
+      <p class="muted">The primary comparison uses BASELINE and SIMD in the same SIMD-enabled module. <strong>A/A</strong> repeats BASELINE to estimate noise. <strong>Module Δ</strong> compares BASELINE across scalar-only and SIMD-enabled binaries; it is not a SIMD solver speedup.</p>
       <div id="tables"></div>
       <details><summary>Protocol, correctness & raw diagnostics</summary><pre id="diagnostics">No run yet.</pre></details>
       <button id="clear" class="quiet" disabled>Clear this browser’s saved result</button>

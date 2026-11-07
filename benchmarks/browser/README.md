@@ -22,8 +22,8 @@ scenario sizes are not reduced. Scalar-only browsers run noise controls without
 inventing a SIMD score or fetching the SIMD module.
 
 The normal and scalar-only artifacts remain separate. The primary comparison
-is ORIGINAL versus WASM_SIMD in the **same SIMD-enabled module**. A/A repeats
-ORIGINAL. Module controls compare ORIGINAL between scalar-only/SIMD modules.
+is BASELINE versus WASM_SIMD in the **same SIMD-enabled module**. A/A repeats
+BASELINE. Module controls compare BASELINE between scalar-only/SIMD modules.
 A difference in that last control is not itself a SIMD solver speedup.
 
 ## Protocol / acceptance criteria
@@ -37,7 +37,7 @@ A difference in that last control is not itself a SIMD solver speedup.
   JSON serialization and local-storage writes are not part of the timed steps.
 - Existing API/direct-packet/allocation/21-probe quality checks run first.
   Every measured scene also checks finite checkpoints and deterministic repeat;
-  ORIGINAL checkpoints match across module variants. Different solver schedules
+  BASELINE checkpoints match across module variants. Different solver schedules
   are deliberately **not** required to match one another.
 - Warmup/calibration is untimed. One common batch per case is chosen using all
   available variants, targeting at least ~80 ms of simulation time (scaled for

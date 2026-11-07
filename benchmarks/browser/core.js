@@ -56,8 +56,8 @@
       checkpointSteps: '0,1,10,final', timing: 'existing MunkBench full trajectory, complete cpSpaceStep pipeline',
       order: 'adjacent alternating AB/BA; balanced primary and control counts',
       noRenderingDuringTiming: true, physicsThreads: 1,
-      baseline: 'ORIGINAL in the same SIMD-enabled module',
-      moduleControl: 'ORIGINAL in scalar-only vs SIMD-enabled modules',
+      baseline: 'BASELINE in the same SIMD-enabled module',
+      moduleControl: 'BASELINE in scalar-only vs SIMD-enabled modules',
       classification: 'bootstrap interval must clear A/A noise margin (at least 1%); exploratory, not a universal confidence guarantee'
     };
   }

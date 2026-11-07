@@ -133,7 +133,7 @@ typedef struct RunResult {
 	double run_time;
 } RunResult;
 
-static cpContactSolverType benchmarkContactSolver = CP_CONTACT_SOLVER_ORIGINAL;
+static cpContactSolverType benchmarkContactSolver = CP_CONTACT_SOLVER_BASELINE;
 
 static double
 now_seconds(void)
@@ -149,7 +149,7 @@ usage(const char *argv0)
 	printf("Options:\n");
 	printf("  -b, --benchmarks  Run only the named benchmarks.\n");
 	printf("  --profile NAME    Size profile: smoke, reference (default), or extended.\n");
-	printf("  --contact-solver  original (default), avx2 or wasm-simd. Unavailable backend is an error.\n");
+	printf("  --contact-solver  baseline (default), avx2 or wasm-simd. Unavailable backend is an error.\n");
 	printf("  -s, --size        Explicit size override; use -1 for a size sweep.\n");
 	printf("  --warmup n        Untimed independent runs before sampling. Default: 0.\n");
 	printf("  --samples n       Number of raw timing samples to emit. Default: 1.\n");
@@ -165,7 +165,7 @@ static cpSpace *
 new_space(cpFloat gx, cpFloat gy)
 {
 	cpSpace *space = cpSpaceNew();
-	if(benchmarkContactSolver != CP_CONTACT_SOLVER_ORIGINAL && !cpSpaceSetContactSolver(space, benchmarkContactSolver)){
+	if(benchmarkContactSolver != CP_CONTACT_SOLVER_BASELINE && !cpSpaceSetContactSolver(space, benchmarkContactSolver)){
 		fprintf(stderr, "Unable to select requested contact solver.\n");
 		cpSpaceFree(space);
 		exit(1);
@@ -1766,7 +1766,7 @@ name_selected(Benchmark *benchmark, char **names, int name_count)
 int
 main(int argc, char **argv)
 {
-	benchmarkContactSolver = CP_CONTACT_SOLVER_ORIGINAL;
+	benchmarkContactSolver = CP_CONTACT_SOLVER_BASELINE;
 	int size_arg_set = 0;
 	int size_arg = 0;
 	int summary_json = 0;
@@ -1808,11 +1808,11 @@ main(int argc, char **argv)
 				return 2;
 			}
 			const char *value = argv[++i];
-			if(strcmp(value, "original") == 0) benchmarkContactSolver = CP_CONTACT_SOLVER_ORIGINAL;
+			if(strcmp(value, "baseline") == 0) benchmarkContactSolver = CP_CONTACT_SOLVER_BASELINE;
 			else if(strcmp(value, "avx2") == 0) benchmarkContactSolver = CP_CONTACT_SOLVER_AVX2;
 			else if(strcmp(value, "wasm-simd") == 0) benchmarkContactSolver = CP_CONTACT_SOLVER_WASM_SIMD;
 			else {
-				fprintf(stderr, "Invalid contact solver: %s. Use original, avx2 or wasm-simd.\n", value);
+				fprintf(stderr, "Invalid contact solver: %s. Use baseline, avx2 or wasm-simd.\n", value);
 				free(selected_names);
 				return 2;
 			}

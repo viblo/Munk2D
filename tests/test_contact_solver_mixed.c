@@ -69,7 +69,7 @@ static void preSolve(cpConstraint *joint, cpSpace *space)
 {
  World *w = (World *)cpConstraintGetUserData(joint);
  CHECK(cpSpaceIsLocked(space));
- CHECK(!cpSpaceSetContactSolver(space, CP_CONTACT_SOLVER_ORIGINAL));
+ CHECK(!cpSpaceSetContactSolver(space, CP_CONTACT_SOLVER_BASELINE));
  w->preCalls++;
 }
 static void postSolve(cpConstraint *joint, cpSpace *space)

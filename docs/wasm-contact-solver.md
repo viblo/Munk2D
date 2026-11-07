@@ -2,7 +2,7 @@
 
 This is an explicit, double-precision, single-threaded backend for
 `cpSpaceStep()`. It uses standard WebAssembly SIMD (`f64x2`), not AVX2/NEON
-intrinsics, relaxed SIMD, mixed precision or browser threads. The original
+intrinsics, relaxed SIMD, mixed precision or browser threads. The baseline
 solver remains the default. SIMD availability is **not** a speed guarantee.
 
 ## Build and select
@@ -29,7 +29,7 @@ if(cpContactSolverIsAvailable(CP_CONTACT_SOLVER_WASM_SIMD)){
     }
 }
 cpSpaceStep(space, 1.0/60.0);
-cpSpaceSetContactSolver(space, CP_CONTACT_SOLVER_ORIGINAL); /* releases scratch */
+cpSpaceSetContactSolver(space, CP_CONTACT_SOLVER_BASELINE); /* releases scratch */
 cpSpaceFree(space);
 ```
 
@@ -47,7 +47,7 @@ without actually compiling/linking its implementation.
 ## Loading policy: two artifacts, not an in-module feature fallback
 
 A module containing SIMD instructions requires a SIMD-capable runtime **at
-validation/loading time**, even if ORIGINAL is selected and the SIMD function
+validation/loading time**, even if BASELINE is selected and the SIMD function
 is never called. `cpContactSolverIsAvailable()` cannot protect an unsupported
 runtime from loading such a module: it runs too late. In a successfully loaded
 SIMD-enabled module, WASM_SIMD availability is true without a CPUID-style probe.
@@ -82,10 +82,10 @@ Selection, locked-space errors, sleeping bodies, retained arenas and per-step
 fallback follow the [AVX2 guide](avx2-contact-solver.md). Fewer than four
 arbiters, nonpositive iterations, unsupported contacts, joint-free color
 overflow, unknown/custom C constraint classes or allocation failure use the
-original solver for the whole step, before committing any packet results. `cpHastySpaceStep()` is
+baseline solver for the whole step, before committing any packet results. `cpHastySpaceStep()` is
 unchanged. No published structure layout changes.
 
-Coloring can change trajectories versus ORIGINAL. Doubles, iterations and
+Coloring can change trajectories versus BASELINE. Doubles, iterations and
 quality settings are unchanged; bit-identical trajectories between different
 solver schedules/builds/platforms are not promised. Exact same-schedule scalar
 checks are a test of these kernels, not a general physical error bound.
@@ -94,8 +94,8 @@ checks are a test of these kernels, not a general physical error bound.
 
 All ten built-in constraint classes can share the **same connected group** with
 SIMD contacts. Each iteration runs one SIMD contact sweep followed by the
-original-order scalar joint sweep; joint impulse kernels themselves are not
-vectorized. Contact dependency queues preserve ORIGINAL arbiter order on every
+baseline-order scalar joint sweep; joint impulse kernels themselves are not
+vectorized. Contact dependency queues preserve BASELINE arbiter order on every
 writable body. Only independent contacts can occupy a packet, avoiding the
 convergence changes of applying the joint-free colored order to mixed worlds.
 This schedule has no 12-color limit.
@@ -104,8 +104,8 @@ Only physical vx/vy/w on bodies shared by contacts and joints cross between
 scratch and body storage each iteration. Split-bias velocities stay in scratch
 until final commit; joint-only bodies stay in ordinary body storage. Frozen
 endpoints are imported but never exported. Spring force/torque callbacks,
-warmstart and pre/post-solve phases remain in their original positions.
-Unknown/custom C constraint classes retain full ORIGINAL fallback because their
+warmstart and pre/post-solve phases remain in their baseline positions.
+Unknown/custom C constraint classes retain full BASELINE fallback because their
 impulse callbacks may mutate unrelated bodies or packed contact state.
 
 This reuses the native mixed scheduler and synchronization code rather than a
@@ -125,7 +125,7 @@ wheel/artifact remains necessary for non-SIMD runtimes.
 Integration validation uses an experimental Pymunk 7.3.1 source fixture, not a
 released package: Pyodide 0.29.5 (Python 3.13, Emscripten 4.0.9), normal CFFI
 wheel building/loading, explicit low-level selection, 600 steps, collision
-callbacks and exact independent-contact comparison with ORIGINAL. Existing
+callbacks and exact independent-contact comparison with BASELINE. Existing
 Pymunk DEFAULT and AUTO behavior is checked unchanged. No downstream Python API
 change is included here.
 
@@ -160,12 +160,12 @@ The build script runs 19 CTest tests in Emscripten/Node, then packages the
 solver/API, allocation, 21-probe physical-quality and mixed-contact/joint tests
 plus MunkBench and the separate mixed workloads as callable browser modules.
 The mixed test executes all ten joint classes in flat/stacked connected worlds,
-checking ORIGINAL/scalar/SIMD exact bodies, contact and joint impulses, original
+checking BASELINE/scalar/SIMD exact bodies, contact and joint impulses, baseline
 per-body dependency order, variable dt/iterations, callbacks, poisoned reuse,
 grow/shrink, joint-only endpoints, frozen/kinematic bodies, sleep/wake and custom
 class fallback. Mixed allocation failures must leave body/contact state
 uncommitted. Browser checks execute these tests (not a native-only skip), check
-mixed benchmark ORIGINAL/SIMD hashes, and reject unavailable SIMD CLI requests. WebAssembly has no
+mixed benchmark BASELINE/SIMD hashes, and reject unavailable SIMD CLI requests. WebAssembly has no
 observable floating-point exception flags; native poisoned-buffer tests retain
 fenv checks, and Wasm retains the poison, finite-result and exact-result checks.
 The CI matrix covers Emscripten 4.0.9 (Pyodide 0.29.x) and 5.0.3 (314.0.x
@@ -184,10 +184,10 @@ the SIMD module must fail that validation:
 ```
 
 MunkBench accepts `--contact-solver wasm-simd` and rejects unavailable requests
-instead of silently timing ORIGINAL. Measure actual complete simulation steps,
+instead of silently timing BASELINE. Measure actual complete simulation steps,
 including preparation, packing, fallback and writeback, not just kernel time.
 Report initialization separately or include it too, alternate paired order and
-include original/original and scalar-module controls. Browser JIT/code layout
+include baseline/baseline and scalar-module controls. Browser JIT/code layout
 and timer resolution can dominate small differences. Repeated `callMain()`
 users must save/restore the Emscripten stack around each invocation; it allocates
 its argument vector on that stack.
@@ -200,13 +200,13 @@ except the explicit SIMD translation unit. No fast-math, workers or shared
 memory. These are browser C/MunkBench timings, not Python-loop speedups.
 
 All 26 existing scenarios, smoke and reference profiles, six adjacent
-alternating AB/BA pairs per scenario for SIMD versus ORIGINAL in the **same
-SIMD-enabled module**, plus two A/A and two scalar-module/ORIGINAL control
+alternating AB/BA pairs per scenario for SIMD versus BASELINE in the **same
+SIMD-enabled module**, plus two A/A and two scalar-module/BASELINE control
 pairs. Reported values are geometric means of per-scene median paired ratios;
 negative means less time. Preparation/packing/fallback/writeback is inside
 every measured step. Initialization is also reported separately/included below.
 
-| Browser / profile | Whole step | Including initialization | A/A control | Scalar-module → SIMD-module ORIGINAL control |
+| Browser / profile | Whole step | Including initialization | A/A control | Scalar-module → SIMD-module BASELINE control |
 |---|---:|---:|---:|---:|
 | chromium / smoke | -0.77% | -0.71% | -0.70% | -1.30% |
 | chromium / reference | -3.09% | -3.02% | -0.17% | -0.23% |
@@ -232,7 +232,7 @@ the explicitly configured four-packet experiment exactly (SHA256
 
 Both browsers also pass exact deterministic checkpoint comparisons at
 0/1/10/50/180/181/final for all 26 scenes and both profiles: two- versus
-four-packet SIMD layouts, repeated SIMD runs, and ORIGINAL in scalar versus
+four-packet SIMD layouts, repeated SIMD runs, and BASELINE in scalar versus
 SIMD modules. The existing physical-quality tests check SIMD against its
 same-schedule scalar kernel separately. Only this CPU/browser environment was
 measured; Safari, mobile, ARM and end-user Pyodide performance remain unmeasured.
@@ -248,8 +248,8 @@ These are direct C/Wasm timings, not Pyodide/Python or whole-application gains.
 
 Each browser has 1,044 adjacent paired comparisons: all 26 scenes at smoke and
 reference plus the three standalone mixed workloads at 64/256 bodies, with six
-pairs versus prior WASM_SIMD, six versus ORIGINAL in the candidate module, and
-two pairs each of A/A, prior-module ORIGINAL and scalar-module ORIGINAL
+pairs versus prior WASM_SIMD, six versus BASELINE in the candidate module, and
+two pairs each of A/A, prior-module BASELINE and scalar-module BASELINE
 controls. Pair order alternates AB/BA. A common batch per case is calibrated to
 at least 80 ms on the fastest variant; minimum actual sample 79.5 ms Chromium /
 80 ms Firefox. Complete steps include dependency preparation, packing, sparse
@@ -279,7 +279,7 @@ whitelist or cutoff hides that regression.
 
 All-26 geometric means of per-scene median paired changes:
 
-| Browser/profile | vs prior SIMD | vs ORIGINAL | A/A | Prior-module ORIGINAL | Scalar-module ORIGINAL |
+| Browser/profile | vs prior SIMD | vs BASELINE | A/A | Prior-module BASELINE | Scalar-module BASELINE |
 |---|---:|---:|---:|---:|---:|
 | Chromium/smoke | +0.31% | +0.07% | +0.31% | +0.01% | +0.26% |
 | Chromium/reference | -0.28% | -3.13% | -0.09% | +0.05% | -0.16% |
@@ -289,13 +289,13 @@ All-26 geometric means of per-scene median paired changes:
 Versus prior SIMD including initialization: Chromium smoke/reference
 +0.35%/-0.27%; Firefox +0.72%/+0.45%. Overall changes versus prior SIMD are
 near control/noise levels, **not a demonstrated suite-wide gain**. Most
-reference gain versus ORIGINAL predates this mixed-step change. Individual
+reference gain versus BASELINE predates this mixed-step change. Individual
 outliers and controls remain in the raw results; SIMD is still opt-in.
 
 Both browsers pass full exact candidate/prior SIMD checkpoint summaries and
 repeat checks at 0/1/10/50/180/181/final for all 26 scenes and both profiles;
-ORIGINAL is exact between prior, candidate and scalar artifacts. All six mixed
-cases have exact candidate/prior/ORIGINAL body+joint hashes at
+BASELINE is exact between prior, candidate and scalar artifacts. All six mixed
+cases have exact candidate/prior/BASELINE body+joint hashes at
 1/10/50/180/181/1200 steps, with no invalid values. Mixed-test enabled runs execute
 7,188 matrix steps per browser. Emscripten 4.0.9 and 5.0.3 each pass 19/19 CTests
 in SIMD/scalar builds and Chromium/Firefox checks. Actual Wasm ASan+UBSan and

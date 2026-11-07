@@ -33,6 +33,15 @@ if(BUILD_TESTING)
 endif()
 
 if(BUILD_TESTING)
+  # Exercise both the new selector and rejection of the removed spelling.
+  # Use the configured emulator for cross-compiled (e.g. Wasm) executables.
+  add_test(NAME baseline_solver_cli
+    COMMAND ${CMAKE_COMMAND}
+      "-DMUNKBENCH=$<TARGET_FILE:munkbench>"
+      "-DMIXEDBENCH=$<TARGET_FILE:munkbench_mixed>"
+      "-DEMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/test_baseline_cli.cmake")
+  set_tests_properties(baseline_solver_cli PROPERTIES TIMEOUT 60)
   add_executable(munkbench_cleanup_tests test_cleanup.c)
   target_include_directories(munkbench_cleanup_tests PRIVATE ${chipmunk_SOURCE_DIR}/include)
   target_link_libraries(munkbench_cleanup_tests PRIVATE chipmunk_static)

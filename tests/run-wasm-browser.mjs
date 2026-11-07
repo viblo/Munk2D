@@ -36,7 +36,7 @@ try {
         const runs = [];
         for (const scene of ['light', 'dense', 'mechanisms']) {
           const hashes = [];
-          for (const mode of ['original', 'wasm-simd']) {
+          for (const mode of ['baseline', 'wasm-simd']) {
             out.length = err.length = 0;
             const stack = m.stackSave();
             let status;
@@ -52,13 +52,13 @@ try {
             }
             runs.push({ scene, mode, status });
           }
-          if (simdEnabled && hashes[0] !== hashes[1]) throw new Error('Mixed ORIGINAL/SIMD mismatch: ' + scene);
+          if (simdEnabled && hashes[0] !== hashes[1]) throw new Error('Mixed BASELINE/SIMD mismatch: ' + scene);
         }
         results[name] = runs;
         continue;
       }
       const args = name === 'munkbench'
-        ? ['--contact-solver', 'original', '--profile', 'smoke', '-b', 'FrictionalPyramid', '--summary-json', '--checkpoints', '1,10'] : [];
+        ? ['--contact-solver', 'baseline', '--profile', 'smoke', '-b', 'FrictionalPyramid', '--summary-json', '--checkpoints', '1,10'] : [];
       const savedStack = m.stackSave();
       let status;
       try { status = m.callMain([...args]); }
