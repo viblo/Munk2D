@@ -85,8 +85,8 @@ async function execute(input) {
     return;
   }
   const scalarModule = await load('scalar', 'munkbench'), simdModule = simd ? await load('simd', 'munkbench') : null;
-  const original = simd ? { module: 'simd', solver: 'original' } : { module: 'scalar', solver: 'original' };
-  const accelerated = { module: 'simd', solver: 'wasm-simd' }, scalar = { module: 'scalar', solver: 'original' };
+  const original = simd ? { module: 'simd', solver: 'baseline' } : { module: 'scalar', solver: 'baseline' };
+  const accelerated = { module: 'simd', solver: 'wasm-simd' }, scalar = { module: 'scalar', solver: 'baseline' };
   function bench(variant, test, batch, summary = false) {
     const args = ['--contact-solver', variant.solver, '--profile', test.profile, '-b', test.name];
     if (summary) args.push('--summary-json', '--checkpoints', protocol.checkpointSteps);
@@ -102,7 +102,7 @@ async function execute(input) {
     const test = schedule.cases[index];
     await emit('progress', { message: `Checking ${test.name} / ${test.profile} (${index + 1}/${schedule.cases.length})` });
     const originalSnapshot = bench(original, test, 1, true), scalarSnapshot = bench(scalar, test, 1, true);
-    if (JSON.stringify(originalSnapshot) !== JSON.stringify(scalarSnapshot)) throw new Error('ORIGINAL module checkpoint mismatch: ' + test.name);
+    if (JSON.stringify(originalSnapshot) !== JSON.stringify(scalarSnapshot)) throw new Error('BASELINE module checkpoint mismatch: ' + test.name);
     const simdSnapshot = simd ? bench(accelerated, test, 1, true) : null;
     const repeated = bench(simd ? accelerated : original, test, 1, true);
     if (JSON.stringify(repeated) !== JSON.stringify(simd ? simdSnapshot : originalSnapshot)) throw new Error('Deterministic repeat mismatch: ' + test.name);
@@ -111,7 +111,7 @@ async function execute(input) {
       originalSha256: await digest(new TextEncoder().encode(JSON.stringify(originalSnapshot))),
       simdSha256: simd ? await digest(new TextEncoder().encode(JSON.stringify(simdSnapshot))) : null,
       original: originalSnapshot, simd: simdSnapshot,
-      note: 'Different ORIGINAL/SIMD schedules are not required to have identical trajectories.' } });
+      note: 'Different BASELINE/SIMD schedules are not required to have identical trajectories.' } });
     const variants = simd ? [original, accelerated, scalar] : [original], trials = [];
     let batch = 1, minimumMs = 0;
     // Calibration and JIT warmup are explicitly outside all reported pairs.

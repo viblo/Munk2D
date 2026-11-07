@@ -1,6 +1,6 @@
 # Optional AVX2 contact solver
 
-The original contact solver remains the default. The AVX2 solver is an explicit
+The baseline contact solver remains the default. The AVX2 solver is an explicit
 per-space opt-in for `cpSpaceStep()`, not a replacement for all workloads.
 It uses double precision and four-lane SIMD for independent contacts. Joint-free
 steps keep the bounded graph-coloring fast path. Mixed steps preserve contact
@@ -22,7 +22,7 @@ if(cpContactSolverIsAvailable(CP_CONTACT_SOLVER_AVX2)){
 /* Simulation setup and cpSpaceStep() as usual. */
 
 /* This releases the optional solver's retained scratch allocations. */
-cpSpaceSetContactSolver(space, CP_CONTACT_SOLVER_ORIGINAL);
+cpSpaceSetContactSolver(space, CP_CONTACT_SOLVER_BASELINE);
 cpSpaceFree(space);
 ```
 
@@ -48,7 +48,7 @@ The first backend supports the ordinary **double-precision x86-64 build**.
 Build-time compiler capability and runtime CPU/OS capability are separate:
 
 - CMake checks whether the actual compiler target supports the x86-64 AVX2 code.
-  Unsupported targets, including ARM and 32-bit x86, keep the original solver.
+  Unsupported targets, including ARM and 32-bit x86, keep the baseline solver.
 - Runtime selection checks CPUID XSAVE/OSXSAVE/AVX, XGETBV XMM/YMM enablement,
   and CPUID leaf7 AVX2. XGETBV is not executed before checking OSXSAVE.
 - Availability is checked when selecting the backend. As with conventional
@@ -58,7 +58,7 @@ Build-time compiler capability and runtime CPU/OS capability are separate:
   does not imply that the runtime API will report availability.
 - No CPU-model whitelist or performance claim is implied by AVX2 availability.
 
-Even when requested and available, the whole step uses the original solver if:
+Even when requested and available, the whole step uses the baseline solver if:
 
 - an active constraint has an unknown/custom implementation class;
 - fewer than four arbiters are active, or the iteration count is not positive;
@@ -68,7 +68,7 @@ Even when requested and available, the whole step uses the original solver if:
 - checked scratch sizing/allocation cannot be satisfied.
 
 Fallback decisions are made before modifying body velocities or accumulated
-contact impulses. Cached/warm-start impulses retain the original phase/order.
+contact impulses. Cached/warm-start impulses retain the baseline phase/order.
 The backend never skips a collision to make a graph fit.
 
 ## Mixed contacts and joints
@@ -79,7 +79,7 @@ rotary spring. Joints in the **same connected group** as the contacts are
 supported; unrelated joints no longer disable all SIMD contact solving.
 
 Each mixed solver iteration performs one contact-packet sweep followed by the
-original scalar joint sweep, in its original joint order. Only physical linear
+baseline scalar joint sweep, in its baseline joint order. Only physical linear
 and angular velocities of bodies shared by contacts and joints are synchronized
 between scratch and body storage. Joint-only bodies stay in ordinary storage;
 built-in joints do not read/write the contact solver's split-impulse bias
@@ -88,7 +88,7 @@ contact solver. All velocities and contact accumulators are committed before
 post-solve callbacks.
 
 Mixed steps use dependency-aware ready queues instead of graph-color ordering.
-On every writable body, contact solves retain their original arbiter order;
+On every writable body, contact solves retain their baseline arbiter order;
 only independent contacts can enter the same packet. Successors become ready
 only after the whole preceding packet has been selected. Mixed graphs are not
 subject to the joint-free12-color limit. The existing joint-free path and its
@@ -98,7 +98,7 @@ Pre-solve, spring force/torque, warm-start, post-solve and post-step phases rema
 in their existing locations. The supported spring callbacks run before packet
 preparation. A custom C constraint class can change unrelated bodies or contact
 coefficients inside its impulse function, so its presence retains complete
-original-solver fallback rather than attempting partial synchronization.
+baseline-solver fallback rather than attempting partial synchronization.
 
 The optional [Wasm SIMD backend](wasm-contact-solver.md) also uses this shared
 mixed schedule. Its module-loading requirement and opt-in build policy are
@@ -107,7 +107,7 @@ unchanged; there is no Python AUTO or wheel change here.
 ## Numerical behavior and quality
 
 Graph coloring changes the order of some dependent contact solves compared with
-the original solver. Therefore trajectories, contact evolution and sleeping
+the baseline solver. Therefore trajectories, contact evolution and sleeping
 behavior can differ. The algorithm remains deterministic for a fixed input,
 backend, build and execution environment; identical results across solver modes,
 compiler versions or hardware are not promised.
@@ -117,13 +117,13 @@ arithmetic remain double. There is no reduction of iterations or collision
 quality settings and no mixed-precision path in this implementation.
 
 Tests compare SIMD with a scalar implementation of the same ordered formulas,
-check original fallback, and exercise physical diagnostics for penetration,
+check baseline fallback, and exercise physical diagnostics for penetration,
 resting behavior, friction, restitution, center-of-mass-frame energy, momentum,
 large coordinates/common velocities and mass ratios. These diagnostics are not
 a universal error bound for all applications. Check your own workloads before
 opting in, particularly sensitive stacks, extreme scales and configurations
 with changing constraints. A passing test suite does not establish superiority
-over the original solver for every quality metric.
+over the baseline solver for every quality metric.
 
 ## Build isolation
 
@@ -185,13 +185,13 @@ MunkBench accepts an explicit selector without changing its CSV schema or size
 profiles:
 
 ```sh
-./build/benchmarks/munkbench --contact-solver original --profile reference --batch auto
+./build/benchmarks/munkbench --contact-solver baseline --profile reference --batch auto
 ./build/benchmarks/munkbench --contact-solver avx2 --profile reference --batch auto
 ```
 
-An unavailable AVX2 request is an error, not a mislabeled original-only run.
+An unavailable AVX2 request is an error, not a mislabeled baseline-only run.
 Per-step eligibility fallback still applies. Use alternating paired runs and
-original-versus-original controls, include setup costs, and check results and
+baseline-versus-baseline controls, include setup costs, and check results and
 physical quality separately. Small percentage differences can be code-layout or
 measurement effects. Collision-heavy workloads may benefit while others do not.
 
@@ -200,7 +200,7 @@ dense joint/contact networks and motor-driven mechanisms, without changing the
 published26-scene browser protocol:
 
 ```sh
-./build/benchmarks/munkbench_mixed --scene light --solver original --count 256
+./build/benchmarks/munkbench_mixed --scene light --solver baseline --count 256
 ./build/benchmarks/munkbench_mixed --scene light --solver avx2 --count 256
 # Also: --scene dense or --scene mechanisms; --steps/--batch/--samples/--warmup.
 ```
@@ -214,7 +214,7 @@ synthetic scenes supplement rather than replace application workloads.
 
 The backend is strictly opt-in because it does not win everywhere. Measured
 with MunkBench paired runs (median geometric means over 26-scenario suites,
-negative = faster than the original solver):
+negative = faster than the baseline solver):
 
 - Wins on newer CPUs: roughly 3–4 % suite-wide on AMD Zen 4 (EPYC 9V74) and
   Intel Meteor Lake / Alder Lake (Ultra 9 185H, i5-12400T), with 20–30 % in
@@ -223,7 +223,7 @@ negative = faster than the original solver):
 - Scenes with few active contacts per step (a couple of resting or bouncing
   bodies, frictionless single-point contacts) are 5–20 % **slower** on every
   measured CPU, including Zen 4. If your typical frame has only a handful of
-  contacts, keep the original solver.
+  contacts, keep the baseline solver.
 - Older AVX2 Intel CPUs (Skylake-derived, e.g. i5-8265U) were a net loss before
   the gather-free loads (#58) and should be re-measured per workload.
 
@@ -245,6 +245,6 @@ in its [GDS guidance](https://www.intel.com/content/www/us/en/developer/articles
 No security mitigation needs to be disabled.
 
 AVX2 capability alone still does not establish that this solver is faster than
-the original: graph preparation, data copying, partly filled packets and
+the baseline: graph preparation, data copying, partly filled packets and
 per-step fallback all cost time. Measure both modes on the actual workload and
 CPU. See `benchmarks/OPTIMIZATION-LOG.md` for local measurements and limitations.

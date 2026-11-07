@@ -106,14 +106,14 @@ cpContactSolverType
 cpSpaceGetContactSolver(const cpSpace *space)
 {
  const cpContactSolverContext *s = cpContactSolverGet(space);
- return s ? s->type : CP_CONTACT_SOLVER_ORIGINAL;
+ return s ? s->type : CP_CONTACT_SOLVER_BASELINE;
 }
 
 cpBool
 cpSpaceSetContactSolver(cpSpace *space, cpContactSolverType solver)
 {
  if(space->locked || !cpContactSolverIsAvailable(solver)) return cpFalse;
- if(solver == CP_CONTACT_SOLVER_ORIGINAL){
+ if(solver == CP_CONTACT_SOLVER_BASELINE){
   cpContactSolverDestroy(space);
   return cpTrue;
  }

@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- **Breaking API rename:** `CP_CONTACT_SOLVER_ORIGINAL` is now
+  `CP_CONTACT_SOLVER_BASELINE` (still enum value `0`), with no compatibility alias.
+  The baseline solver remains the default; no solver behavior or default policy
+  changes. Benchmark CLI selectors are now `--contact-solver baseline` and
+  `--solver baseline`; the former `original` selectors are no longer accepted.
+
 ## 2.2.0
 
 Released 2026-11-06.

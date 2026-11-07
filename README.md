@@ -54,7 +54,7 @@ licensed under the permissive MIT license. I hope you enjoy using Munk2D!
   algorithm.
 - Supports sleeping objects that have come to rest to reduce the CPU load.
 - An [optional AVX2 contact solver](docs/avx2-contact-solver.md) for supported
-  double-precision x86-64 builds. Explicit per-space opt-in; the original solver
+  double-precision x86-64 builds. Explicit per-space opt-in; the baseline solver
   remains the default.
 - An [optional WebAssembly SIMD contact solver](docs/wasm-contact-solver.md)
   for explicit SIMD-enabled Emscripten builds, using two double lanes without
@@ -122,7 +122,7 @@ original-only configuration; CMake is the supported AVX2 build path.
 
 Emscripten builds can explicitly opt in with
 `-DMUNK2D_ENABLE_WASM_SIMD_CONTACT_SOLVER=ON` (default OFF). Such modules require
-SIMD **at load time**, even when the original solver is selected. Preserve a
+SIMD **at load time**, even when the baseline solver is selected. Preserve a
 separate scalar artifact for older runtimes. See the
 [Wasm solver guide](docs/wasm-contact-solver.md) for compilation/linking, browser
 checks, Pyodide integration and fallback policy. Both optional packet backends

@@ -63,7 +63,7 @@ int main(void)
  free(s.graphMemory);free(s.solverMemory);free(s.mixedMemory);
  failAllocation=0;cpSpace *space=cpSpaceNew();
  if(cpContactSolverIsAvailable(TEST_CONTACT_SOLVER)){
-  failAllocation=1;CHECK(!cpSpaceSetContactSolver(space,TEST_CONTACT_SOLVER));CHECK(cpSpaceGetContactSolver(space)==CP_CONTACT_SOLVER_ORIGINAL);
+  failAllocation=1;CHECK(!cpSpaceSetContactSolver(space,TEST_CONTACT_SOLVER));CHECK(cpSpaceGetContactSolver(space)==CP_CONTACT_SOLVER_BASELINE);
   failAllocation=0;CHECK(cpSpaceSetContactSolver(space,TEST_CONTACT_SOLVER));
   for(int i=0;i<4;i++)cpArrayPush(space->arbiters,NULL);
   failAllocation=1;CHECK(!cpContactSolverStep(space,cpContactSolverGet(space)));CHECK(!cpContactSolverGet(space)->usedLastStep);CHECK(!cpContactSolverGet(space)->graphMemory);
