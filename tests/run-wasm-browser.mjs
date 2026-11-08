@@ -24,7 +24,7 @@ try {
   await page.goto(`http://127.0.0.1:${server.address().port}/`);
   const results = await page.evaluate(async (simdEnabled) => {
     const results = {};
-    for (const name of ['contact_solver', 'contact_solver_alloc', 'contact_solver_quality', 'contact_solver_mixed', 'munkbench', 'mixedbench']) {
+    for (const name of ['contact_solver', 'contact_solver_alloc', 'contact_solver_quality', 'contact_solver_mixed', 'capsule_collision', 'munkbench', 'mixedbench']) {
       await new Promise((yes, no) => {
         const script = document.createElement('script');
         script.src = name + '.js'; script.onload = yes; script.onerror = no;
