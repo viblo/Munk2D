@@ -133,6 +133,41 @@ static int dynamics(void)
 	return failures;
 }
 
+// Use double intermediates for the oracle even when the engine uses floats.
+// Normalizing the float projection residual near a core intersection can
+// amplify its coordinate-rounding error into an unrelated reference normal.
+struct ReferenceVect {
+	double x, y;
+};
+static struct ReferenceVect reference_project(struct ReferenceVect p, struct ReferenceVect a,
+											  struct ReferenceVect b)
+{
+	double dx = b.x - a.x, dy = b.y - a.y;
+	double t = ((p.x - a.x) * dx + (p.y - a.y) * dy) / (dx * dx + dy * dy);
+	t = fmax(0, fmin(1, t));
+	struct ReferenceVect projected = {a.x + t * dx, a.y + t * dy};
+	return projected;
+}
+static cpVect reference_direction(cpVect a, cpVect b, cpVect c, cpVect d)
+{
+	struct ReferenceVect aa = {a.x, a.y}, bb = {b.x, b.y}, cc = {c.x, c.y}, dd = {d.x, d.y};
+	struct ReferenceVect as[] = {aa, bb, reference_project(cc, aa, bb),
+								 reference_project(dd, aa, bb)};
+	struct ReferenceVect bs[] = {reference_project(aa, cc, dd), reference_project(bb, cc, dd), cc,
+								 dd};
+	double best = INFINITY, x = 0, y = 0;
+	for (int i = 0; i < 4; i++) {
+		double dx = bs[i].x - as[i].x, dy = bs[i].y - as[i].y, value = dx * dx + dy * dy;
+		if (value < best) {
+			best = value;
+			x = dx;
+			y = dy;
+		}
+	}
+	double length = sqrt(best);
+	return length > 0 ? cpv((cpFloat)(x / length), (cpFloat)(y / length)) : cpvzero;
+}
+
 static uint32_t seed = 19;
 static double random01(void)
 {
@@ -197,7 +232,7 @@ static int geometry_audit(void)
 			badNormal = !isfinite(hit.normal.x) || !isfinite(hit.normal.y) ||
 						fabs(cpvlengthsq(hit.normal) - 1) > (CP_USE_DOUBLES ? 1e-7 : 1e-4);
 			if (!cross && distance > 1e-6)
-				badNormal = badNormal || cpvdot(hit.normal, cpvnormalize(cpvsub(pb, pa))) <
+				badNormal = badNormal || cpvdot(hit.normal, reference_direction(a, b, c, d)) <
 											 1 - (CP_USE_DOUBLES ? 1e-7 : 1e-4);
 		}
 		int badDepth = 0;
@@ -463,10 +498,34 @@ static int transformed_manifolds_and_neighbors(void)
 	return failures;
 }
 
+static int precision_fixture(void)
+{
+#if !CP_USE_DOUBLES
+	cpVect a = cpv(-132.83753967285156, 163.17552185058594),
+		   b = cpv(-91.8529052734375, 259.976806640625);
+	cpVect c = cpv(-101.35692596435547, 237.53038024902344),
+		   d = cpv(-153.91110229492188, 163.99557495117188);
+	cpBody *bodyA = cpBodyNew(1, 1), *bodyB = cpBodyNew(1, 1);
+	cpShape *sa = cpSegmentShapeNew(bodyA, a, b, 80), *sb = cpSegmentShapeNew(bodyB, c, d, 80);
+	cpShapeCacheBB(sa);
+	cpShapeCacheBB(sb);
+	cpContactPointSet hit = cpShapesCollide(sa, sb);
+	int failed = hit.count == 0 || cpvdot(hit.normal, reference_direction(a, b, c, d)) < 1 - 1e-6;
+	cpShapeFree(sa);
+	cpShapeFree(sb);
+	cpBodyFree(bodyA);
+	cpBodyFree(bodyB);
+	return failed;
+#else
+	return 0;
+#endif
+}
+
 int main(void)
 {
 	int failures = static_probes() + dynamics() + geometry_audit() + degenerates() +
-				   overlap_queries() + persistence() + transformed_manifolds_and_neighbors();
+				   overlap_queries() + persistence() + transformed_manifolds_and_neighbors() +
+				   precision_fixture();
 	if (failures) {
 		fprintf(stderr, "capsule regression failures: %d\n", failures);
 		return 1;
