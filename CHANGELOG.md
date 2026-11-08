@@ -10,6 +10,14 @@
   changes. Benchmark CLI selectors are now `--contact-solver baseline` and
   `--solver baseline`; the former `original` selectors are no longer accepted.
 
+### Fixed
+
+- Capsule (segment/segment) endpoint-aligned and collinear collisions can no
+  longer select an unrelated normal or discard genuine overlaps (#19). Use
+  direct closest-core features for capsules, including zero-length cores;
+  preserve parallel two-contact manifolds and segment-neighbor filtering.
+  Other shape pairs retain their existing GJK/EPA and clipping behavior.
+
 ## 2.2.0
 
 Released 2026-11-06.

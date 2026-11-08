@@ -143,8 +143,6 @@ struct SupportContext {
 	CachedPairFunc cached;
 };
 
-static struct MinkowskiPoint SupportSegmentSegment(const struct SupportContext *ctx, const cpVect n)
-{return MinkowskiPointNew(SegmentSupportPoint((const cpSegmentShape *)ctx->shape1, cpvneg(n)), SegmentSupportPoint((const cpSegmentShape *)ctx->shape2, n));}
 static struct MinkowskiPoint SupportPolyPoly(const struct SupportContext *ctx, const cpVect n)
 {return MinkowskiPointNew(PolySupportPoint((const cpPolyShape *)ctx->shape1, cpvneg(n)), PolySupportPoint((const cpPolyShape *)ctx->shape2, n));}
 static struct MinkowskiPoint SupportSegmentPoly(const struct SupportContext *ctx, const cpVect n)
@@ -152,12 +150,6 @@ static struct MinkowskiPoint SupportSegmentPoly(const struct SupportContext *ctx
 static struct MinkowskiPoint SupportCirclePoly(const struct SupportContext *ctx, const cpVect n)
 {return MinkowskiPointNew(CircleSupportPoint((const cpCircleShape *)ctx->shape1, cpvneg(n)), PolySupportPoint((const cpPolyShape *)ctx->shape2, n));}
 
-static struct MinkowskiPoint CachedSegmentSegment(const struct SupportContext *ctx, int index1, int index2)
-{
-	const cpSegmentShape *a = (const cpSegmentShape *)ctx->shape1;
-	const cpSegmentShape *b = (const cpSegmentShape *)ctx->shape2;
-	return MinkowskiPointNew(SupportPointNew(index1 == 0 ? a->ta : a->tb, index1), SupportPointNew(index2 == 0 ? b->ta : b->tb, index2));
-}
 static struct MinkowskiPoint CachedPolyPoly(const struct SupportContext *ctx, int index1, int index2)
 {
 	const cpPolyShape *a = (const cpPolyShape *)ctx->shape1;
@@ -610,11 +602,124 @@ CircleToSegment(const cpCircleShape *circle, const cpSegmentShape *segment, stru
 	}
 }
 
+// Closest points on the boundary of the segment/segment Minkowski difference.
+// Its four edges are obtained by projecting each endpoint onto the other core.
+// Unlike GJK, this also handles a collinear (one-dimensional) difference.
+static inline cpFloat
+SegmentClosestT(cpVect p, cpVect a, cpVect b)
+{
+	cpVect delta = cpvsub(b, a);
+	cpFloat lengthSq = cpvlengthsq(delta);
+	return lengthSq ? cpfclamp01(cpvdot(cpvsub(p, a), delta)/lengthSq) : 0.0f;
+}
+
+static inline cpVect
+SegmentLerp(cpVect a, cpVect b, cpFloat t)
+{
+	// Preserve exact endpoint identity for the segment-neighbor filters.
+	return t == 0.0f ? a : (t == 1.0f ? b : cpvlerp(a, b, t));
+}
+
+static inline cpBool
+SegmentStraddles(cpFloat a, cpFloat b)
+{
+	return (a <= 0.0f && b >= 0.0f) || (a >= 0.0f && b <= 0.0f);
+}
+
+static struct ClosestPoints
+SegmentClosestPoints(const cpSegmentShape *seg1, const cpSegmentShape *seg2)
+{
+	cpVect a = seg1->ta, b = seg1->tb, c = seg2->ta, d = seg2->tb;
+	cpVect ab = cpvsub(b, a), cd = cpvsub(d, c);
+	cpFloat ts[] = {SegmentClosestT(a, c, d), SegmentClosestT(b, c, d),
+		SegmentClosestT(c, a, b), SegmentClosestT(d, a, b)};
+	cpVect as[] = {a, b, SegmentLerp(a, b, ts[2]), SegmentLerp(a, b, ts[3])};
+	cpVect bs[] = {SegmentLerp(c, d, ts[0]), SegmentLerp(c, d, ts[1]), c, d};
+	int closest = 0;
+	cpFloat distanceSq = cpvdistsq(as[0], bs[0]);
+	for(int i = 1; i < 4; i++){
+		cpFloat candidate = cpvdistsq(as[i], bs[i]);
+		if(candidate < distanceSq){ closest = i; distanceSq = candidate; }
+	}
+
+	cpVect pa = as[closest], pb = bs[closest], delta = cpvsub(pb, pa);
+	cpVect n;
+	cpFloat distance;
+	if(distanceSq > 0.0f){
+		cpFloat t = ts[closest];
+		if(0.0f < t && t < 1.0f){
+			// An interior projection has an exact edge-normal direction. Do
+			// not normalize the tiny rounding residual along that edge.
+			n = cpvnormalize(cpvperp(closest < 2 ? cd : ab));
+			if(cpvdot(n, delta) < 0.0f) n = cpvneg(n);
+			distance = cpvdot(n, delta);
+		} else {
+			distance = cpfsqrt(distanceSq);
+			n = cpvmult(delta, 1.0f/distance);
+		}
+
+		// Cross-products avoid dividing by a nearly parallel determinant.
+		// The bounds test distinguishes disjoint collinear cores from
+		// overlapping cores, whose cross-products are all zero.
+		cpBB bb1 = cpBBNew(cpfmin(a.x,b.x), cpfmin(a.y,b.y), cpfmax(a.x,b.x), cpfmax(a.y,b.y));
+		cpBB bb2 = cpBBNew(cpfmin(c.x,d.x), cpfmin(c.y,d.y), cpfmax(c.x,d.x), cpfmax(c.y,d.y));
+		if(cpBBIntersects(bb1, bb2) &&
+			SegmentStraddles(cpvcross(ab, cpvsub(c,a)), cpvcross(ab, cpvsub(d,a))) &&
+			SegmentStraddles(cpvcross(cd, cpvsub(a,c)), cpvcross(cd, cpvsub(b,c)))){
+			n = cpvneg(n);
+			distance = -distance;
+		}
+	} else {
+		// Touching endpoints and coincident/zero-length cores have no
+		// radial direction. Choose the least-penetrating core face axis.
+		n = cpv(1.0f, 0.0f);
+		cpFloat best = -INFINITY;
+		cpVect axes[] = {ab, cd};
+		for(int i = 0; i < 2; i++) if(cpvlengthsq(axes[i]) > 0.0f){
+			cpVect axis = cpvnormalize(cpvperp(axes[i]));
+			cpFloat aa = cpvdot(a,axis), bb = cpvdot(b,axis);
+			cpFloat cc = cpvdot(c,axis), dd = cpvdot(d,axis);
+			cpFloat positive = cpfmin(cc,dd) - cpfmax(aa,bb);
+			cpFloat negative = cpfmin(aa,bb) - cpfmax(cc,dd);
+			if(positive > best){ best = positive; n = axis; }
+			if(negative > best){ best = negative; n = cpvneg(axis); }
+		}
+		distance = 0.0f;
+	}
+	struct ClosestPoints points = {pa, pb, n, distance, 0};
+	return points;
+}
+
+static void
+SegmentContactPoints(const struct Edge e1, const struct Edge e2, const struct ClosestPoints points, struct cpCollisionInfo *info)
+{
+	cpVect n = points.n;
+	cpVect edge1 = cpvsub(e1.b.p, e1.a.p), edge2 = cpvsub(e2.b.p, e2.a.p);
+	cpFloat length1 = cpvlengthsq(edge1), length2 = cpvlengthsq(edge2);
+	cpFloat along1 = cpvdot(edge1,n), along2 = cpvdot(edge2,n);
+	cpFloat epsilon = CP_USE_DOUBLES ? DBL_EPSILON : FLT_EPSILON;
+	cpBool faces = length1 > 0.0f && length2 > 0.0f &&
+		along1*along1 <= epsilon*length1 && along2*along2 <= epsilon*length2;
+	if(!faces){
+		// Endcaps and vertex/face pairs have one closest contact. Clipping
+		// them as two faces divides by a potentially point-like tangent
+		// projection and can also put contacts inside a rounded endcap.
+		cpVect p1 = cpvadd(points.a, cpvmult(n, e1.r));
+		cpVect p2 = cpvsub(points.b, cpvmult(n, e2.r));
+		info->n = n;
+		if(cpvdot(cpvsub(p2,p1),n) <= 0.0f){
+			cpCollisionInfoPushContact(info, p1, p2, CP_HASH_PAIR(e1.a.hash,e2.b.hash));
+		}
+	} else {
+		ContactPoints(e1, e2, points, info);
+	}
+}
+
 static void
 SegmentToSegment(const cpSegmentShape *seg1, const cpSegmentShape *seg2, struct cpCollisionInfo *info)
 {
-	struct SupportContext context = {(cpShape *)seg1, (cpShape *)seg2, SupportSegmentSegment, CachedSegmentSegment};
-	struct ClosestPoints points = GJK(&context, &info->id);
+	struct ClosestPoints points = SegmentClosestPoints(seg1, seg2);
+	info->id = 0;
 	
 #if DRAW_CLOSEST
 #if PRINT_LOG
@@ -641,7 +746,7 @@ SegmentToSegment(const cpSegmentShape *seg1, const cpSegmentShape *seg2, struct 
 			(!cpveql(points.b, seg2->tb) || cpvdot(n, cpvrotate(seg2->b_tangent, rot2)) >= 0.0)
 		)
 	){
-		ContactPoints(SupportEdgeForSegment(seg1, n), SupportEdgeForSegment(seg2, cpvneg(n)), points, info);
+		SegmentContactPoints(SupportEdgeForSegment(seg1, n), SupportEdgeForSegment(seg2, cpvneg(n)), points, info);
 	}
 }
 
