@@ -167,7 +167,10 @@ cpArbiterTotalKE(const cpArbiter *arb)
 		cpFloat jnAcc = con->jnAcc;
 		cpFloat jtAcc = con->jtAcc;
 
-		sum += eCoef*jnAcc*jnAcc/con->nMass + jtAcc*jtAcc/con->tMass;
+		// Zero friction disables the tangential mass. Its energy contribution
+		// is zero too; evaluating 0/0 here would discard the normal loss as NaN.
+		cpFloat tangentKE = (con->tMass != 0.0f ? jtAcc*jtAcc/con->tMass : 0.0f);
+		sum += eCoef*jnAcc*jnAcc/con->nMass + tangentKE;
 	}
 
 	return sum;
