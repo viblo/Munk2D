@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Fixed
+
+- `cpArbiterTotalKE()` no longer returns NaN for resolved zero-friction
+  contacts. Disabled tangential response contributes zero energy while the
+  normal collision loss is retained (issue #22).
+
 ### Changed
 
 - **Breaking API rename:** `CP_CONTACT_SOLVER_ORIGINAL` is now
